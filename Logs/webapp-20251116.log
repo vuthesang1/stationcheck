@@ -25,3 +25,10 @@ CREATE TABLE [Languages] (
 2025-11-16 16:32:25.616 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
 2025-11-16 16:32:25.881 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 UNREAD email(s) with [stm] prefix in All Mail
 2025-11-16 16:32:26.119 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-16 16:33:26.134 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-16 16:33:26.135 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-16 16:33:28.124 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-16 16:33:28.389 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-16 16:33:28.641 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 UNREAD email(s) with [stm] prefix in All Mail
+2025-11-16 16:33:28.877 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-16 16:33:53.613 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...

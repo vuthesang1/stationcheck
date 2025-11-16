@@ -1,2 +1,6 @@
 2025-11-16 16:32:13.012 [INF] [AlertGeneration] Service started
 2025-11-16 16:32:13.248 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:32:43.305 [INF] [AlertGeneration] Running check at "2025-11-16T16:32:43.3048795+07:00"
+2025-11-16 16:32:43.650 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 16:32:43.822 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 16:32:43.831 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds

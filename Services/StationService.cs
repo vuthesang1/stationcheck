@@ -146,22 +146,6 @@ namespace StationCheck.Services
             _logger.LogInformation("Deleted station {StationId} - {StationName}", id, station.Name);
         }
 
-        public async Task<List<CameraInfo>> GetStationCamerasAsync(int stationId)
-        {
-            await Task.CompletedTask;
-            return new List<CameraInfo>();
-        }
-
-        public async Task AssignCameraToStationAsync(string cameraId, int stationId, string assignedBy)
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task RemoveCameraFromStationAsync(string cameraId, int stationId)
-        {
-            await Task.CompletedTask;
-        }
-
         public async Task<List<Station>> GetUserStationsAsync(string userId, UserRole userRole)
         {
             using var context = await _contextFactory.CreateDbContextAsync();

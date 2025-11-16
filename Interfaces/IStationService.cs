@@ -11,11 +11,6 @@ namespace StationCheck.Interfaces
         Task DeleteStationAsync(Guid id);
         IQueryable<Station> GetStationsQueryable();
         
-        // Camera assignments
-        Task<List<CameraInfo>> GetStationCamerasAsync(int stationId);
-        Task AssignCameraToStationAsync(string cameraId, int stationId, string assignedBy);
-        Task RemoveCameraFromStationAsync(string cameraId, int stationId);
-        
         // Get stations accessible to user
         Task<List<Station>> GetUserStationsAsync(string userId, UserRole userRole);
     }

@@ -164,11 +164,6 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Register services - All using DbContextFactory now
-// builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddSingleton<INvrService, MockNvrService>();
-builder.Services.AddScoped<IFaceRecognitionService, MockFaceRecognitionService>();
-// builder.Services.AddScoped<ICheckInService, CheckInService>();
-// builder.Services.AddScoped<IMotionDetectionService, MotionDetectionService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStationService, StationService>();
