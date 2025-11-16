@@ -1,0 +1,27 @@
+2025-11-16 16:31:30.943 [ERR] [Microsoft.EntityFrameworkCore.Database.Command] Failed executing DbCommand (49ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Languages] (
+    [Code] nvarchar(10) NOT NULL,
+    [Name] nvarchar(100) NOT NULL,
+    [NativeName] nvarchar(100) NOT NULL,
+    [IsActive] bit NOT NULL,
+    [IsDefault] bit NOT NULL,
+    [FlagIcon] nvarchar(10) NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [CreatedBy] nvarchar(50) NULL,
+    [ModifiedAt] datetime2 NULL,
+    [ModifiedBy] nvarchar(50) NULL,
+    CONSTRAINT [PK_Languages] PRIMARY KEY ([Code])
+);
+2025-11-16 16:32:12.631 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-16 16:32:12.936 [INF] [] Starting StationCheck application
+2025-11-16 16:32:13.329 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-16 16:32:13.342 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-16 16:32:13.343 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-16 16:32:13.344 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-16 16:32:13.375 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\station-c
+2025-11-16 16:32:23.040 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-16 16:32:23.050 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-16 16:32:25.233 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-16 16:32:25.616 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-16 16:32:25.881 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 UNREAD email(s) with [stm] prefix in All Mail
+2025-11-16 16:32:26.119 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully

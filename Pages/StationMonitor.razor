@@ -1,0 +1,519 @@
+@page "/station-monitor"
+@using StationCheck.Models
+@using StationCheck.Interfaces
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
+@inject IStationService StationService
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject LocalizationStateService LocalizationState
+@implements IDisposable
+
+<PageTitle>Giám sát trạm theo thời gian thực</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-broadcast"></i> Giám sát trạm theo thời gian thực</h3>
+        <div>
+            <span class="badge bg-secondary me-2">Tự động làm mới: 10 phút</span>
+            <button class="btn btn-primary btn-sm" @onclick="LoadStations">
+                <i class="bi bi-arrow-clockwise"></i> Làm mới
+            </button>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Legend -->
+        <div class="alert alert-info mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <span class="status-indicator normal pulse"></span> 
+                    <strong>Bình thường:</strong> Có chuyển động trong thời gian cho phép
+                </div>
+                <div class="col-md-4">
+                    <span class="status-indicator alert pulse"></span> 
+                    <strong>Cảnh báo:</strong> Quá thời gian không có chuyển động
+                </div>
+                <div class="col-md-4">
+                    <span class="status-indicator paused"></span> 
+                    <strong>Tạm ngưng:</strong> Đang tắt giám sát
+                </div>
+            </div>
+        </div>
+
+        <!-- Station Cards -->
+        <div class="row g-4">
+            @foreach (var station in stations)
+            {
+                var status = GetStationStatus(station);
+                var alertCount = alertCounts.GetValueOrDefault(station.Id, 0);
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="card station-card @GetCardClass(status)" @onclick="() => ShowStationDetail(station)">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <span class="status-indicator @GetStatusClass(status) @(status != StationStatus.Paused ? "pulse" : "")"></span>
+                                        @station.StationCode
+                                    </h5>
+                                    <p class="text-muted mb-0">@station.Name</p>
+                                </div>
+                                @if (alertCount > 0)
+                                {
+                                    <span class="badge bg-danger rounded-pill">@alertCount</span>
+                                }
+                            </div>
+                            
+                            <div class="station-info">
+                                <div class="info-row">
+                                    <i class="bi bi-clock"></i>
+                                    <span>Lần cuối: @(station.LastMotionDetectedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")</span>
+                                </div>
+                                <div class="info-row">
+                                    <i class="bi bi-calendar-range"></i>
+                                    <span>Khung giờ: @GetActiveTimeFrameCount(station)</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <span class="badge @GetStatusBadgeClass(status)">
+                                    @GetStatusText(status)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (stations.Count == 0)
+        {
+            <div class="alert alert-warning text-center">
+                <i class="bi bi-info-circle"></i> Chưa có trạm nào được cấu hình
+            </div>
+        }
+    }
+</div>
+
+<!-- Station Detail Modal -->
+@if (selectedStation != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-info-circle"></i> Chi tiết trạm - @selectedStation.StationCode
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetail"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Thông tin trạm</h6>
+                            <table class="table table-sm">
+                                <tr><th>Mã trạm:</th><td>@selectedStation.StationCode</td></tr>
+                                <tr><th>Tên trạm:</th><td>@selectedStation.Name</td></tr>
+                                <tr><th>Địa chỉ:</th><td>@selectedStation.Address</td></tr>
+                                <tr><th>Liên hệ:</th><td>@selectedStation.ContactPerson - @selectedStation.ContactPhone</td></tr>
+                                <tr><th>Trạng thái:</th><td>
+                                    <span class="badge @(selectedStation.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(selectedStation.IsActive ? "Đang hoạt động" : "Tạm ngưng")
+                                    </span>
+                                </td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Khung giờ giám sát</h6>
+                            @if (selectedStationTimeFrames.Any())
+                            {
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Khung giờ</th>
+                                            <th>Tần suất</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var tf in selectedStationTimeFrames)
+                                        {
+                                            <tr>
+                                                <td>@tf.StartTime.ToString(@"hh\:mm") - @tf.EndTime.ToString(@"hh\:mm")</td>
+                                                <td>@tf.FrequencyMinutes phút</td>
+                                                <td>
+                                                    <span class="badge @(tf.IsEnabled ? "bg-success" : "bg-secondary")">
+                                                        @(tf.IsEnabled ? "Bật" : "Tắt")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">Chưa cấu hình khung giờ</div>
+                            }
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>Lịch sử chuyển động gần nhất (20 lần)</h6>
+                    @if (motionHistory.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Loại sự kiện</th>
+                                        <th>Camera</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var motion in motionHistory)
+                                    {
+                                        <tr>
+                                            <td>@motion.DetectedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                            <td>@motion.EventType</td>
+                                            <td>@motion.CameraName</td>
+                                            <td>
+                                                <span class="badge @(motion.IsProcessed ? "bg-success" : "bg-warning")">
+                                                    @(motion.IsProcessed ? "Đã xử lý" : "Chờ xử lý")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">Chưa có lịch sử chuyển động</div>
+                    }
+
+                    <hr />
+
+                    <h6>Lịch sử cảnh báo (50 lần gần nhất)</h6>
+                    @if (alertHistory.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Loại</th>
+                                        <th>Cấu hình snapshot</th>
+                                        <th>Giải quyết</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var alert in alertHistory)
+                                    {
+                                        <tr>
+                                            <td>@alert.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                            <td>
+                                                <span class="badge bg-@(alert.Severity == AlertSeverity.Critical ? "danger" : "warning")">
+                                                    @alert.Severity
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    Tần suất: @alert.ConfigurationSnapshot<br/>
+                                                </small>
+                                            </td>
+                                            <td>@(alert.ResolvedAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</td>
+                                            <td>
+                                                <span class="badge @(!alert.IsResolved ? "bg-danger" : "bg-success")">
+                                                    @(!alert.IsResolved ? "Đang báo" : "Đã giải quyết")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">Chưa có cảnh báo nào</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetail">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .station-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-left: 4px solid #dee2e6;
+    }
+    
+    .station-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .station-card.normal {
+        border-left-color: #28a745;
+    }
+    
+    .station-card.alert {
+        border-left-color: #dc3545;
+    }
+    
+    .station-card.paused {
+        border-left-color: #6c757d;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-indicator.normal {
+        background-color: #28a745;
+    }
+    
+    .status-indicator.alert {
+        background-color: #dc3545;
+    }
+    
+    .status-indicator.paused {
+        background-color: #6c757d;
+    }
+    
+    .status-indicator.pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+    }
+    
+    .station-info {
+        font-size: 0.9rem;
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .info-row i {
+        margin-right: 8px;
+        color: #6c757d;
+    }
+</style>
+
+@code {
+    private enum StationStatus
+    {
+        Normal,
+        Alert,
+        Paused
+    }
+
+    private List<Station> stations = new();
+    private Dictionary<Guid, int> alertCounts = new();
+    private bool isLoading = true;
+    
+    // Detail modal
+    private Station? selectedStation;
+    private List<TimeFrame> selectedStationTimeFrames = new();
+    private List<MotionEvent> motionHistory = new();
+    private List<MotionAlert> alertHistory = new();
+    
+    // Auto refresh timer
+    private System.Threading.Timer? refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStations();
+        
+        // Set up auto refresh every 10 minutes
+        refreshTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadStations();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
+    }
+
+    private async Task LoadStations()
+    {
+        isLoading = true;
+        try
+        {
+            stations = await StationService.GetAllStationsAsync();
+            await LoadAlertCounts();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadAlertCounts()
+    {
+        using var context = await DbContextFactory.CreateDbContextAsync();
+        alertCounts = await context.MotionAlerts
+            .Where(a => !a.IsResolved)
+            .GroupBy(a => a.StationId ?? Guid.Empty)
+            .Select(g => new { StationId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.StationId, x => x.Count);
+    }
+
+    private StationStatus GetStationStatus(Station station)
+    {
+        if (!station.IsActive)
+            return StationStatus.Paused;
+
+        // Get active timeframe for current time
+        var now = DateTime.Now;
+        var currentTime = now.TimeOfDay;
+        var currentDay = now.DayOfWeek;
+
+        var activeTimeFrames = station.TimeFrames?
+            .Where(tf => tf.IsEnabled 
+                && tf.StartTime <= currentTime 
+                && tf.EndTime >= currentTime
+                && (string.IsNullOrEmpty(tf.DaysOfWeek) || tf.DaysOfWeek.Contains(currentDay.ToString())))
+            .ToList();
+
+        if (activeTimeFrames == null || !activeTimeFrames.Any())
+            return StationStatus.Paused;
+
+        // Check if there's motion within the allowed time
+        if (!station.LastMotionDetectedAt.HasValue)
+            return StationStatus.Alert;
+
+        var activeFrame = activeTimeFrames.First();
+        var timeSinceLastMotion = (now - station.LastMotionDetectedAt.Value).TotalMinutes;
+        var allowedTime = activeFrame.FrequencyMinutes + activeFrame.BufferMinutes;
+
+        return timeSinceLastMotion <= allowedTime ? StationStatus.Normal : StationStatus.Alert;
+    }
+
+    private string GetCardClass(StationStatus status)
+    {
+        return status switch
+        {
+            StationStatus.Normal => "normal",
+            StationStatus.Alert => "alert",
+            StationStatus.Paused => "paused",
+            _ => ""
+        };
+    }
+
+    private string GetStatusClass(StationStatus status)
+    {
+        return status switch
+        {
+            StationStatus.Normal => "normal",
+            StationStatus.Alert => "alert",
+            StationStatus.Paused => "paused",
+            _ => ""
+        };
+    }
+
+    private string GetStatusBadgeClass(StationStatus status)
+    {
+        return status switch
+        {
+            StationStatus.Normal => "bg-success",
+            StationStatus.Alert => "bg-danger",
+            StationStatus.Paused => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusText(StationStatus status)
+    {
+        return status switch
+        {
+            StationStatus.Normal => "Bình thường",
+            StationStatus.Alert => "Cảnh báo",
+            StationStatus.Paused => "Tạm ngưng",
+            _ => "Không xác định"
+        };
+    }
+
+    private int GetActiveTimeFrameCount(Station station)
+    {
+        return station.TimeFrames?.Count(tf => tf.IsEnabled) ?? 0;
+    }
+
+    private async Task ShowStationDetail(Station station)
+    {
+        selectedStation = station;
+        
+        using var context = await DbContextFactory.CreateDbContextAsync();
+        
+        // Load timeframes
+        selectedStationTimeFrames = await context.TimeFrames
+            .Where(tf => tf.StationId == station.Id)
+            .OrderBy(tf => tf.StartTime)
+            .ToListAsync();
+        
+        // Load recent motion history
+        motionHistory = await context.MotionEvents
+            .Where(m => m.StationId == station.Id)
+            .OrderByDescending(m => m.DetectedAt)
+            .Take(20)
+            .ToListAsync();
+        
+        // Load alert history
+        alertHistory = await context.MotionAlerts
+            .Where(a => a.StationId == station.Id)
+            .OrderByDescending(a => a.CreatedAt)
+            .Take(50)
+            .ToListAsync();
+    }
+
+    private void CloseDetail()
+    {
+        selectedStation = null;
+        selectedStationTimeFrames.Clear();
+        motionHistory.Clear();
+        alertHistory.Clear();
+    }
+
+    public void Dispose()
+    {
+        refreshTimer?.Dispose();
+    }
+}

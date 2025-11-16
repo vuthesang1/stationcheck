@@ -1,0 +1,235 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using StationCheck.Data;
+using StationCheck.Interfaces;
+using StationCheck.Models;
+
+namespace StationCheck.Services;
+
+public class AuthService : IAuthService
+{
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthService> _logger;
+
+    public AuthService(
+        IDbContextFactory<ApplicationDbContext> contextFactory,
+        IConfiguration configuration,
+        ILogger<AuthService> logger)
+    {
+        _contextFactory = contextFactory;
+        _configuration = configuration;
+        _logger = logger;
+    }
+
+    public async Task<LoginResponse> LoginAsync(LoginRequest request)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+        
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
+
+        if (user == null)
+        {
+            _logger.LogWarning($"Login failed: User '{request.Username}' not found");
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Invalid username or password"
+            };
+        }
+
+        var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+        _logger.LogInformation($"Login attempt for user '{user.Username}': Password={request.Password}, Hash={user.PasswordHash}, Valid={isPasswordValid}");
+
+        if (!isPasswordValid)
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Invalid username or password"
+            };
+        }
+
+        if (!user.IsActive)
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Account is disabled"
+            };
+        }
+
+        // Update last login
+        user.LastLoginAt = DateTime.Now;
+        await context.SaveChangesAsync();
+
+        var token = GenerateJwtToken(user);
+
+        _logger.LogInformation($"User {user.Username} logged in successfully");
+
+        return new LoginResponse
+        {
+            Success = true,
+            Message = "Login successful",
+            Token = token,
+            AccessToken = token,
+            RefreshToken = null,
+            User = new UserInfo
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = user.Role,
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt
+            }
+        };
+    }
+
+    public async Task<LoginResponse> RegisterAsync(RegisterRequest request, string? createdBy = null)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+
+        // Check if username exists
+        if (await context.Users.AnyAsync(u => u.Username == request.Username))
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Username already exists"
+            };
+        }
+
+        // Check if email exists
+        if (await context.Users.AnyAsync(u => u.Email == request.Email))
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Email already exists"
+            };
+        }
+
+        var user = new ApplicationUser
+        {
+            Username = request.Username,
+            Email = request.Email,
+            FullName = request.FullName,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Role = request.Role,
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = createdBy
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        _logger.LogInformation($"New user {user.Username} registered by {createdBy ?? "self"}");
+
+        var token = GenerateJwtToken(user);
+
+        return new LoginResponse
+        {
+            Success = true,
+            Message = "Registration successful",
+            Token = token,
+            AccessToken = token,
+            RefreshToken = null,
+            User = new UserInfo
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = user.Role,
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt
+            }
+        };
+    }
+
+    public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        await Task.CompletedTask;
+        
+        return new LoginResponse
+        {
+            Success = false,
+            Message = "Refresh token functionality is not implemented"
+        };
+    }
+
+    public async Task<bool> RevokeTokenAsync(string refreshToken)
+    {
+        await Task.CompletedTask;
+        return false;
+    }
+
+    public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+
+        var user = await context.Users.FindAsync(request.UserId);
+        if (user == null)
+            return false;
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+            return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        user.ModifiedAt = DateTime.Now;
+        await context.SaveChangesAsync();
+
+        _logger.LogInformation($"User {user.Username} changed password");
+
+        return true;
+    }
+
+    public string GenerateJwtToken(ApplicationUser user)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"] ?? "YourVerySecureSecretKeyForJWT_MinimumLength32Characters!";
+        var issuer = jwtSettings["Issuer"] ?? "StationCheck";
+        var audience = jwtSettings["Audience"] ?? "StationCheckApp";
+        var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Name, user.Username),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("FullName", user.FullName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: DateTime.Now.AddMinutes(expiryMinutes),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+}

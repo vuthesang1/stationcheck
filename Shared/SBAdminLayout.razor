@@ -1,0 +1,425 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using StationCheck.Services
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+@inject LocalizationStateService LocalizationState
+
+<AuthorizeView>
+    <Authorized Context="authContext">
+        <div id="wrapper">
+            <!-- Sidebar -->
+            <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+                <!-- Sidebar - Brand -->
+                <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+                    <div class="sidebar-brand-icon rotate-n-15">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="sidebar-brand-text mx-3">StationCheck</div>
+                </a>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider my-0">
+
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item @(IsActive("/") ? "active" : "")">
+                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>@GetText("menu.dashboard", "Dashboard")</span>
+                    </NavLink>
+                </li>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    @GetText("menu.management", "Quản lý")
+                </div>
+
+                <!-- Nav Item - Stations (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/stations") ? "active" : "")">
+                        <NavLink class="nav-link" href="/stations">
+                            <i class="fas fa-fw fa-building"></i>
+                            <span>@GetText("menu.stations", "Quản lý Trạm")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - My Station (StationEmployee Only) -->
+                <AuthorizeView Roles="StationEmployee">
+                    <li class="nav-item @(IsActive("/my-station") ? "active" : "")">
+                        <NavLink class="nav-link" href="/my-station">
+                            <i class="fas fa-fw fa-building"></i>
+                            <span>@GetText("menu.my_station", "Trạm của tôi")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - Motion Monitoring (Manager & Admin) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/motion-monitoring") ? "active" : "")">
+                        <NavLink class="nav-link" href="/motion-monitoring">
+                            <i class="fas fa-fw fa-video"></i>
+                            <span>@GetText("menu.motion_monitoring", "Giám sát Chuyển động")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - Time Schedules (Manager & Admin) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/schedules") ? "active" : "")">
+                        <NavLink class="nav-link" href="/schedules">
+                            <i class="fas fa-fw fa-clock"></i>
+                            <span>@GetText("menu.schedules", "Cấu hình Lịch")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    @GetText("menu.monitoring", "Giám sát")
+                </div>
+
+                <!-- Nav Item - Station Monitor (All roles) -->
+                <li class="nav-item @(IsActive("/station-monitor") ? "active" : "")">
+                    <NavLink class="nav-link" href="/station-monitor">
+                        <i class="fas fa-fw fa-broadcast-tower"></i>
+                        <span>Dashboard Giám sát</span>
+                    </NavLink>
+                </li>
+
+                <!-- Nav Item - Monitoring Settings (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/monitoring/settings") ? "active" : "")">
+                        <NavLink class="nav-link" href="/monitoring/settings">
+                            <i class="fas fa-fw fa-toggle-on"></i>
+                            <span>@GetText("menu.monitoring_settings", "Cấu hình Giám sát")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - Monitoring Profiles (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/monitoring/profiles") ? "active" : "")">
+                        <NavLink class="nav-link" href="/monitoring/profiles">
+                            <i class="fas fa-fw fa-calendar-alt"></i>
+                            <span>@GetText("menu.monitoring_profiles", "Profile Giám sát")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - System Configuration (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/system-config") ? "active" : "")">
+                        <NavLink class="nav-link" href="/system-config">
+                            <i class="fas fa-fw fa-cogs"></i>
+                            <span>@GetText("menu.system_config", "Cấu hình Hệ thống")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Báo cáo
+                </div>
+
+                <!-- Nav Item - Reports -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/reports") ? "active" : "")">
+                        <NavLink class="nav-link" href="/reports">
+                            <i class="fas fa-fw fa-chart-bar"></i>
+                            <span>Báo cáo Hệ thống</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    @GetText("menu.personnel", "Nhân sự")
+                </div>
+
+                <!-- Nav Item - Employees (Manager & Admin) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/employees") ? "active" : "")">
+                        <NavLink class="nav-link" href="/employees">
+                            <i class="fas fa-fw fa-users"></i>
+                            <span>@GetText("menu.employees", "Nhân viên")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - Users (Manager & Admin) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/users") ? "active" : "")">
+                        <NavLink class="nav-link" href="/users">
+                            <i class="fas fa-fw fa-user-cog"></i>
+                            <span>@GetText("menu.users", "Quản lý User")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    @GetText("menu.system", "Hệ thống")
+                </div>
+
+                <!-- Nav Item - Languages (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/languages") ? "active" : "")">
+                        <NavLink class="nav-link" href="/languages">
+                            <i class="fas fa-fw fa-language"></i>
+                            <span>@GetText("menu.languages", "Ngôn ngữ")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Nav Item - Translations (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item @(IsActive("/translations") ? "active" : "")">
+                        <NavLink class="nav-link" href="/translations">
+                            <i class="fas fa-fw fa-globe"></i>
+                            <span>@GetText("menu.translations", "Bản dịch")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider d-none d-md-block">
+
+                <!-- Sidebar Toggler (Sidebar) -->
+                <div class="text-center d-none d-md-inline">
+                    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+                </div>
+            </ul>
+            <!-- End of Sidebar -->
+
+            <!-- Content Wrapper -->
+            <div id="content-wrapper" class="d-flex flex-column">
+                <!-- Main Content -->
+                <div id="content">
+                    <!-- Topbar -->
+                    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                        <!-- Sidebar Toggle (Topbar) -->
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <!-- Topbar Navbar -->
+                        <ul class="navbar-nav ml-auto">
+                            <!-- Nav Item - Language Switcher -->
+                            <li class="nav-item dropdown no-arrow mx-1">
+                                <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-globe fa-fw"></i>
+                                    <span class="d-none d-lg-inline ml-1">@GetCurrentLanguageName()</span>
+                                </a>
+                                <!-- Dropdown - Language Selection -->
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                     aria-labelledby="languageDropdown">
+                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "vi" ? "active" : "")" 
+                                       href="#" @onclick="@(() => ChangeLanguage("vi"))" @onclick:preventDefault>
+                                        <i class="fas fa-flag fa-sm fa-fw mr-2"></i>
+                                        Tiếng Việt
+                                    </a>
+                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "en" ? "active" : "")" 
+                                       href="#" @onclick="@(() => ChangeLanguage("en"))" @onclick:preventDefault>
+                                        <i class="fas fa-flag fa-sm fa-fw mr-2"></i>
+                                        English
+                                    </a>
+                                </div>
+                            </li>
+
+                            <!-- Nav Item - User Information -->
+                            <li class="nav-item dropdown no-arrow">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">@authContext.User.Identity?.Name</span>
+                                    <i class="fas fa-user-circle fa-2x text-gray-600"></i>
+                                </a>
+                                <!-- Dropdown - User Information -->
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                     aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="/profile">
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        @GetText("menu.profile", "Profile")
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" @onclick="Logout">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        @GetText("menu.logout", "Logout")
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+                    <!-- End of Topbar -->
+
+                    <!-- Begin Page Content -->
+                    <div class="container-fluid">
+                        @Body
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+                <!-- End of Main Content -->
+
+                <!-- Footer -->
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; StationCheck @DateTime.Now.Year</span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
+            </div>
+            <!-- End of Content Wrapper -->
+        </div>
+        <!-- End of Page Wrapper -->
+
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string currentLanguage = "vi";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize LocalizationState
+        if (LocalizationState != null && !LocalizationState.IsLoaded)
+        {
+            var storedLanguage = await JS.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+            var browserLanguage = await JS.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
+            var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
+            
+            await LocalizationState.InitializeAsync(preferredLanguage);
+            currentLanguage = preferredLanguage;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Read current language from localStorage
+                var storedLanguage = await JS.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+                if (!string.IsNullOrEmpty(storedLanguage))
+                {
+                    currentLanguage = storedLanguage;
+                    StateHasChanged();
+                }
+            }
+            catch { }
+
+            // Subscribe to language changes
+            if (LocalizationState != null)
+            {
+                LocalizationState.OnLanguageChanged += HandleLanguageChanged;
+            }
+            
+            // Wait for translations to load
+            if (LocalizationState != null)
+            {
+                int attempts = 0;
+                while (!LocalizationState.IsLoaded && attempts < 20)
+                {
+                    await Task.Delay(100);
+                    attempts++;
+                }
+                
+                if (LocalizationState.IsLoaded)
+                {
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+    private void HandleLanguageChanged()
+    {
+        currentLanguage = LocalizationState?.CurrentLanguage ?? "vi";
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        if (LocalizationState != null)
+        {
+            LocalizationState.OnLanguageChanged -= HandleLanguageChanged;
+        }
+    }
+
+    private bool IsActive(string href)
+    {
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        return currentPath.Equals(href, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task Logout()
+    {
+        if (AuthStateProvider is CustomAuthenticationStateProvider customAuthStateProvider)
+        {
+            await customAuthStateProvider.NotifyUserLogout();
+            Navigation.NavigateTo("/login", true);
+        }
+    }
+
+    private string GetText(string key, string defaultText)
+    {
+        return LocalizationState?.GetText(key, defaultText) ?? defaultText;
+    }
+
+    private string GetCurrentLanguageName()
+    {
+        return currentLanguage switch
+        {
+            "vi" => "Tiếng Việt",
+            "en" => "English",
+            _ => "Language"
+        };
+    }
+
+    private async Task ChangeLanguage(string languageCode)
+    {
+        if (LocalizationState != null)
+        {
+            // Save to localStorage
+            try
+            {
+                await JS.InvokeVoidAsync("localStorage.setItem", "preferredLanguage", languageCode);
+            }
+            catch { }
+
+            // Update state
+            await LocalizationState.SetLanguageAsync(languageCode);
+            
+            // Reload page to apply translations
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        }
+    }
+}

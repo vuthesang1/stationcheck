@@ -1,0 +1,184 @@
+@page "/login"
+@layout EmptyLayout
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using StationCheck.Services
+@using StationCheck.Interfaces
+@using StationCheck.Models
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService AuthService
+
+<div class="bg-gradient-primary" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-12 col-md-9">
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image" style="background: url('https://source.unsplash.com/K4mSJ7kc0As/600x800') center center; background-size: cover;"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">Chào mừng trở lại!</h1>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(errorMessage))
+                                    {
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <strong>Lỗi!</strong> @errorMessage
+                                            <button type="button" class="close" @onclick="() => errorMessage = string.Empty">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                    }
+                                    
+                                    <EditForm Model="@loginRequest" OnValidSubmit="@HandleLogin" class="user">
+                                        <DataAnnotationsValidator />
+                                        
+                                        <div class="form-group">
+                                            <InputText @bind-Value="loginRequest.Username" 
+                                                       class="form-control form-control-user" 
+                                                       placeholder="Tên đăng nhập" 
+                                                       disabled="@isLoggingIn" />
+                                            <ValidationMessage For="@(() => loginRequest.Username)" class="text-danger small" />
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <InputText type="password" 
+                                                       @bind-Value="loginRequest.Password" 
+                                                       class="form-control form-control-user" 
+                                                       placeholder="Mật khẩu" 
+                                                       disabled="@isLoggingIn" />
+                                            <ValidationMessage For="@(() => loginRequest.Password)" class="text-danger small" />
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox small">
+                                                <InputCheckbox @bind-Value="loginRequest.RememberMe" 
+                                                              class="custom-control-input" 
+                                                              id="customCheck" 
+                                                              disabled="@isLoggingIn" />
+                                                <label class="custom-control-label" for="customCheck">Ghi nhớ đăng nhập</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" 
+                                                class="btn btn-primary btn-user btn-block" 
+                                                disabled="@isLoggingIn">
+                                            @if (isLoggingIn)
+                                            {
+                                                <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                                <span>Đang đăng nhập...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Đăng nhập</span>
+                                            }
+                                        </button>
+                                    </EditForm>
+                                    
+                                    <hr>
+                                    
+                                    <div class="text-center">
+                                        <small class="text-muted">
+                                            <strong>Tài khoản mặc định:</strong><br/>
+                                            Admin: <code>admin</code> / <code>Admin@123</code><br/>
+                                            Manager: <code>manager</code> / <code>Manager@123</code><br/>
+                                            Employee: <code>employee1</code> / <code>Employee@123</code>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: 500;
+    }
+    
+    .btn-block {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    
+    .login-info {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .login-info ul {
+        padding-left: 20px;
+    }
+    
+@code {
+    private LoginRequest loginRequest = new LoginRequest();
+    private string errorMessage = "";
+    private bool isLoggingIn = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if already logged in
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "jwt_token");
+        if (!string.IsNullOrEmpty(token))
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+    
+    private async Task HandleLogin()
+    {
+        try
+        {
+            isLoggingIn = true;
+            errorMessage = "";
+            
+            // Call AuthService
+            var loginResponse = await AuthService.LoginAsync(loginRequest);
+            
+            if (loginResponse.Success && !string.IsNullOrEmpty(loginResponse.AccessToken))
+            {
+                // Notify authentication state provider
+                if (AuthStateProvider is CustomAuthenticationStateProvider customAuthProvider)
+                {
+                    await customAuthProvider.NotifyUserAuthentication(loginResponse.AccessToken, loginResponse.User);
+                }
+                
+                // Redirect to home
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = loginResponse.Message ?? "Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi: {ex.Message}";
+        }
+        finally
+        {
+            isLoggingIn = false;
+        }
+    }
+}

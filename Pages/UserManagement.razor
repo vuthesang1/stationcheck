@@ -1,0 +1,410 @@
+@page "/users"
+@using StationCheck.Interfaces
+@using StationCheck.Services
+@attribute [Authorize(Policy = "ManagerOrAbove")]
+@inject IUserService UserService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject LocalizationStateService LocalizationState
+
+<PageTitle>@GetText("user.title", "User Management")</PageTitle>
+
+<div class="user-management">
+    <div class="header-section">
+        <h3>@GetText("user.title", "User Management")</h3>
+        @if (currentUser?.Role >= UserRole.Manager)
+        {
+            <button class="btn btn-success" @onclick="ShowAddUserModal">
+                <i class="bi bi-plus-circle"></i> @GetText("user.add_new", "Add User")
+            </button>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible">
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="@(() => errorMessage = "")"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible">
+            @successMessage
+            <button type="button" class="btn-close" @onclick="@(() => successMessage = "")"></button>
+        </div>
+    }
+
+    @if (users == null)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (!users.Any())
+    {
+        <div class="alert alert-info">@GetText("user.no_users_found", "No users found.")</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>@GetText("user.username_column", "Username")</th>
+                        <th>@GetText("user.fullname_column", "Full Name")</th>
+                        <th>@GetText("user.email_column", "Email")</th>
+                        <th>@GetText("user.role_column", "Role")</th>
+                        <th>@GetText("user.status_column", "Status")</th>
+                        <th>@GetText("user.created_column", "Created At")</th>
+                        <th>@GetText("user.last_login_column", "Last Login")</th>
+                        <th>@GetText("user.actions_column", "Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge @GetRoleBadgeClass(user.Role)">
+                                    @user.Role.ToString()
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(user.IsActive ? GetText("user.active", "Active") : GetText("user.inactive", "Inactive"))
+                                </span>
+                            </td>
+                            <td>@user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(user.LastLoginAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? GetText("user.never_login", "Never"))</td>
+                            <td>
+                                @if (CanModifyUser(user))
+                                {
+                                    <button class="btn btn-sm btn-primary me-1" @onclick="@(() => ShowEditUserModal(user))">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    @if (user.Id != currentUser?.Id)
+                                    {
+                                        <button class="btn btn-sm btn-danger" @onclick="@(() => DeleteUser(user))">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">@GetText("user.no_permission", "No permission")</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Add/Edit User Modal -->
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(editingUser == null ? "Add User" : "Edit User")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@userFormModel" OnValidSubmit="@SaveUser">
+                        <DataAnnotationsValidator />
+                        
+                        @if (editingUser == null)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <InputText @bind-Value="userFormModel.Username" class="form-control" />
+                                <ValidationMessage For="@(() => userFormModel.Username)" />
+                            </div>
+                        }
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <InputText @bind-Value="userFormModel.FullName" class="form-control" />
+                            <ValidationMessage For="@(() => userFormModel.FullName)" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="userFormModel.Email" class="form-control" type="email" />
+                            <ValidationMessage For="@(() => userFormModel.Email)" />
+                        </div>
+                        
+                        @if (editingUser == null)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <InputText @bind-Value="userFormModel.Password" class="form-control" type="password" />
+                                <ValidationMessage For="@(() => userFormModel.Password)" />
+                            </div>
+                        }
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <InputSelect @bind-Value="userFormModel.Role" class="form-select">
+                                @if (currentUser?.Role == UserRole.Admin)
+                                {
+                                    <option value="@UserRole.Admin">Admin (Quản trị)</option>
+                                    <option value="@UserRole.Manager">Manager (Quản lý)</option>
+                                }
+                                <option value="@UserRole.StationEmployee">Station Employee (Nhân viên trạm)</option>
+                            </InputSelect>
+                        </div>
+                        
+                        @if (editingUser != null)
+                        {
+                            <div class="mb-3 form-check">
+                                <InputCheckbox @bind-Value="userFormModel.IsActive" class="form-check-input" id="isActiveCheck" />
+                                <label class="form-check-label" for="isActiveCheck">Active</label>
+                            </div>
+                        }
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+<style>
+    .user-management {
+        padding: 20px;
+    }
+    
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .modal.show {
+        display: block;
+    }
+    
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0,0,0,0.5);
+    }
+</style>
+
+@code {
+    private List<UserInfo>? users;
+    private UserInfo? currentUser;
+    private UserInfo? editingUser;
+    private bool showModal = false;
+    private UserFormModel userFormModel = new();
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    public class UserFormModel
+    {
+        public string Username { get; set; } = "";
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string? Password { get; set; }
+        public UserRole Role { get; set; } = UserRole.StationEmployee;
+        public bool IsActive { get; set; } = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize LocalizationState
+        if (LocalizationState != null && !LocalizationState.IsLoaded)
+        {
+            var browserLanguage = await JS.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
+            var storedLanguage = await JS.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+            var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
+            await LocalizationState.InitializeAsync(preferredLanguage);
+        }
+        
+        await LoadCurrentUser();
+        await LoadUsers();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && LocalizationState != null)
+        {
+            // Wait for translations to load
+            int attempts = 0;
+            while (!LocalizationState.IsLoaded && attempts < 20)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+            
+            if (LocalizationState.IsLoaded)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+    
+    private string GetText(string key, string defaultText)
+    {
+        return LocalizationState?.GetText(key, defaultText) ?? defaultText;
+    }
+
+    private async Task LoadCurrentUser()
+    {
+        try
+        {
+            var userJson = await JS.InvokeAsync<string>("localStorage.getItem", "user_info");
+            if (!string.IsNullOrEmpty(userJson))
+            {
+                currentUser = System.Text.Json.JsonSerializer.Deserialize<UserInfo>(userJson);
+            }
+        }
+        catch { }
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            users = await UserService.GetAllUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load users: {ex.Message}";
+        }
+    }
+
+    private bool CanModifyUser(UserInfo user)
+    {
+        if (currentUser == null) return false;
+        
+        // Admin can modify everyone
+        if (currentUser.Role == UserRole.Admin) return true;
+        
+        // Manager can only modify StationEmployees
+        if (currentUser.Role == UserRole.Manager && user.Role == UserRole.StationEmployee) return true;
+        
+        return false;
+    }
+
+    private void ShowAddUserModal()
+    {
+        editingUser = null;
+        userFormModel = new UserFormModel();
+        showModal = true;
+    }
+
+    private void ShowEditUserModal(UserInfo user)
+    {
+        editingUser = user;
+        userFormModel = new UserFormModel
+        {
+            FullName = user.FullName,
+            Email = user.Email,
+            Role = user.Role,
+            IsActive = user.IsActive
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        editingUser = null;
+    }
+
+    private async Task SaveUser()
+    {
+        try
+        {
+            errorMessage = "";
+            successMessage = "";
+
+            if (editingUser == null)
+            {
+                // Add new user
+                var registerRequest = new RegisterRequest
+                {
+                    Username = userFormModel.Username,
+                    Password = userFormModel.Password ?? "",
+                    Email = userFormModel.Email,
+                    FullName = userFormModel.FullName,
+                    Role = userFormModel.Role
+                };
+                
+                await UserService.CreateUserAsync(registerRequest, currentUser?.Id ?? "");
+                successMessage = "User created successfully";
+            }
+            else
+            {
+                // Update existing user
+                var updateRequest = new UpdateUserRequest
+                {
+                    Email = userFormModel.Email,
+                    FullName = userFormModel.FullName,
+                    Role = userFormModel.Role,
+                    IsActive = userFormModel.IsActive
+                };
+                
+                await UserService.UpdateUserAsync(editingUser.Id, updateRequest, currentUser?.Id ?? "");
+                successMessage = "User updated successfully";
+            }
+
+            CloseModal();
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to save user: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteUser(UserInfo user)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user '{user.Username}'?"))
+            return;
+
+        try
+        {
+            await UserService.DeleteUserAsync(user.Id, currentUser?.Id ?? "");
+            successMessage = "User deleted successfully";
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to delete user: {ex.Message}";
+        }
+    }
+
+    private string GetRoleBadgeClass(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => "bg-danger",
+            UserRole.Manager => "bg-warning text-dark",
+            UserRole.StationEmployee => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+}

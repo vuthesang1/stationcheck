@@ -1,0 +1,376 @@
+@using StationCheck.Models
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject IJSRuntime JS
+@inject LocalizationStateService LocalizationState
+
+<div class="timeframe-config-container">
+    @if (timeFrames == null)
+    {
+        <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@GetText("timeframe.list_title", "Danh sách Khung giờ")</h5>
+            <button class="btn btn-primary btn-sm" @onclick="ShowAddModal">
+                <i class="fas fa-plus me-1"></i>@GetText("button.add", "Thêm mới")
+            </button>
+        </div>
+
+        @if (!timeFrames.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>@GetText("timeframe.no_data", "Chưa có khung giờ giám sát nào. Nhấn 'Thêm mới' để tạo.")
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>@GetText("timeframe.name", "Tên")</th>
+                            <th>@GetText("timeframe.time", "Thời gian")</th>
+                            <th>@GetText("timeframe.days", "Ngày áp dụng")</th>
+                            <th>@GetText("timeframe.buffer", "Dung sai (phút)")</th>
+                            <th>@GetText("timeframe.frequency", "Tần suất (phút)")</th>
+                            <th>@GetText("timeframe.active", "Kích hoạt")</th>
+                            <th width="120">@GetText("timeframe.actions", "Thao tác")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tf in timeFrames.OrderBy(t => t.StartTime))
+                        {
+                            <tr>
+                                <td>@tf.Name</td>
+                                <td>@tf.StartTime.ToString(@"hh\:mm") - @tf.EndTime.ToString(@"hh\:mm")</td>
+                                <td>@FormatDaysOfWeek(tf)</td>
+                                <td class="text-center">@tf.BufferMinutes</td>
+                                <td class="text-center">@tf.FrequencyMinutes</td>
+                                <td class="text-center">
+                                    <i class="fas @(tf.IsEnabled ? "fa-check-circle text-success" : "fa-times-circle text-danger")"></i>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" @onclick="() => ShowEditModal(tf)" title="@GetText("button.edit", "Sửa")">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" @onclick="() => DeleteTimeFrame(tf.Id)" title="@GetText("button.delete", "Xóa")">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+</div>
+
+<!-- Add/Edit TimeFrame Modal -->
+@if (showEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(editingTimeFrame?.Id == Guid.Empty ? GetText("timeframe.add_title", "Thêm Khung giờ") : GetText("timeframe.edit_title", "Sửa Khung giờ"))</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <EditForm Model="@timeFrameForm" OnValidSubmit="SaveTimeFrame">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">@GetText("timeframe.name", "Tên") *</label>
+                                <input type="text" class="form-control" @bind="timeFrameForm.Name" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">@GetText("timeframe.start_time", "Giờ bắt đầu") *</label>
+                                <input type="time" class="form-control" value="@startTimeString" @onchange="@((e) => startTimeString = e.Value?.ToString() ?? "08:00")" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">@GetText("timeframe.end_time", "Giờ kết thúc") *</label>
+                                <input type="time" class="form-control" value="@endTimeString" @onchange="@((e) => endTimeString = e.Value?.ToString() ?? "17:00")" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">@GetText("timeframe.frequency_minutes", "Tần suất (phút)") *</label>
+                                <input type="number" class="form-control" @bind="timeFrameForm.FrequencyMinutes" min="1" max="1440" required />
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">@GetText("timeframe.buffer_minutes", "Dung sai (phút)") *</label>
+                                <input type="number" class="form-control" @bind="timeFrameForm.BufferMinutes" min="0" max="120" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label d-block mb-2">@GetText("timeframe.days_of_week", "Ngày áp dụng") *</label>
+                                <div class="btn-group btn-group-sm d-flex flex-wrap gap-2" role="group">
+                                    @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                                    {
+                                        var isSelected = timeFrameForm.DaysOfWeek.Contains((int)day);
+                                        <button type="button" 
+                                                class="btn @(isSelected ? "btn-primary" : "btn-outline-secondary")" 
+                                                @onclick="() => ToggleDay(day)"
+                                                style="flex: 1; min-width: 70px;">
+                                            @GetDayName(day)
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @bind="timeFrameForm.IsEnabled" id="isEnabledCheck" />
+                                    <label class="form-check-label" for="isEnabledCheck">@GetText("timeframe.is_enabled", "Kích hoạt")</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">@GetText("button.cancel", "Hủy")</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>@GetText("button.save", "Lưu")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .timeframe-config-container {
+        min-height: 300px;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+@code {
+    [Parameter] public Guid StationId { get; set; }
+    [Parameter] public string StationName { get; set; } = "";
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private List<TimeFrame>? timeFrames;
+    private bool showEditModal = false;
+    private TimeFrame? editingTimeFrame;
+    private TimeFrameFormModel timeFrameForm = new();
+    private string startTimeString = "08:00";
+    private string endTimeString = "17:00";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTimeFrames();
+    }
+
+    private async Task LoadTimeFrames()
+    {
+        using var context = await DbContextFactory.CreateDbContextAsync();
+        timeFrames = await context.TimeFrames
+            .Where(tf => tf.StationId == StationId)
+            .OrderBy(tf => tf.StartTime)
+            .ToListAsync();
+    }
+
+    private void ShowAddModal()
+    {
+        editingTimeFrame = new TimeFrame
+        {
+            Id = Guid.Empty,
+            StationId = StationId,
+            IsEnabled = true,
+            FrequencyMinutes = 5,
+            BufferMinutes = 5
+        };
+        timeFrameForm = new TimeFrameFormModel
+        {
+            Name = "",
+            StartTime = new TimeSpan(8, 0, 0),
+            EndTime = new TimeSpan(17, 0, 0),
+            FrequencyMinutes = 5,
+            BufferMinutes = 5,
+            IsEnabled = true,
+            DaysOfWeek = new List<int>()
+        };
+        startTimeString = "08:00";
+        endTimeString = "17:00";
+        showEditModal = true;
+    }
+
+    private void ShowEditModal(TimeFrame timeFrame)
+    {
+        editingTimeFrame = timeFrame;
+        timeFrameForm = new TimeFrameFormModel
+        {
+            Name = timeFrame.Name,
+            StartTime = timeFrame.StartTime,
+            EndTime = timeFrame.EndTime,
+            FrequencyMinutes = timeFrame.FrequencyMinutes,
+            BufferMinutes = timeFrame.BufferMinutes,
+            IsEnabled = timeFrame.IsEnabled,
+            DaysOfWeek = ParseDaysOfWeek(timeFrame.DaysOfWeek ?? "")
+        };
+        startTimeString = timeFrame.StartTime.ToString(@"hh\:mm");
+        endTimeString = timeFrame.EndTime.ToString(@"hh\:mm");
+        showEditModal = true;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        editingTimeFrame = null;
+    }
+
+    private async Task SaveTimeFrame()
+    {
+        if (editingTimeFrame == null) return;
+
+        try
+        {
+            // Parse time strings
+            if (TimeSpan.TryParse(startTimeString, out var startTime))
+                timeFrameForm.StartTime = startTime;
+            if (TimeSpan.TryParse(endTimeString, out var endTime))
+                timeFrameForm.EndTime = endTime;
+
+            using var context = await DbContextFactory.CreateDbContextAsync();
+
+            if (editingTimeFrame.Id == Guid.Empty)
+            {
+                // Add new
+                var newTimeFrame = new TimeFrame
+                {
+                    Id = Guid.NewGuid(),
+                    StationId = StationId,
+                    Name = timeFrameForm.Name,
+                    StartTime = timeFrameForm.StartTime,
+                    EndTime = timeFrameForm.EndTime,
+                    DaysOfWeek = FormatDaysOfWeekToString(timeFrameForm.DaysOfWeek),
+                    FrequencyMinutes = timeFrameForm.FrequencyMinutes,
+                    BufferMinutes = timeFrameForm.BufferMinutes,
+                    IsEnabled = timeFrameForm.IsEnabled,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "System" // TODO: Get from auth
+                };
+                context.TimeFrames.Add(newTimeFrame);
+            }
+            else
+            {
+                // Update existing
+                var existing = await context.TimeFrames.FindAsync(editingTimeFrame.Id);
+                if (existing != null)
+                {
+                    existing.Name = timeFrameForm.Name;
+                    existing.StartTime = timeFrameForm.StartTime;
+                    existing.EndTime = timeFrameForm.EndTime;
+                    existing.DaysOfWeek = FormatDaysOfWeekToString(timeFrameForm.DaysOfWeek);
+                    existing.FrequencyMinutes = timeFrameForm.FrequencyMinutes;
+                    existing.BufferMinutes = timeFrameForm.BufferMinutes;
+                    existing.IsEnabled = timeFrameForm.IsEnabled;
+                    existing.ModifiedAt = DateTime.UtcNow;
+                    existing.ModifiedBy = "System"; // TODO: Get from auth
+                }
+            }
+
+            await context.SaveChangesAsync();
+            await LoadTimeFrames();
+            CloseEditModal();
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteTimeFrame(Guid id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", GetText("message.confirm_delete", "Bạn có chắc chắn muốn xóa?"));
+        if (!confirmed) return;
+
+        try
+        {
+            using var context = await DbContextFactory.CreateDbContextAsync();
+            var timeFrame = await context.TimeFrames.FindAsync(id);
+            if (timeFrame != null)
+            {
+                context.TimeFrames.Remove(timeFrame);
+                await context.SaveChangesAsync();
+                await LoadTimeFrames();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi khi xóa: {ex.Message}");
+        }
+    }
+
+    private void ToggleDay(DayOfWeek day)
+    {
+        var dayInt = (int)day;
+        if (timeFrameForm.DaysOfWeek.Contains(dayInt))
+            timeFrameForm.DaysOfWeek.Remove(dayInt);
+        else
+            timeFrameForm.DaysOfWeek.Add(dayInt);
+    }
+
+    private string FormatDaysOfWeek(TimeFrame tf)
+    {
+        if (string.IsNullOrEmpty(tf.DaysOfWeek)) return "N/A";
+        
+        var days = ParseDaysOfWeek(tf.DaysOfWeek);
+        if (days.Count == 7) return GetText("timeframe.all_days", "Tất cả các ngày");
+        
+        return string.Join(", ", days.OrderBy(d => d).Select(d => GetDayName((DayOfWeek)d)));
+    }
+
+    private List<int> ParseDaysOfWeek(string daysOfWeek)
+    {
+        if (string.IsNullOrEmpty(daysOfWeek)) return new List<int>();
+        return daysOfWeek.Split(',').Select(int.Parse).ToList();
+    }
+
+    private string FormatDaysOfWeekToString(List<int> days)
+    {
+        return string.Join(",", days.OrderBy(d => d));
+    }
+
+    private string GetDayName(DayOfWeek day)
+    {
+        return day switch
+        {
+            DayOfWeek.Sunday => "CN",
+            DayOfWeek.Monday => "T2",
+            DayOfWeek.Tuesday => "T3",
+            DayOfWeek.Wednesday => "T4",
+            DayOfWeek.Thursday => "T5",
+            DayOfWeek.Friday => "T6",
+            DayOfWeek.Saturday => "T7",
+            _ => day.ToString()
+        };
+    }
+
+    private string GetText(string key, string fallback)
+    {
+        return fallback; // TODO: Implement localization
+    }
+
+    public class TimeFrameFormModel
+    {
+        public string Name { get; set; } = "";
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public int FrequencyMinutes { get; set; } = 5;
+        public int BufferMinutes { get; set; } = 0;
+        public bool IsEnabled { get; set; } = true;
+        public List<int> DaysOfWeek { get; set; } = new();
+    }
+}

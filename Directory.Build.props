@@ -1,0 +1,8 @@
+<Project>
+  <ItemGroup>
+    <Compile Remove="devexpress-reference\**" />
+    <Content Remove="devexpress-reference\**" />
+    <EmbeddedResource Remove="devexpress-reference\**" />
+    <None Remove="devexpress-reference\**" />
+  </ItemGroup>
+</Project>

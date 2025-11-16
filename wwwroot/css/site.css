@@ -1,0 +1,85 @@
+.container {
+    padding: 20px;
+}
+
+.btn {
+    margin: 5px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+img {
+    max-width: 300px;
+    margin: 10px 0;
+}
+
+#blazor-error-ui {
+    display: none;
+}
+
+/* DevExpress Grid Fixes - MUST override their CSS */
+.dxbs-grid {
+    font-size: 14px;
+}
+
+.dxbs-grid .dxbs-grid-header-content {
+    font-weight: 600;
+}
+
+/* Fix ALL SVG icons in grid - use very specific selectors */
+div.card-body div[class*="dxbs"] svg,
+table.dxbs-grid svg,
+th svg,
+td svg,
+.dxbs-grid-header svg,
+.dxbs-grid-header-content svg,
+.dxbs-sort-index svg,
+.dxbs-filter-row svg,
+.dxbs-grid-cell svg,
+button svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    display: inline-block !important;
+}
+
+/* Pager buttons */
+.dxbs-grid-pager button svg,
+.dxbs-pager svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Make sure filter textboxes are normal size */
+.dxbs-filter-row input {
+    font-size: 14px;
+    padding: 4px 8px;
+}
+
+/* Custom grid class for more specific targeting */
+.custom-grid svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+}
+
+.custom-grid th svg,
+.custom-grid td svg {
+    width: 14px !important;
+    height: 14px !important;
+}

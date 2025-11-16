@@ -1,0 +1,140 @@
+@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using StationCheck.Services
+@attribute [Authorize]
+@inject IJSRuntime JS
+@inject LocalizationStateService LocalizationState
+
+<PageTitle>@GetText("dashboard.page_title", "Dashboard") - StationCheck</PageTitle>
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@GetText("dashboard.title", "Dashboard")</h1>
+</div>
+
+<!-- Content Row - Stats Cards -->
+<div class="row">
+    <!-- Stations Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            @GetText("dashboard.total_stations", "Total Stations")</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">2</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cameras Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            @GetText("dashboard.active_cameras", "Active Cameras")</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">2</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-video fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            @GetText("dashboard.pending_alerts", "Pending Alerts")</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employees Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            @GetText("dashboard.employees", "Employees")</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">3</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row - Recent Activity -->
+<div class="row">
+    <!-- Motion Alerts -->
+    <div class="col-lg-8 mb-4">
+        <MotionAlertsPanel />
+    </div>
+
+    <!-- Motion Stats -->
+    <div class="col-lg-4 mb-4">
+        <MotionStatsPanel />
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize LocalizationState
+        if (LocalizationState != null && !LocalizationState.IsLoaded)
+        {
+            var browserLanguage = await JS.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
+            var storedLanguage = await JS.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+            var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
+            await LocalizationState.InitializeAsync(preferredLanguage);
+        }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && LocalizationState != null)
+        {
+            // Wait for translations to load
+            int attempts = 0;
+            while (!LocalizationState.IsLoaded && attempts < 20)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+            
+            if (LocalizationState.IsLoaded)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+    
+    private string GetText(string key, string defaultText)
+    {
+        return LocalizationState?.GetText(key, defaultText) ?? defaultText;
+    }
+}

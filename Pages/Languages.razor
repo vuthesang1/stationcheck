@@ -1,0 +1,372 @@
+@page "/languages"
+@using StationCheck.Services
+@attribute [Authorize(Policy = "AdminOnly")]
+@inject ILocalizationService LocalizationService
+@inject IJSRuntime JSRuntime
+@inject LocalizationStateService LocalizationState
+
+<PageTitle>@GetText("language.title", "Language Management")</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-language"></i> @GetText("language.title", "Language Management")
+        </h1>
+        <button class="btn btn-primary" @onclick="ShowAddModal">
+            <i class="fas fa-plus"></i> @GetText("language.add_new", "Add Language")
+        </button>
+    </div>
+
+    @if (errorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @errorMessage
+            <button type="button" class="close" @onclick="() => errorMessage = null">
+                <span>&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (languages == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else if (!languages.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> @GetText("language.no_languages_found", "No languages found. Click \"Add Language\" to create the first one.")
+        </div>
+    }
+    else
+    {
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <DxGrid @ref="Grid"
+                        Data="@languages"
+                        PageSize="20"
+                        ShowPager="true"
+                        PagerNavigationMode="PagerNavigationMode.InputBox"
+                        PageSizeSelectorVisible="true"
+                        AllowSelectRowByClick="false"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                        SizeMode="SizeMode.Medium">
+                    <Columns>
+                        <DxGridDataColumn FieldName="@nameof(Language.Code)" Caption="@CodeColumnCaption" Width="100px" />
+                        <DxGridDataColumn FieldName="@nameof(Language.Name)" Caption="@NameColumnCaption" MinWidth="150" />
+                        <DxGridDataColumn FieldName="@nameof(Language.NativeName)" Caption="@NativeNameColumnCaption" MinWidth="150" />
+                        <DxGridDataColumn FieldName="@nameof(Language.FlagIcon)" Caption="@FlagColumnCaption" Width="100px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var language = (Language)context.DataItem;
+                                    if (!string.IsNullOrEmpty(language.FlagIcon))
+                                    {
+                                        <span class="flag-icon flag-icon-@language.FlagIcon"></span>
+                                    }
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="@nameof(Language.IsDefault)" Caption="@DefaultColumnCaption" Width="100px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var language = (Language)context.DataItem;
+                                    if (language.IsDefault)
+                                    {
+                                        <span class="badge badge-primary">@GetText("language.default_badge", "Default")</span>
+                                    }
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="@nameof(Language.IsActive)" Caption="@ActiveColumnCaption" Width="100px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var language = (Language)context.DataItem;
+                                    <span class="badge @(language.IsActive ? "badge-success" : "badge-secondary")">
+                                        @(language.IsActive ? GetText("common.yes", "Yes") : GetText("common.no", "No"))
+                                    </span>
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridCommandColumn Width="150px" MinWidth="150" Caption="@ActionsColumnCaption">
+                            <CellDisplayTemplate>
+                                <div class="d-flex flex-nowrap">
+                                    <button class="btn btn-warning btn-sm mr-1" title="Chỉnh sửa" @onclick="() => ShowEditModal((Language)context.DataItem)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" title="Xóa" 
+                                            @onclick="() => DeleteLanguage(((Language)context.DataItem).Code)"
+                                            disabled="@(((Language)context.DataItem).IsDefault)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </CellDisplayTemplate>
+                        </DxGridCommandColumn>
+                    </Columns>
+                </DxGrid>
+            </div>
+        </div>
+    }
+</div>
+
+@* Modal for Add/Edit *@
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @(editingLanguage == null ? "Thêm Ngôn ngữ Mới" : "Chỉnh sửa Ngôn ngữ")
+                    </h5>
+                    <button type="button" class="close" @onclick="CloseModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="languageForm" OnValidSubmit="SaveLanguage">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="form-group">
+                            <label>Mã ngôn ngữ <span class="text-danger">*</span></label>
+                            <InputText @bind-Value="languageForm.Code" class="form-control" placeholder="vi, en, ja..." 
+                                       disabled="@(editingLanguage != null)" maxlength="10" />
+                            <ValidationMessage For="@(() => languageForm.Code)" />
+                            <small class="form-text text-muted">Mã ISO 639-1 (2-3 ký tự)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên tiếng Anh <span class="text-danger">*</span></label>
+                            <InputText @bind-Value="languageForm.Name" class="form-control" placeholder="Vietnamese" maxlength="100" />
+                            <ValidationMessage For="@(() => languageForm.Name)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên ngôn ngữ gốc <span class="text-danger">*</span></label>
+                            <InputText @bind-Value="languageForm.NativeName" class="form-control" placeholder="Tiếng Việt" maxlength="100" />
+                            <ValidationMessage For="@(() => languageForm.NativeName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Biểu tượng cờ</label>
+                            <InputText @bind-Value="languageForm.FlagIcon" class="form-control" placeholder="vn, us, jp..." maxlength="10" />
+                            <small class="form-text text-muted">Mã quốc gia 2 ký tự (ISO 3166-1 alpha-2)</small>
+                        </div>
+
+                        <div class="form-check">
+                            <InputCheckbox @bind-Value="languageForm.IsActive" class="form-check-input" id="isActiveCheck" />
+                            <label class="form-check-label" for="isActiveCheck">
+                                Kích hoạt ngôn ngữ này
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <InputCheckbox @bind-Value="languageForm.IsDefault" class="form-check-input" id="isDefaultCheck" />
+                            <label class="form-check-label" for="isDefaultCheck">
+                                Đặt làm ngôn ngữ mặc định
+                            </label>
+                            <small class="form-text text-muted">Chỉ có thể có 1 ngôn ngữ mặc định</small>
+                        </div>
+
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                                }
+                                <i class="fas fa-save"></i> Lưu
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal" disabled="@isSaving">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    IGrid? Grid { get; set; }
+    List<Language>? languages;
+    Language? editingLanguage = null;
+    LanguageFormModel languageForm = new();
+    bool showModal = false;
+    bool isSaving = false;
+    string? errorMessage = null;
+
+    // Reactive column captions
+    private string CodeColumnCaption => GetText("language.code_column", "Code");
+    private string NameColumnCaption => GetText("language.name_column", "English Name");
+    private string NativeNameColumnCaption => GetText("language.native_name_column", "Native Name");
+    private string FlagColumnCaption => GetText("language.flag_column", "Flag Icon");
+    private string DefaultColumnCaption => GetText("language.default_column", "Default");
+    private string ActiveColumnCaption => GetText("language.active_column", "Active");
+    private string ActionsColumnCaption => GetText("language.actions_column", "Actions");
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize LocalizationState
+        if (LocalizationState != null && !LocalizationState.IsLoaded)
+        {
+            var browserLanguage = await JSRuntime.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
+            var storedLanguage = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+            var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
+            await LocalizationState.InitializeAsync(preferredLanguage);
+        }
+        
+        await LoadLanguages();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && LocalizationState != null)
+        {
+            // Wait for translations to load
+            int attempts = 0;
+            while (!LocalizationState.IsLoaded && attempts < 20)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+            
+            if (LocalizationState.IsLoaded)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+    
+    private string GetText(string key, string defaultText)
+    {
+        return LocalizationState?.GetText(key, defaultText) ?? defaultText;
+    }
+
+    async Task LoadLanguages()
+    {
+        try
+        {
+            languages = await LocalizationService.GetLanguagesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi tải danh sách ngôn ngữ: {ex.Message}";
+        }
+    }
+
+    void ShowAddModal()
+    {
+        editingLanguage = null;
+        languageForm = new LanguageFormModel
+        {
+            IsActive = true,
+            IsDefault = false
+        };
+        showModal = true;
+    }
+
+    void ShowEditModal(Language language)
+    {
+        editingLanguage = language;
+        languageForm = new LanguageFormModel
+        {
+            Code = language.Code,
+            Name = language.Name,
+            NativeName = language.NativeName,
+            FlagIcon = language.FlagIcon,
+            IsActive = language.IsActive,
+            IsDefault = language.IsDefault
+        };
+        showModal = true;
+    }
+
+    async Task SaveLanguage()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            var language = new Language
+            {
+                Code = languageForm.Code!.Trim().ToLower(),
+                Name = languageForm.Name!.Trim(),
+                NativeName = languageForm.NativeName!.Trim(),
+                FlagIcon = string.IsNullOrWhiteSpace(languageForm.FlagIcon) ? null : languageForm.FlagIcon.Trim().ToLower(),
+                IsActive = languageForm.IsActive,
+                IsDefault = languageForm.IsDefault,
+                CreatedAt = editingLanguage?.CreatedAt ?? DateTime.UtcNow
+            };
+
+            if (editingLanguage == null)
+            {
+                await LocalizationService.CreateLanguageAsync(language);
+            }
+            else
+            {
+                await LocalizationService.UpdateLanguageAsync(editingLanguage.Code, language);
+            }
+
+            await LoadLanguages();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi lưu ngôn ngữ: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    async Task DeleteLanguage(string code)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa ngôn ngữ '{code}'?\n\nCảnh báo: Tất cả bản dịch liên quan sẽ bị xóa!");
+        if (!confirmed) return;
+
+        try
+        {
+            await LocalizationService.DeleteLanguageAsync(code);
+            await LoadLanguages();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi xóa ngôn ngữ: {ex.Message}";
+        }
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        editingLanguage = null;
+        languageForm = new();
+    }
+
+    public class LanguageFormModel
+    {
+        [Required(ErrorMessage = "Mã ngôn ngữ là bắt buộc")]
+        [StringLength(10, MinimumLength = 2, ErrorMessage = "Mã ngôn ngữ phải từ 2-10 ký tự")]
+        [RegularExpression(@"^[a-z]{2,3}$", ErrorMessage = "Mã phải là chữ thường, 2-3 ký tự")]
+        public string? Code { get; set; }
+
+        [Required(ErrorMessage = "Tên tiếng Anh là bắt buộc")]
+        [StringLength(100, ErrorMessage = "Tên không được quá 100 ký tự")]
+        public string? Name { get; set; }
+
+        [Required(ErrorMessage = "Tên ngôn ngữ gốc là bắt buộc")]
+        [StringLength(100, ErrorMessage = "Tên không được quá 100 ký tự")]
+        public string? NativeName { get; set; }
+
+        [StringLength(10, ErrorMessage = "Biểu tượng không được quá 10 ký tự")]
+        public string? FlagIcon { get; set; }
+
+        public bool IsActive { get; set; } = true;
+        public bool IsDefault { get; set; } = false;
+    }
+}

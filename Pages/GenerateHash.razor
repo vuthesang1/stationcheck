@@ -1,0 +1,41 @@
+@page "/generate-hash"
+@using BCrypt.Net
+
+<h3>Generate BCrypt Hash</h3>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h5>Admin@123</h5>
+        <code>@BCrypt.HashPassword("Admin@123", 12)</code>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <h5>Manager@123</h5>
+        <code>@BCrypt.HashPassword("Manager@123", 12)</code>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <h5>Employee@123</h5>
+        <code>@BCrypt.HashPassword("Employee@123", 12)</code>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h5>Current Hash in DB</h5>
+        <code>$2a$11$xvLZKqQVGnJ8tqJN7YZ7c.KqnY4YhXpDxUoXH5cV5vX0Xx8k5.8Gi</code>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h5>Verify</h5>
+        <p>Admin@123: @BCrypt.Verify("Admin@123", "$2a$11$xvLZKqQVGnJ8tqJN7YZ7c.KqnY4YhXpDxUoXH5cV5vX0Xx8k5.8Gi")</p>
+        <p>Manager@123: @BCrypt.Verify("Manager@123", "$2a$11$xvLZKqQVGnJ8tqJN7YZ7c.KqnY4YhXpDxUoXH5cV5vX0Xx8k5.8Gi")</p>
+        <p>Employee@123: @BCrypt.Verify("Employee@123", "$2a$11$xvLZKqQVGnJ8tqJN7YZ7c.KqnY4YhXpDxUoXH5cV5vX0Xx8k5.8Gi")</p>
+    </div>
+</div>

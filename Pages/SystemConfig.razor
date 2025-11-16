@@ -1,0 +1,214 @@
+@page "/system-config"
+@using StationCheck.Models
+@using StationCheck.Services
+@inject SystemConfigurationService ConfigService
+@inject NavigationManager NavigationManager
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+
+<PageTitle>Cấu hình hệ thống</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3><i class="bi bi-gear-fill"></i> Cấu hình hệ thống</h3>
+            <p class="text-muted">Quản lý các thiết lập chung của hệ thống</p>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (configurations != null && configurations.Any())
+    {
+        @foreach (var category in configurations.GroupBy(c => c.Category ?? "General"))
+        {
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">@category.Key</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">Tên cấu hình</th>
+                                <th style="width: 20%">Giá trị</th>
+                                <th style="width: 35%">Mô tả</th>
+                                <th style="width: 15%">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var config in category.OrderBy(c => c.DisplayName))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@config.DisplayName</strong>
+                                        <br />
+                                        <small class="text-muted">@config.Key</small>
+                                    </td>
+                                    <td>
+                                        @if (editingId == config.Id)
+                                        {
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   @bind="editValue" 
+                                                   @bind:event="oninput" />
+                                        }
+                                        else
+                                        {
+                                            <code>@GetFormattedValue(config)</code>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@config.Description</small>
+                                        @if (config.ModifiedAt.HasValue)
+                                        {
+                                            <br />
+                                            <small class="text-muted">
+                                                Sửa lần cuối: @config.ModifiedAt.Value.ToString("dd/MM/yyyy HH:mm") 
+                                                bởi @config.ModifiedBy
+                                            </small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!config.IsEditable)
+                                        {
+                                            <span class="badge bg-secondary">Không thể sửa</span>
+                                        }
+                                        else if (editingId == config.Id)
+                                        {
+                                            <button class="btn btn-sm btn-success me-1" 
+                                                    @onclick="() => SaveEdit(config.Id)">
+                                                <i class="bi bi-check-lg"></i> Lưu
+                                            </button>
+                                            <button class="btn btn-sm btn-secondary" 
+                                                    @onclick="CancelEdit">
+                                                <i class="bi bi-x-lg"></i> Hủy
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-primary" 
+                                                    @onclick="() => StartEdit(config)">
+                                                <i class="bi bi-pencil-fill"></i> Sửa
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert @(isError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+                @message
+                <button type="button" class="btn-close" @onclick="() => message = null"></button>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có cấu hình nào.
+        </div>
+    }
+</div>
+
+@code {
+    private List<SystemConfiguration>? configurations;
+    private bool isLoading = true;
+    private int? editingId = null;
+    private string editValue = string.Empty;
+    private string? message;
+    private bool isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConfigurations();
+    }
+
+    private async Task LoadConfigurations()
+    {
+        isLoading = true;
+        try
+        {
+            configurations = await ConfigService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            message = $"Lỗi khi tải cấu hình: {ex.Message}";
+            isError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartEdit(SystemConfiguration config)
+    {
+        editingId = config.Id;
+        editValue = config.Value;
+        message = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingId = null;
+        editValue = string.Empty;
+        message = null;
+    }
+
+    private async Task SaveEdit(int configId)
+    {
+        try
+        {
+            // TODO: Get actual username from auth context
+            var username = "Admin";
+            
+            var success = await ConfigService.UpdateAsync(configId, editValue, username);
+            
+            if (success)
+            {
+                message = "Cập nhật cấu hình thành công!";
+                isError = false;
+                await LoadConfigurations();
+                editingId = null;
+            }
+            else
+            {
+                message = "Không thể cập nhật cấu hình.";
+                isError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Lỗi: {ex.Message}";
+            isError = true;
+        }
+    }
+
+    private string GetFormattedValue(SystemConfiguration config)
+    {
+        if (config.ValueType == "int" && int.TryParse(config.Value, out var intValue))
+        {
+            // Format seconds as human-readable
+            if (config.Key.Contains("Interval"))
+            {
+                if (intValue >= 3600)
+                    return $"{intValue} giây ({intValue / 3600.0:F1} giờ)";
+                else if (intValue >= 60)
+                    return $"{intValue} giây ({intValue / 60.0:F1} phút)";
+            }
+        }
+        
+        return config.Value;
+    }
+}

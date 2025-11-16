@@ -1,0 +1,410 @@
+@page "/translations"
+@using StationCheck.Services
+@attribute [Authorize(Policy = "AdminOnly")]
+@inject ILocalizationService LocalizationService
+@inject IJSRuntime JSRuntime
+@inject LocalizationStateService LocalizationState
+
+<PageTitle>@GetText("translation.title", "Translation Management")</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-language"></i> @GetText("translation.title", "Translation Management")
+        </h1>
+        <button class="btn btn-primary" @onclick="ShowAddModal">
+            <i class="fas fa-plus"></i> @GetText("translation.add_new", "Add Translation")
+        </button>
+    </div>
+
+    @if (errorMessage != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @errorMessage
+            <button type="button" class="close" @onclick="() => errorMessage = null">
+                <span>&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (languages == null || translations == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label class="mb-0 mr-2"><strong>@GetText("translation.language_filter", "Language:"):</strong></label>
+                        <select class="form-control form-control-sm d-inline-block" style="width: auto;" @onchange="OnLanguageChanged">
+                            @foreach (var lang in languages)
+                            {
+                                <option value="@lang.Code" selected="@(lang.Code == selectedLanguage)">
+                                    @lang.NativeName (@lang.Code)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="mb-0 mr-2"><strong>@GetText("translation.category_filter", "Category:"):</strong></label>
+                        <select class="form-control form-control-sm d-inline-block" style="width: auto;" @onchange="OnCategoryChanged">
+                            <option value="">@GetText("translation.all_categories", "All")</option>
+                            <option value="menu">Menu</option>
+                            <option value="button">Button</option>
+                            <option value="label">Label</option>
+                            <option value="message">Message</option>
+                            <option value="validation">Validation</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <DxGrid @ref="Grid"
+                        Data="@filteredTranslations"
+                        PageSize="20"
+                        ShowPager="true"
+                        PagerNavigationMode="PagerNavigationMode.InputBox"
+                        PageSizeSelectorVisible="true"
+                        AllowSelectRowByClick="false"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                        SizeMode="SizeMode.Medium">
+                    <Columns>
+                        <DxGridDataColumn FieldName="@nameof(Translation.Category)" Caption="@CategoryColumnCaption" Width="120px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var translation = (Translation)context.DataItem;
+                                    var badgeClass = translation.Category switch
+                                    {
+                                        "menu" => "badge-primary",
+                                        "button" => "badge-success",
+                                        "label" => "badge-info",
+                                        "message" => "badge-warning",
+                                        "validation" => "badge-danger",
+                                        _ => "badge-secondary"
+                                    };
+                                    <span class="badge @badgeClass">@(translation.Category ?? "N/A")</span>
+                                }
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="@nameof(Translation.Key)" Caption="@KeyColumnCaption" MinWidth="200">
+                            <CellDisplayTemplate>
+                                <code>@((Translation)context.DataItem).Key</code>
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="@nameof(Translation.Value)" Caption="@ValueColumnCaption" MinWidth="250" />
+                        <DxGridCommandColumn Width="150px" MinWidth="150" Caption="@ActionsColumnCaption">
+                            <CellDisplayTemplate>
+                                <div class="d-flex flex-nowrap">
+                                    <button class="btn btn-warning btn-sm mr-1" title="Chỉnh sửa" @onclick="() => ShowEditModal((Translation)context.DataItem)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" title="Xóa" @onclick="() => DeleteTranslation(((Translation)context.DataItem).Id)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </CellDisplayTemplate>
+                        </DxGridCommandColumn>
+                    </Columns>
+                </DxGrid>
+            </div>
+        </div>
+    }
+</div>
+
+@* Modal for Add/Edit *@
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @(editingTranslation == null ? "Thêm Bản dịch Mới" : "Chỉnh sửa Bản dịch")
+                    </h5>
+                    <button type="button" class="close" @onclick="CloseModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="translationForm" OnValidSubmit="SaveTranslation">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@GetText("translation.language_label", "Language") <span class="text-danger">*</span></label>
+                                    <select @bind="translationForm.LanguageCode" class="form-control" disabled="@(editingTranslation != null)">
+                                        @foreach (var lang in languages ?? new List<Language>())
+                                        {
+                                            <option value="@lang.Code">@lang.NativeName (@lang.Code)</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => translationForm.LanguageCode)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>@GetText("translation.category_label", "Category")</label>
+                                    <select @bind="translationForm.Category" class="form-control">
+                                        <option value="">@GetText("translation.select_category", "-- Select Category --")</option>
+                                        <option value="menu">Menu</option>
+                                        <option value="button">Button</option>
+                                        <option value="label">Label</option>
+                                        <option value="message">Message</option>
+                                        <option value="validation">Validation</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>@GetText("translation.key_label", "Key") <span class="text-danger">*</span></label>
+                            <InputText @bind-Value="translationForm.Key" class="form-control" placeholder="station.name" 
+                                       disabled="@(editingTranslation != null)" />
+                            <ValidationMessage For="@(() => translationForm.Key)" />
+                            <small class="form-text text-muted">
+                                @GetText("translation.key_example", "Example: menu.dashboard, button.save, label.station_name")
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>@GetText("translation.value_label", "Translation") <span class="text-danger">*</span></label>
+                            <InputTextArea @bind-Value="translationForm.Value" class="form-control" rows="3" 
+                                           placeholder="@GetText("translation.value_placeholder", "Enter translation content...")" />
+                            <ValidationMessage For="@(() => translationForm.Value)" />
+                        </div>
+
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                                }
+                                <i class="fas fa-save"></i> @GetText("button.save", "Save")
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal" disabled="@isSaving">
+                                <i class="fas fa-times"></i> @GetText("button.cancel", "Cancel")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    IGrid? Grid { get; set; }
+    List<Language>? languages;
+    List<Translation>? translations;
+    List<Translation>? filteredTranslations;
+    Translation? editingTranslation = null;
+    TranslationFormModel translationForm = new();
+    bool showModal = false;
+    bool isSaving = false;
+    string? errorMessage = null;
+    string selectedLanguage = "vi";
+    string? selectedCategory = null;
+
+    // Reactive column captions
+    private string CategoryColumnCaption => GetText("translation.category_column", "Category");
+    private string KeyColumnCaption => GetText("translation.key_column", "Key");
+    private string ValueColumnCaption => GetText("translation.value_column", "Translation");
+    private string ActionsColumnCaption => GetText("translation.actions_column", "Actions");
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize LocalizationState
+        if (LocalizationState != null && !LocalizationState.IsLoaded)
+        {
+            var browserLanguage = await JSRuntime.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
+            var storedLanguage = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
+            var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
+            await LocalizationState.InitializeAsync(preferredLanguage);
+        }
+        
+        await LoadLanguages();
+        await LoadTranslations();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && LocalizationState != null)
+        {
+            // Wait for translations to load
+            int attempts = 0;
+            while (!LocalizationState.IsLoaded && attempts < 20)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+            
+            if (LocalizationState.IsLoaded)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+    
+    private string GetText(string key, string defaultText)
+    {
+        return LocalizationState?.GetText(key, defaultText) ?? defaultText;
+    }
+
+    async Task LoadLanguages()
+    {
+        try
+        {
+            languages = await LocalizationService.GetLanguagesAsync();
+            if (languages.Any())
+            {
+                selectedLanguage = languages.FirstOrDefault(l => l.IsDefault)?.Code ?? languages.First().Code;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi tải danh sách ngôn ngữ: {ex.Message}";
+        }
+    }
+
+    async Task LoadTranslations()
+    {
+        try
+        {
+            translations = await LocalizationService.GetTranslationsAsync(selectedLanguage, selectedCategory);
+            FilterTranslations();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi tải danh sách bản dịch: {ex.Message}";
+        }
+    }
+
+    void FilterTranslations()
+    {
+        filteredTranslations = translations;
+    }
+
+    async Task OnLanguageChanged(ChangeEventArgs e)
+    {
+        selectedLanguage = e.Value?.ToString() ?? "vi";
+        await LoadTranslations();
+    }
+
+    async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        selectedCategory = string.IsNullOrEmpty(e.Value?.ToString()) ? null : e.Value.ToString();
+        await LoadTranslations();
+    }
+
+    void ShowAddModal()
+    {
+        editingTranslation = null;
+        translationForm = new TranslationFormModel
+        {
+            LanguageCode = selectedLanguage
+        };
+        showModal = true;
+    }
+
+    void ShowEditModal(Translation translation)
+    {
+        editingTranslation = translation;
+        translationForm = new TranslationFormModel
+        {
+            LanguageCode = translation.LanguageCode,
+            Key = translation.Key,
+            Value = translation.Value,
+            Category = translation.Category
+        };
+        showModal = true;
+    }
+
+    async Task SaveTranslation()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            var translation = new Translation
+            {
+                Id = editingTranslation?.Id ?? 0,
+                LanguageCode = translationForm.LanguageCode!.Trim(),
+                Key = translationForm.Key!.Trim(),
+                Value = translationForm.Value!.Trim(),
+                Category = string.IsNullOrWhiteSpace(translationForm.Category) ? null : translationForm.Category.Trim(),
+                CreatedAt = editingTranslation?.CreatedAt ?? DateTime.UtcNow,
+                ModifiedAt = editingTranslation != null ? DateTime.UtcNow : null
+            };
+
+            if (editingTranslation == null)
+            {
+                await LocalizationService.CreateTranslationAsync(translation);
+            }
+            else
+            {
+                await LocalizationService.UpdateTranslationAsync(translation.Id, translation);
+            }
+
+            await LoadTranslations();
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi lưu bản dịch: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    async Task DeleteTranslation(int id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn xóa bản dịch này?");
+        if (!confirmed) return;
+
+        try
+        {
+            await LocalizationService.DeleteTranslationAsync(id);
+            await LoadTranslations();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi xóa bản dịch: {ex.Message}";
+        }
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        editingTranslation = null;
+        translationForm = new();
+    }
+
+    public class TranslationFormModel
+    {
+        [Required(ErrorMessage = "Ngôn ngữ là bắt buộc")]
+        public string? LanguageCode { get; set; }
+
+        [Required(ErrorMessage = "Key là bắt buộc")]
+        [StringLength(200, ErrorMessage = "Key không được quá 200 ký tự")]
+        [RegularExpression(@"^[a-z0-9._]+$", ErrorMessage = "Key chỉ chứa chữ thường, số, dấu chấm và gạch dưới")]
+        public string? Key { get; set; }
+
+        [Required(ErrorMessage = "Bản dịch là bắt buộc")]
+        public string? Value { get; set; }
+
+        [StringLength(100, ErrorMessage = "Phân loại không được quá 100 ký tự")]
+        public string? Category { get; set; }
+    }
+}
