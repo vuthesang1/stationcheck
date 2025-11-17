@@ -1,0 +1,181 @@
+@using StationCheck.Models
+@using StationCheck.Interfaces
+@inject IMonitoringService MonitoringService
+
+<div class="motion-stats-panel">
+    <div class="panel-header">
+        <h5><i class="bi bi-activity"></i> Motion Events Today</h5>
+         <button class="btn btn-sm btn-primary" @onclick="LoadStats">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center p-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+        </div>
+    }
+    else
+    {
+        <div class="stats-grid">
+            @foreach (var stat in stats)
+            {
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-camera-video-fill"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-label">@stat.Key</div>
+                        <div class="stat-value">@stat.Value</div>
+                        <div class="stat-subtext">motion events</div>
+                    </div>
+                </div>
+            }
+            
+            @if (stats.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> No motion events recorded today
+                </div>
+            }
+        </div>
+
+        <div class="recent-events mt-3">
+            <h6>Recent Events</h6>
+            @if (recentEvents.Count > 0)
+            {
+                <div class="events-list">
+                    @foreach (var evt in recentEvents.Take(5))
+                    {
+                        <div class="event-item">
+                            <i class="bi bi-dot"></i>
+                            <span><strong>@evt.CameraName</strong></span>
+                            <span class="text-muted">@evt.DetectedAt.ToString("HH:mm:ss")</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted small">No recent events</p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private Dictionary<string, int> stats = new();
+    private List<MotionEvent> recentEvents = new();
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStats();
+    }
+
+    private async Task LoadStats()
+    {
+        isLoading = true;
+        try
+        {
+            // COMMENTED OUT: MotionService methods need to be re-implemented
+            stats = new Dictionary<string, int>(); // Placeholder
+            recentEvents = new List<MotionEvent>(); // Placeholder
+            // stats = await MotionService.GetTodayMotionStatsAsync();
+            // recentEvents = await MotionService.GetMotionEventsAsync(null, DateTime.Today, null);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+
+<style>
+    .motion-stats-panel {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .panel-header h5 {
+        margin: 0;
+        color: #333;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: #f8f9fa;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        color: #0d6efd;
+        margin-right: 15px;
+    }
+
+    .stat-details {
+        flex: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+        line-height: 1.2;
+    }
+
+    .stat-subtext {
+        font-size: 0.75rem;
+        color: #999;
+    }
+
+    .recent-events h6 {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .event-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px;
+        font-size: 0.85rem;
+    }
+
+    .event-item i {
+        color: #28a745;
+    }
+</style>

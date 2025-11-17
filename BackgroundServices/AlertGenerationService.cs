@@ -60,15 +60,13 @@ namespace StationCheck.BackgroundServices
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
-                using var db = await context.CreateDbContextAsync();
+                var configService = scope.ServiceProvider.GetRequiredService<SystemConfigurationService>();
                 
-                var config = await db.SystemConfigurations
-                    .FirstOrDefaultAsync(c => c.Key == "AlertGenerationInterval");
+                var interval = await configService.GetTimeSpanValueAsync("AlertGenerationInterval");
                 
-                if (config != null && int.TryParse(config.Value, out int seconds))
+                if (interval.HasValue)
                 {
-                    _checkInterval = TimeSpan.FromSeconds(seconds);
+                    _checkInterval = interval.Value;
                     _logger.LogInformation(
                         "[AlertGeneration] Loaded interval from config: {Interval} seconds",
                         _checkInterval.TotalSeconds
@@ -94,8 +92,7 @@ namespace StationCheck.BackgroundServices
             _logger.LogInformation("[AlertGeneration] Running check at {Time}", now);
 
             using var scope = _serviceProvider.CreateScope();
-            var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
-            using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             try
             {
@@ -180,7 +177,7 @@ namespace StationCheck.BackgroundServices
         /// </summary>
         private async Task<List<TimeFrame>> GetMatchingTimeFramesAsync(
             ApplicationDbContext context,
-            Guid stationId,
+            int stationId,
             DateTime now,
             CancellationToken cancellationToken)
         {
@@ -313,6 +310,60 @@ namespace StationCheck.BackgroundServices
                 );
             }
 
+            // ✅ Get ProfileHistory if TimeFrame is linked to a Profile
+            MonitoringProfileHistory? profileHistory = null;
+            #pragma warning disable CS0618 // Type or member is obsolete
+            if (timeFrame.ProfileId.HasValue)
+            {
+                // COMMENTED OUT: MonitoringProfileHistories/MonitoringProfiles tables removed
+                /* Get latest version of the profile
+                profileHistory = await context.MonitoringProfileHistories
+                    .Where(h => h.MonitoringProfileId == timeFrame.ProfileId.Value)
+                    .OrderByDescending(h => h.Version)
+                    .FirstOrDefaultAsync(cancellationToken);
+                
+                // If no history exists, create one for current profile state
+                if (profileHistory == null)
+                {
+                    var profile = await context.MonitoringProfiles
+                        .Include(p => p.TimeFrames)
+                        .FirstOrDefaultAsync(p => p.Id == timeFrame.ProfileId.Value, cancellationToken);
+                    
+                    if (profile != null)
+                    {
+                        var profileSnapshot = new
+                        {
+                            ProfileId = profile.Id,
+                            ProfileName = profile.Name,
+                            Version = profile.Version,
+                            TimeFrames = profile.TimeFrames.Select(tf => new
+                            {
+                                tf.Id,
+                                tf.Name,
+                                StartTime = tf.StartTime.ToString(),
+                                EndTime = tf.EndTime.ToString(),
+                                tf.FrequencyMinutes,
+                                tf.DaysOfWeek
+                            }).ToList()
+                        };
+                        
+                        profileHistory = new MonitoringProfileHistory
+                        {
+                            MonitoringProfileId = profile.Id,
+                            Version = profile.Version,
+                            ProfileSnapshot = JsonSerializer.Serialize(profileSnapshot),
+                            ModifiedBy = "System (Auto-created for alert)",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        
+                        context.MonitoringProfileHistories.Add(profileHistory);
+                        await context.SaveChangesAsync(cancellationToken);
+                    }
+                }
+                */
+            }
+            #pragma warning restore CS0618
+
             // Create configuration snapshot for audit
             var configSnapshot = new
             {
@@ -322,6 +373,7 @@ namespace StationCheck.BackgroundServices
                 EndTime = timeFrame.EndTime.ToString(),
                 FrequencyMinutes = timeFrame.FrequencyMinutes,
                 DaysOfWeek = timeFrame.DaysOfWeek,
+                ProfileVersion = profileHistory?.Version,
                 CheckedAt = now
             };
 
@@ -335,11 +387,34 @@ namespace StationCheck.BackgroundServices
                 .OrderByDescending(me => me.DetectedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // ✅ LEGACY: Ensure CameraId is never NULL for database compatibility
+            string cameraId = $"STATION_{station.Id}_MAIN";
+            string cameraName = station.Name;
+            
+            if (lastMotionEvent != null)
+            {
+                cameraId = lastMotionEvent.CameraId ?? cameraId;
+                cameraName = lastMotionEvent.CameraName ?? cameraName;
+                _logger.LogDebug(
+                    "[AlertGeneration] Found last motion event for Station {StationId}: CameraId={CameraId}, CameraName={CameraName}",
+                    station.Id, cameraId, cameraName
+                );
+            }
+            else
+            {
+                _logger.LogDebug(
+                    "[AlertGeneration] No motion events found for Station {StationId}, using default CameraId={CameraId}",
+                    station.Id, cameraId
+                );
+            }
+
             var alert = new MotionAlert
             {
                 StationId = station.Id,
                 StationName = station.Name,
                 TimeFrameId = timeFrame.Id,
+                ProfileHistoryId = profileHistory?.Id,  // ✅ Link to profile version
+                TimeFrameHistoryId = timeFrameHistory?.Id,  // ✅ Link to timeframe version
                 ConfigurationSnapshot = JsonSerializer.Serialize(configSnapshot),
                 AlertTime = now,
                 Severity = minutesSinceLastMotion > timeFrame.FrequencyMinutes * 2 
@@ -351,17 +426,21 @@ namespace StationCheck.BackgroundServices
                 LastMotionCameraId = lastMotionEvent?.CameraId,
                 LastMotionCameraName = lastMotionEvent?.CameraName,
                 MinutesSinceLastMotion = minutesSinceLastMotion,
-                IsResolved = false
+                IsResolved = false,
+                // ✅ LEGACY: Populate obsolete CameraId field for database compatibility
+                CameraId = cameraId,
+                CameraName = cameraName
             };
 
             context.MotionAlerts.Add(alert);
             await context.SaveChangesAsync(cancellationToken);
 
             _logger.LogWarning(
-                "[AlertGeneration] Created alert {AlertId} for Station {StationId} ({StationName}). TimeFrameVersion: {TimeFrameVersion}, Last motion: {LastMotion}, Minutes since: {Minutes}",
+                "[AlertGeneration] Created alert {AlertId} for Station {StationId} ({StationName}). ProfileVersion: {ProfileVersion}, TimeFrameVersion: {TimeFrameVersion}, Last motion: {LastMotion}, Minutes since: {Minutes}",
                 alert.Id,
                 station.Id,
                 station.Name,
+                profileHistory?.Version.ToString() ?? "N/A",
                 timeFrameHistory?.Version.ToString() ?? "N/A",
                 station.LastMotionDetectedAt?.ToString() ?? "Never",
                 minutesSinceLastMotion

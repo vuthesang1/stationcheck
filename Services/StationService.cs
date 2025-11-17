@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using StationCheck.Data;
 using StationCheck.Interfaces;
 using StationCheck.Models;
+using System.Text.Json;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace StationCheck.Services
 {
@@ -9,11 +11,16 @@ namespace StationCheck.Services
     {
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
         private readonly ILogger<StationService> _logger;
+        private readonly AuthenticationStateProvider _authStateProvider;
 
-        public StationService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<StationService> logger)
+        public StationService(
+            IDbContextFactory<ApplicationDbContext> contextFactory, 
+            ILogger<StationService> logger,
+            AuthenticationStateProvider authStateProvider)
         {
             _contextFactory = contextFactory;
             _logger = logger;
+            _authStateProvider = authStateProvider;
         }
 
         public async Task<List<Station>> GetAllStationsAsync()
@@ -28,10 +35,11 @@ namespace StationCheck.Services
         {
             var context = _contextFactory.CreateDbContext();
             return context.Stations
+                .Include(s => s.TimeFrames)
                 .OrderBy(s => s.Name);
         }
 
-        public async Task<Station?> GetStationByIdAsync(Guid id)
+        public async Task<Station?> GetStationByIdAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Stations
@@ -53,6 +61,9 @@ namespace StationCheck.Services
             
             context.Stations.Add(station);
             await context.SaveChangesAsync();
+            
+            // Create audit log
+            await CreateAuditLog(context, "Station", station.Id, station.Name, "Create", null, station);
             
             _logger.LogInformation("Created station {StationId} - {StationCode} - {StationName}", station.Id, station.StationCode, station.Name);
             return station;
@@ -85,15 +96,28 @@ namespace StationCheck.Services
             return $"ST{DateTime.UtcNow.Ticks % 1000000:D6}";
         }
 
-        public async Task<Station> UpdateStationAsync(Station station)
+        public async Task<Station> UpdateStationAsync(int id, Station station)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
-            var existingStation = await context.Stations.FindAsync(station.Id);
+            var existingStation = await context.Stations.FindAsync(id);
             if (existingStation == null)
             {
-                throw new KeyNotFoundException($"Station with ID {station.Id} not found");
+                throw new KeyNotFoundException($"Station with ID {id} not found");
             }
+
+            // Clone old values for audit
+            var oldStation = new Station
+            {
+                Id = existingStation.Id,
+                StationCode = existingStation.StationCode,
+                Name = existingStation.Name,
+                Address = existingStation.Address,
+                Description = existingStation.Description,
+                ContactPerson = existingStation.ContactPerson,
+                ContactPhone = existingStation.ContactPhone,
+                IsActive = existingStation.IsActive
+            };
 
             existingStation.Name = station.Name;
             existingStation.Address = station.Address;
@@ -106,11 +130,14 @@ namespace StationCheck.Services
 
             await context.SaveChangesAsync();
             
-            _logger.LogInformation("Updated station {StationId} - {StationName}", station.Id, station.Name);
+            // Create audit log
+            await CreateAuditLog(context, "Station", existingStation.Id, existingStation.Name, "Update", oldStation, existingStation);
+            
+            _logger.LogInformation("Updated station {StationId} - {StationName}", id, station.Name);
             return existingStation;
         }
 
-        public async Task DeleteStationAsync(Guid id)
+        public async Task DeleteStationAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
@@ -168,6 +195,89 @@ namespace StationCheck.Services
 
             var station = await GetStationByIdAsync(user.StationId.Value);
             return station != null ? new List<Station> { station } : new List<Station>();
+        }
+
+        private async Task CreateAuditLog(
+            ApplicationDbContext context,
+            string entityType,
+            int entityId,
+            string entityName,
+            string actionType,
+            object? oldValue,
+            object? newValue)
+        {
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                var userName = user?.Identity?.IsAuthenticated == true ? user.Identity.Name : "System";
+                
+                // Note: IP and UserAgent not available in Blazor Server circuit context
+                string? ipAddress = null;
+                string? userAgent = null;
+
+                var changes = GenerateChangesSummary(oldValue, newValue);
+
+                var auditLog = new ConfigurationAuditLog
+                {
+                    EntityType = entityType,
+                    EntityId = entityId,
+                    EntityName = entityName,
+                    ActionType = actionType,
+                    OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue) : null,
+                    NewValue = newValue != null ? JsonSerializer.Serialize(newValue) : null,
+                    Changes = changes,
+                    ChangedAt = DateTime.Now,
+                    ChangedBy = userName ?? "System",
+                    IpAddress = ipAddress,
+                    UserAgent = userAgent
+                };
+
+                context.ConfigurationAuditLogs.Add(auditLog);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create audit log for {EntityType} {EntityId}", entityType, entityId);
+            }
+        }
+
+        private string GenerateChangesSummary(object? oldValue, object? newValue)
+        {
+            if (oldValue == null && newValue != null)
+            {
+                return "Created new record";
+            }
+
+            if (oldValue == null || newValue == null)
+            {
+                return "Record modified";
+            }
+
+            var changes = new List<string>();
+            var oldProps = oldValue.GetType().GetProperties();
+            var newProps = newValue.GetType().GetProperties();
+
+            foreach (var prop in oldProps)
+            {
+                var newProp = newProps.FirstOrDefault(p => p.Name == prop.Name);
+                if (newProp == null) continue;
+
+                var oldVal = prop.GetValue(oldValue)?.ToString();
+                var newVal = newProp.GetValue(newValue)?.ToString();
+
+                if (oldVal != newVal && !string.IsNullOrEmpty(prop.Name))
+                {
+                    // Skip audit fields
+                    if (prop.Name.Contains("CreatedAt") || prop.Name.Contains("CreatedBy") ||
+                        prop.Name.Contains("ModifiedAt") || prop.Name.Contains("ModifiedBy"))
+                        continue;
+
+                    changes.Add($"{prop.Name}: '{oldVal}' → '{newVal}'");
+                }
+            }
+
+            return changes.Any() ? string.Join("; ", changes) : "No significant changes";
         }
     }
 }

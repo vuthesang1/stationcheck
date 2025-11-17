@@ -69,6 +69,18 @@ public class AuthService : IAuthService
         await context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        // Save refresh token
+        var refreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            Token = refreshToken,
+            ExpiresAt = DateTime.Now.AddDays(7),
+            CreatedAt = DateTime.Now
+        };
+        context.RefreshTokens.Add(refreshTokenEntity);
+        await context.SaveChangesAsync();
 
         _logger.LogInformation($"User {user.Username} logged in successfully");
 
@@ -78,7 +90,7 @@ public class AuthService : IAuthService
             Message = "Login successful",
             Token = token,
             AccessToken = token,
-            RefreshToken = null,
+            RefreshToken = refreshToken,
             User = new UserInfo
             {
                 Id = user.Id,
@@ -135,6 +147,17 @@ public class AuthService : IAuthService
         _logger.LogInformation($"New user {user.Username} registered by {createdBy ?? "self"}");
 
         var token = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        // Save refresh token
+        var refreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            Token = refreshToken,
+            ExpiresAt = DateTime.Now.AddDays(7)
+        };
+        context.RefreshTokens.Add(refreshTokenEntity);
+        await context.SaveChangesAsync();
 
         return new LoginResponse
         {
@@ -142,7 +165,7 @@ public class AuthService : IAuthService
             Message = "Registration successful",
             Token = token,
             AccessToken = token,
-            RefreshToken = null,
+            RefreshToken = refreshToken,
             User = new UserInfo
             {
                 Id = user.Id,
@@ -158,19 +181,83 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
-        await Task.CompletedTask;
-        
+        using var context = await _contextFactory.CreateDbContextAsync();
+
+        var refreshToken = await context.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && !rt.IsRevoked);
+
+        if (refreshToken == null || refreshToken.ExpiresAt < DateTime.Now)
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "Invalid or expired refresh token"
+            };
+        }
+
+        if (refreshToken.User == null || !refreshToken.User.IsActive)
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                Message = "User account is disabled"
+            };
+        }
+
+        // Revoke old refresh token
+        refreshToken.IsRevoked = true;
+        refreshToken.RevokedAt = DateTime.Now;
+
+        // Generate new tokens
+        var newToken = GenerateJwtToken(refreshToken.User);
+        var newRefreshToken = GenerateRefreshToken();
+
+        var newRefreshTokenEntity = new RefreshToken
+        {
+            UserId = refreshToken.UserId,
+            Token = newRefreshToken,
+            ExpiresAt = DateTime.Now.AddDays(7)
+        };
+        context.RefreshTokens.Add(newRefreshTokenEntity);
+        await context.SaveChangesAsync();
+
         return new LoginResponse
         {
-            Success = false,
-            Message = "Refresh token functionality is not implemented"
+            Success = true,
+            Message = "Token refreshed successfully",
+            Token = newToken,
+            AccessToken = newToken,
+            RefreshToken = newRefreshToken,
+            User = new UserInfo
+            {
+                Id = refreshToken.User.Id,
+                Username = refreshToken.User.Username,
+                Email = refreshToken.User.Email,
+                FullName = refreshToken.User.FullName,
+                Role = refreshToken.User.Role,
+                IsActive = refreshToken.User.IsActive,
+                CreatedAt = refreshToken.User.CreatedAt,
+                LastLoginAt = refreshToken.User.LastLoginAt
+            }
         };
     }
 
     public async Task<bool> RevokeTokenAsync(string refreshToken)
     {
-        await Task.CompletedTask;
-        return false;
+        using var context = await _contextFactory.CreateDbContextAsync();
+
+        var token = await context.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+
+        if (token == null)
+            return false;
+
+        token.IsRevoked = true;
+        token.RevokedAt = DateTime.Now;
+        await context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request)

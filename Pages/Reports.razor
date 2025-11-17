@@ -1,738 +1,1116 @@
 @page "/reports"
 @using StationCheck.Models
 @using StationCheck.Data
-@using StationCheck.Services
 @using Microsoft.EntityFrameworkCore
 @using System.Text
-@using System.Text.Json
+@using ClosedXML.Excel
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JS
-@inject LocalizationStateService LocalizationState
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
-<PageTitle>Báo cáo</PageTitle>
+<PageTitle>Báo cáo và Lịch sử</PageTitle>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .cursor-pointer:hover {
+        background-color: rgba(0, 123, 255, 0.1) !important;
+    }
+    .modal-header .btn-close {
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+        border: 0;
+        width: 1em;
+        height: 1em;
+        padding: 0.25em;
+        opacity: 0.8;
+    }
+    .modal-header .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Standardize all form controls height */
+    .form-select,
+    .form-control,
+    input[type="date"],
+    input[type="text"],
+    select {
+        height: 38px !important;
+        padding: 0.375rem 0.75rem !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Ensure buttons align with form controls */
+    .btn {
+        height: 38px !important;
+        padding: 0.375rem 0.75rem !important;
+        line-height: 1.5 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Fix alignment for filter rows */
+    .row.mb-3 .col-md-1,
+    .row.mb-3 .col-md-2,
+    .row.mb-3 .col-md-3,
+    .row.mb-3 .col-md-6 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .row.mb-3 .d-flex.align-items-end {
+        padding-bottom: 0 !important;
+    }
+</style>
 
 <div class="container-fluid">
-    <h3 class="mb-4">📊 Báo cáo Hệ thống</h3>
+    <h1 class="h3 mb-4 text-gray-800">Báo cáo và Lịch sử</h1>
 
-    <DxTabs @bind-ActiveTabIndex="@activeTabIndex" CssClass="mb-3">
-        <DxTabPage Text="Báo cáo Cảnh báo">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    @* Alert Report Filters *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Từ ngày:</label>
-                            <DxDateEdit @bind-Date="@alertFromDate" CssClass="w-100" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Đến ngày:</label>
-                            <DxDateEdit @bind-Date="@alertToDate" CssClass="w-100" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Trạm:</label>
-                            <DxComboBox Data="@stations"
-                                        @bind-Value="@selectedAlertStationId"
-                                        TextFieldName="Name"
-                                        ValueFieldName="Id"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100">
-                                <DxListEditorColumn FieldName="Name" Caption="Tên trạm" />
-                            </DxComboBox>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Mức độ:</label>
-                            <DxComboBox Data="@severityLevels"
-                                        @bind-Value="@selectedSeverity"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100" />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Trạng thái:</label>
-                            <DxComboBox Data="@statusOptions"
-                                        @bind-Value="@selectedStatus"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100" />
-                        </div>
-                        <div class="col-md-9 d-flex align-items-end">
-                            <DxButton Text="Tìm kiếm" Click="@LoadAlertData" RenderStyle="ButtonRenderStyle.Primary" CssClass="me-2" />
-                            <DxButton Text="Xuất Excel" Click="@ExportAlertsToExcel" RenderStyle="ButtonRenderStyle.Success" />
-                        </div>
-                    </div>
+    <!-- Report Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "alerts" ? "active" : "")" 
+                    @onclick='() => SwitchTab("alerts")'>
+                <i class="fas fa-exclamation-triangle"></i> Báo cáo Cảnh báo
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
+                    @onclick='() => SwitchTab("motion")'>
+                <i class="fas fa-chart-line"></i> Báo cáo Chuyển động
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "audit" ? "active" : "")" 
+                    @onclick='() => SwitchTab("audit")'>
+                <i class="fas fa-history"></i> Lịch sử Thay đổi Cấu hình
+            </button>
+        </li>
+    </ul>
 
-                    @* Statistics Cards *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body">
-                                    <h5>Đang hoạt động</h5>
-                                    <h2>@alertStats.ActiveCount</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h5>Đã xử lý</h5>
-                                    <h2>@alertStats.ResolvedCount</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h5>Nghiêm trọng</h5>
-                                    <h2>@alertStats.CriticalCount</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <h5>Cảnh báo</h5>
-                                    <h2>@alertStats.WarningCount</h2>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Alert Report Tab -->
+    @if (activeTab == "alerts")
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Báo cáo Cảnh báo</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Khoảng thời gian</label>
+                        <select class="form-select" @bind="alertPeriod" @bind:after="LoadAlertData">
+                            <option value="today">Hôm nay</option>
+                            <option value="week">Tuần này</option>
+                            <option value="month">Tháng này</option>
+                            <option value="custom">Tùy chỉnh</option>
+                        </select>
                     </div>
+                    @if (alertPeriod == "custom")
+                    {
+                        <div class="col-md-3">
+                            <label class="form-label">Từ ngày</label>
+                            <input type="date" class="form-control" @bind="alertStartDate" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Đến ngày</label>
+                            <input type="date" class="form-control" @bind="alertEndDate" />
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="LoadAlertData">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    }
+                </div>
 
-                    @* Alert Data Grid *@
-                    <DxGrid Data="@alertData" CssClass="mt-3">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Trạm</label>
+                        <select class="form-select" @bind="selectedStationId" @bind:after="LoadAlertData">
+                            <option value="0">Tất cả</option>
+                            @foreach (var station in stations)
+                            {
+                                <option value="@station.Id">@station.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" @bind="alertStatus" @bind:after="LoadAlertData">
+                            <option value="all">Tất cả</option>
+                            <option value="active">Chưa xử lý</option>
+                            <option value="resolved">Đã xử lý</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end justify-content-end">
+                        <button class="btn btn-success" @onclick="ExportAlertsToExcel" disabled="@isExporting">
+                            <i class="fas fa-file-excel"></i> @(isExporting ? "Đang xuất..." : "Xuất Excel")
+                        </button>
+                    </div>
+                </div>
+
+                @if (isLoadingAlerts)
+                {
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary"></div>
+                        <p>Đang tải dữ liệu...</p>
+                    </div>
+                }
+                else
+                {
+                    <DxGrid Data="@alerts"
+                            PageSize="20"
+                            ShowPager="true"
+                            PagerNavigationMode="PagerNavigationMode.InputBox"
+                            PageSizeSelectorVisible="true"
+                            AllowSelectRowByClick="false"
+                            HighlightRowOnHover="true"
+                            TextWrapEnabled="false"
+                            FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                            ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                            SizeMode="SizeMode.Medium"
+                            >
                         <Columns>
-                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" DisplayFormat="{0:dd/MM/yyyy HH:mm}" Width="150px" />
-                            <DxGridDataColumn FieldName="Station.Name" Caption="Trạm" Width="200px" />
-                            <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="120px">
-                                <CellDisplayTemplate>
-                                    @{
-                                        var alert = (MotionAlert)context.DataItem;
-                                        var badgeClass = alert.Severity switch
-                                        {
-                                            AlertSeverity.Critical => "badge bg-danger",
-                                            AlertSeverity.Warning => "badge bg-warning text-dark",
-                                            _ => "badge bg-info"
-                                        };
-                                        <span class="@badgeClass">@alert.Severity</span>
-                                    }
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                            <DxGridDataColumn FieldName="Message" Caption="Thông báo" Width="300px" />
-                            <DxGridDataColumn FieldName="ConfigurationSnapshot" Caption="Cấu hình" Width="200px">
-                                <CellDisplayTemplate>
-                                    @{
-                                        var alert = (MotionAlert)context.DataItem;
-                                        var snapshot = alert.ConfigurationSnapshot ?? "N/A";
-                                        <span title="@snapshot">@(snapshot.Length > 50 ? snapshot.Substring(0, 50) + "..." : snapshot)</span>
-                                    }
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
+                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="StationName" Caption="Trạm" Width="200px" />
+                            <DxGridDataColumn FieldName="Message" Caption="Thông điệp" MinWidth="300" />
+                            <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="100px" />
                             <DxGridDataColumn FieldName="IsResolved" Caption="Trạng thái" Width="120px">
                                 <CellDisplayTemplate>
                                     @{
                                         var alert = (MotionAlert)context.DataItem;
-                                        <span class="badge @(alert.IsResolved ? "bg-success" : "bg-danger")">
-                                            @(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
-                                        </span>
                                     }
+                                    <span class="badge @(alert.IsResolved ? "bg-success" : "bg-danger")">
+                                        @(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
+                                    </span>
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
-                            <DxGridDataColumn FieldName="ResolvedAt" Caption="Ngày xử lý" DisplayFormat="{0:dd/MM/yyyy HH:mm}" Width="150px" />
+                            <DxGridDataColumn FieldName="ResolvedAt" Caption="Xử lý lúc" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="ResolvedBy" Caption="Người xử lý" Width="150px" />
                         </Columns>
                     </DxGrid>
-                </div>
+
+                    <div class="mt-3">
+                        <strong>Tổng số cảnh báo:</strong> @alerts.Count |
+                        <strong>Chưa xử lý:</strong> @alerts.Count(a => !a.IsResolved) |
+                        <strong>Đã xử lý:</strong> @alerts.Count(a => a.IsResolved)
+                    </div>
+                }
             </div>
-        </DxTabPage>
+        </div>
+    }
 
-        <DxTabPage Text="Báo cáo Tần suất">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    @* Motion Frequency Report Filters *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Từ ngày:</label>
-                            <DxDateEdit @bind-Date="@motionFromDate" CssClass="w-100" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Đến ngày:</label>
-                            <DxDateEdit @bind-Date="@motionToDate" CssClass="w-100" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Trạm:</label>
-                            <DxComboBox Data="@stations"
-                                        @bind-Value="@selectedMotionStationId"
-                                        TextFieldName="Name"
-                                        ValueFieldName="Id"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100">
-                                <DxListEditorColumn FieldName="Name" Caption="Tên trạm" />
-                            </DxComboBox>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Nhóm theo:</label>
-                            <DxComboBox Data="@groupByOptions"
-                                        @bind-Value="@selectedGroupBy"
-                                        CssClass="w-100" />
-                        </div>
+    <!-- Motion Report Tab -->
+    @if (activeTab == "motion")
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Báo cáo Tần suất Chuyển động</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Khoảng thời gian</label>
+                        <select class="form-select" @bind="motionPeriod" @bind:after="LoadMotionData">
+                            <option value="today">Hôm nay</option>
+                            <option value="week">7 ngày qua</option>
+                            <option value="month">30 ngày qua</option>
+                            <option value="custom">Tùy chỉnh</option>
+                        </select>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-12 d-flex align-items-end">
-                            <DxButton Text="Tìm kiếm" Click="@LoadMotionData" RenderStyle="ButtonRenderStyle.Primary" CssClass="me-2" />
-                            <DxButton Text="Xuất Excel" Click="@ExportMotionToExcel" RenderStyle="ButtonRenderStyle.Success" />
-                        </div>
-                    </div>
-
-                    @* Summary Cards *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <h5>Tổng sự kiện</h5>
-                                    <h2>@motionStats.TotalEvents</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <h5>Số trạm</h5>
-                                    <h2>@motionStats.DistinctStations</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h5>TB/Ngày</h5>
-                                    <h2>@motionStats.AveragePerDay.ToString("F1")</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h5>TB/Trạm</h5>
-                                    <h2>@motionStats.AveragePerStation.ToString("F1")</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* Chart *@
-                    @if (motionData.Any())
+                    @if (motionPeriod == "custom")
                     {
-                        <div class="card mb-3">
-                            <div class="card-body">
+                        <div class="col-md-3">
+                            <label class="form-label">Từ ngày</label>
+                            <input type="date" class="form-control" @bind="motionStartDate" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Đến ngày</label>
+                            <input type="date" class="form-control" @bind="motionEndDate" />
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="LoadMotionData">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                @if (isLoadingMotion)
+                {
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary"></div>
+                        <p>Đang tải dữ liệu...</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Thống kê theo trạm</h5>
+                            <DxGrid Data="@motionStats"
+                                    PageSize="20"
+                                    ShowPager="true"
+                                    PagerNavigationMode="PagerNavigationMode.InputBox"
+                                    PageSizeSelectorVisible="true"
+                                    AllowSelectRowByClick="false"
+                                    HighlightRowOnHover="true"
+                                    TextWrapEnabled="false"
+                                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                                    SizeMode="SizeMode.Medium"
+                                    >
+                                <Columns>
+                                    <DxGridDataColumn FieldName="StationName" Caption="Trạm" />
+                                    <DxGridDataColumn FieldName="TotalCount" Caption="Tổng số lần phát hiện" Width="180px" />
+                                    <DxGridDataColumn FieldName="AveragePerDay" Caption="Trung bình / ngày" Width="160px" DisplayFormat="F1" />
+                                    <DxGridDataColumn FieldName="MaxDate" Caption="Ngày nhiều nhất" Width="150px" DisplayFormat="dd/MM/yyyy" />
+                                    <DxGridDataColumn FieldName="MaxCount" Caption="Số lần (ngày nhiều nhất)" Width="200px" />
+                                </Columns>
+                            </DxGrid>
+                        </div>
+                    </div>
+
+                    @if (motionStats.Any())
+                    {
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5>Biểu đồ so sánh</h5>
                                 <canvas id="motionChart" style="max-height: 400px;"></canvas>
                             </div>
                         </div>
                     }
+                }
+            </div>
+        </div>
+    }
 
-                    @* Motion Data Grid *@
-                    <DxGrid Data="@motionData" CssClass="mt-3">
+    <!-- Audit Log Tab -->
+    @if (activeTab == "audit")
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Lịch sử Thay đổi Cấu hình</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 g-2">
+                    <div class="col-md-2">
+                        <label class="form-label">Loại thực thể</label>
+                        <select class="form-select" @bind="auditEntityType" @bind:after="LoadAuditData">
+                            <option value="all">Tất cả</option>
+                            <option value="Station">Trạm</option>
+                            <option value="TimeFrame">Khung giờ</option>
+                            <option value="MonitoringProfile">Cấu hình giám sát</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Hành động</label>
+                        <select class="form-select" @bind="auditActionType" @bind:after="LoadAuditData">
+                            <option value="all">Tất cả</option>
+                            <option value="Create">Tạo mới</option>
+                            <option value="Update">Cập nhật</option>
+                            <option value="Delete">Xóa</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạm</label>
+                        <select class="form-select" @bind="auditStationId" @bind:after="LoadAuditData">
+                            <option value="0">Tất cả</option>
+                            @foreach (var station in stations)
+                            {
+                                <option value="@station.Id">@station.StationCode - @station.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" class="form-control" @bind="auditStartDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        @if (auditDateError)
+                        {
+                            <small class="text-danger">@auditDateErrorMessage</small>
+                        }
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" class="form-control" @bind="auditEndDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" @onclick="LoadAuditData">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @if (isLoadingAudit)
+                {
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary"></div>
+                        <p>Đang tải dữ liệu...</p>
+                    </div>
+                }
+                else
+                {
+                    <DxGrid Data="@auditLogs"
+                            PageSize="20"
+                            ShowPager="true"
+                            PagerNavigationMode="PagerNavigationMode.InputBox"
+                            PageSizeSelectorVisible="true"
+                            AllowSelectRowByClick="false"
+                            HighlightRowOnHover="true"
+                            TextWrapEnabled="false"
+                            FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                            ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                            SizeMode="SizeMode.Medium"
+                            
+                            CustomizeElement="OnCustomizeAuditGridElement">
                         <Columns>
-                            @if (selectedGroupBy == "Ngày")
-                            {
-                                <DxGridDataColumn FieldName="GroupKey" Caption="Ngày" Width="150px" />
-                            }
-                            else if (selectedGroupBy == "Trạm")
-                            {
-                                <DxGridDataColumn FieldName="GroupKey" Caption="Trạm" Width="300px" />
-                            }
-                            else if (selectedGroupBy == "Giờ")
-                            {
-                                <DxGridDataColumn FieldName="GroupKey" Caption="Giờ" Width="150px" />
-                            }
-                            <DxGridDataColumn FieldName="EventCount" Caption="Số sự kiện" Width="150px" />
+                            <DxGridDataColumn FieldName="ChangedAt" Caption="Thời gian" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="EntityType" Caption="Loại" Width="150px" />
+                            <DxGridDataColumn FieldName="EntityName" Caption="Tên" Width="200px" />
+                            <DxGridDataColumn FieldName="ActionType" Caption="Hành động" Width="120px">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var log = (ConfigurationAuditLog)context.DataItem;
+                                        var badgeClass = log.ActionType switch
+                                        {
+                                            "Create" => "bg-success",
+                                            "Update" => "bg-warning",
+                                            "Delete" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@log.ActionType</span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                            <DxGridDataColumn FieldName="Changes" Caption="Thay đổi" MinWidth="300" />
+                            <DxGridDataColumn FieldName="ChangedBy" Caption="Người thực hiện" Width="150px" />
                         </Columns>
                     </DxGrid>
-                </div>
+                }
             </div>
-        </DxTabPage>
+        </div>
+    }
+</div>
 
-        <DxTabPage Text="Audit Log">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    @* Audit Log Filters *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Từ ngày:</label>
-                            <DxDateEdit @bind-Date="@auditFromDate" CssClass="w-100" />
+<!-- Audit Detail Modal -->
+@if (showAuditDetailModal && selectedAuditLog != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.7);" @onclick="CloseAuditDetailModal">
+        <div class="modal-dialog modal-xl" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-text"></i> Chi tiết thay đổi cấu hình
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseAuditDetailModal" @onclick:stopPropagation="true"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Basic Info -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <strong>Thông tin cơ bản</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted" style="width: 150px;">Loại:</td>
+                                                <td><span class="badge bg-info">@selectedAuditLog.EntityType</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Tên:</td>
+                                                <td><strong>@selectedAuditLog.EntityName</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Entity ID:</td>
+                                                <td><code>@selectedAuditLog.EntityId</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Hành động:</td>
+                                                <td>
+                                                    @{
+                                                        var badgeClass = selectedAuditLog.ActionType switch
+                                                        {
+                                                            "Create" => "bg-success",
+                                                            "Update" => "bg-warning text-dark",
+                                                            "Delete" => "bg-danger",
+                                                            _ => "bg-secondary"
+                                                        };
+                                                    }
+                                                    <span class="badge @badgeClass">@selectedAuditLog.ActionType</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label>Đến ngày:</label>
-                            <DxDateEdit @bind-Date="@auditToDate" CssClass="w-100" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Trạm:</label>
-                            <DxComboBox Data="@stations"
-                                        @bind-Value="@selectedAuditStationId"
-                                        TextFieldName="Name"
-                                        ValueFieldName="Id"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100">
-                                <DxListEditorColumn FieldName="Name" Caption="Tên trạm" />
-                            </DxComboBox>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Loại thay đổi:</label>
-                            <DxComboBox Data="@auditTypes"
-                                        @bind-Value="@selectedAuditType"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100" />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Hành động:</label>
-                            <DxComboBox Data="@actionTypes"
-                                        @bind-Value="@selectedActionType"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                        CssClass="w-100" />
-                        </div>
-                        <div class="col-md-9 d-flex align-items-end">
-                            <DxButton Text="Tìm kiếm" Click="@LoadAuditData" RenderStyle="ButtonRenderStyle.Primary" CssClass="me-2" />
-                            <DxButton Text="Xuất Excel" Click="@ExportAuditToExcel" RenderStyle="ButtonRenderStyle.Success" />
-                        </div>
-                    </div>
 
-                    @* Statistics Cards *@
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
+                        <!-- User Info -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <strong>Thông tin người thực hiện</strong>
+                                </div>
                                 <div class="card-body">
-                                    <h5>Tổng thay đổi</h5>
-                                    <h2>@auditStats.TotalChanges</h2>
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted" style="width: 150px;">Người thực hiện:</td>
+                                                <td><strong>@selectedAuditLog.ChangedBy</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Thời gian:</td>
+                                                <td><strong>@ConvertToLocalTime(selectedAuditLog.ChangedAt)</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">IP Address:</td>
+                                                <td><code>@(selectedAuditLog.IpAddress ?? "N/A")</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">User Agent:</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(selectedAuditLog.UserAgent))
+                                                    {
+                                                        <small class="text-muted">@selectedAuditLog.UserAgent</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">N/A</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h5>Trạm</h5>
-                                    <h2>@auditStats.StationChanges</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <h5>TimeFrame</h5>
-                                    <h2>@auditStats.TimeFrameChanges</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h5>Người dùng</h5>
-                                    <h2>@auditStats.DistinctUsers</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    @* Audit Data Grid *@
-                    <DxGrid Data="@auditData" CssClass="mt-3">
-                        <Columns>
-                            <DxGridDataColumn FieldName="ChangedAt" Caption="Thời gian" DisplayFormat="{0:dd/MM/yyyy HH:mm:ss}" Width="170px" />
-                            <DxGridDataColumn FieldName="Type" Caption="Loại" Width="120px">
-                                <CellDisplayTemplate>
-                                    @{
-                                        var audit = (AuditLogData)context.DataItem;
-                                        var badgeClass = audit.Type == "Station" ? "badge bg-success" : "badge bg-info";
-                                        <span class="@badgeClass">@audit.Type</span>
-                                    }
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                            <DxGridDataColumn FieldName="Action" Caption="Hành động" Width="120px">
-                                <CellDisplayTemplate>
-                                    @{
-                                        var audit = (AuditLogData)context.DataItem;
-                                        var badgeClass = audit.Action switch
+                        <!-- Changes Summary -->
+                        @if (!string.IsNullOrEmpty(selectedAuditLog.Changes))
+                        {
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Tóm tắt thay đổi</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle"></i> @selectedAuditLog.Changes
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Old Value -->
+                        @if (!string.IsNullOrEmpty(selectedAuditLog.OldValue) && selectedAuditLog.ActionType == "Update")
+                        {
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Giá trị cũ</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        @{
+                                            var oldValueFormatted = FormatJsonValue(selectedAuditLog.OldValue ?? "");
+                                            var newValueFormatted = FormatJsonValue(selectedAuditLog.NewValue ?? "");
+                                        }
+                                        @if (oldValueFormatted != null)
                                         {
-                                            "Created" => "badge bg-primary",
-                                            "Updated" => "badge bg-warning text-dark",
-                                            "Deleted" => "badge bg-danger",
-                                            _ => "badge bg-secondary"
-                                        };
-                                        <span class="@badgeClass">@audit.Action</span>
-                                    }
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                            <DxGridDataColumn FieldName="ObjectName" Caption="Đối tượng" Width="250px" />
-                            <DxGridDataColumn FieldName="ChangeDescription" Caption="Mô tả thay đổi" Width="350px" />
-                            <DxGridDataColumn FieldName="ChangedBy" Caption="Người thực hiện" Width="180px" />
-                            <DxGridDataColumn FieldName="ConfigSnapshot" Caption="Chi tiết" Width="150px">
-                                <CellDisplayTemplate>
-                                    @{
-                                        var audit = (AuditLogData)context.DataItem;
-                                        var snapshot = audit.ConfigSnapshot ?? "";
-                                        if (snapshot.Length > 30)
-                                        {
-                                            <span title="@snapshot" style="cursor: help;">@(snapshot.Substring(0, 30))...</span>
+                                            <table class="table table-sm table-bordered">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 40%;">Thuộc tính</th>
+                                                        <th>Giá trị</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var kvp in oldValueFormatted)
+                                                    {
+                                                        var newVal = newValueFormatted?.ContainsKey(kvp.Key) == true ? newValueFormatted[kvp.Key] : kvp.Value;
+                                                        var isChanged = newVal != kvp.Value;
+                                                        <tr class="@(isChanged ? "table-warning" : "")">
+                                                            <td class="text-muted"><strong>@kvp.Key</strong></td>
+                                                            <td><code>@kvp.Value</code></td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
                                         }
                                         else
                                         {
-                                            <span>@snapshot</span>
+                                            <pre class="bg-dark text-light p-3 mb-0" style="max-height: 400px; overflow-y: auto; font-size: 11px;">@selectedAuditLog.OldValue</pre>
                                         }
-                                    }
-                                </CellDisplayTemplate>
-                            </DxGridDataColumn>
-                        </Columns>
-                    </DxGrid>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- New Value -->
+                        @if (!string.IsNullOrEmpty(selectedAuditLog.NewValue))
+                        {
+                            <div class="col-md-@(selectedAuditLog.ActionType == "Update" ? "6" : "12")">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Giá trị mới</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        @{
+                                            var newValueFormatted = FormatJsonValue(selectedAuditLog.NewValue ?? "");
+                                            var oldValueFormatted = selectedAuditLog.ActionType == "Update" ? FormatJsonValue(selectedAuditLog.OldValue ?? "") : null;
+                                        }
+                                        @if (newValueFormatted != null)
+                                        {
+                                            <table class="table table-sm table-bordered">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th style="width: 40%;">Thuộc tính</th>
+                                                        <th>Giá trị</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var kvp in newValueFormatted)
+                                                    {
+                                                        var oldVal = oldValueFormatted?.ContainsKey(kvp.Key) == true ? oldValueFormatted[kvp.Key] : kvp.Value;
+                                                        var isChanged = oldVal != kvp.Value;
+                                                        <tr class="@(isChanged ? "table-warning" : "")">
+                                                            <td class="text-muted"><strong>@kvp.Key</strong></td>
+                                                            <td><code>@kvp.Value</code></td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                        else
+                                        {
+                                            <pre class="bg-dark text-light p-3 mb-0" style="max-height: 400px; overflow-y: auto; font-size: 11px;">@selectedAuditLog.NewValue</pre>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseAuditDetailModal">Đóng</button>
                 </div>
             </div>
-        </DxTabPage>
-    </DxTabs>
-</div>
+        </div>
+    </div>
+}
 
 @code {
-    private int activeTabIndex = 0;
+    private string activeTab = "alerts";
+    private bool isFirstRender = true;
 
-    // Alert Report Variables
-    private DateTime alertFromDate = DateTime.Today.AddDays(-7);
-    private DateTime alertToDate = DateTime.Today.AddDays(1).AddSeconds(-1);
-    private Guid? selectedAlertStationId = null;
-    private string? selectedSeverity = null;
-    private string? selectedStatus = null;
-    private List<MotionAlert> alertData = new();
-    private (int ActiveCount, int ResolvedCount, int CriticalCount, int WarningCount) alertStats;
+    // Alert Report
+    private string alertPeriod = "week";
+    private DateTime alertStartDate = DateTime.Today.AddDays(-7);
+    private DateTime alertEndDate = DateTime.Today;
+    private int selectedStationId = 0;
+    private string alertStatus = "all";
+    private List<MotionAlert> alerts = new();
+    private bool isLoadingAlerts = false;
+    private bool isExporting = false;
 
-    // Motion Frequency Report Variables
-    private DateTime motionFromDate = DateTime.Today.AddDays(-7);
-    private DateTime motionToDate = DateTime.Today.AddDays(1).AddSeconds(-1);
-    private Guid? selectedMotionStationId = null;
-    private string selectedGroupBy = "Ngày";
-    private List<MotionFrequencyData> motionData = new();
-    private (int TotalEvents, int DistinctStations, double AveragePerDay, double AveragePerStation) motionStats;
+    // Motion Report
+    private string motionPeriod = "week";
+    private DateTime motionStartDate = DateTime.Today.AddDays(-7);
+    private DateTime motionEndDate = DateTime.Today;
+    private List<MotionStatistic> motionStats = new();
+    private bool isLoadingMotion = false;
 
-    // Audit Log Variables
-    private DateTime auditFromDate = DateTime.Today.AddDays(-7);
-    private DateTime auditToDate = DateTime.Today.AddDays(1).AddSeconds(-1);
-    private Guid? selectedAuditStationId = null;
-    private string? selectedAuditType = null;
-    private string? selectedActionType = null;
-    private List<string> auditTypes = new() { "Station", "TimeFrame" };
-    private List<string> actionTypes = new() { "Created", "Updated", "Deleted" };
-    private List<AuditLogData> auditData = new();
-    private (int TotalChanges, int StationChanges, int TimeFrameChanges, int DistinctUsers) auditStats;
+    // Audit Log
+    private string auditEntityType = "all";
+    private string auditActionType = "all";
+    private int auditStationId = 0;
+    private DateTime auditStartDate = DateTime.Today.AddMonths(-1);
+    private DateTime auditEndDate = DateTime.Today;
+    private bool auditDateError = false;
+    private string auditDateErrorMessage = string.Empty;
+    private List<ConfigurationAuditLog> auditLogs = new();
+    private bool isLoadingAudit = false;
+    private int? auditEntityId = null;
+    private bool showAuditDetailModal = false;
+    private ConfigurationAuditLog? selectedAuditLog = null;
 
-    // Shared Variables
+    // Common
     private List<Station> stations = new();
-    private List<string> severityLevels = new() { "Critical", "Warning", "Info" };
-    private List<string> statusOptions = new() { "Tất cả", "Đang hoạt động", "Đã xử lý" };
-    private List<string> groupByOptions = new() { "Ngày", "Trạm", "Giờ" };
 
     protected override async Task OnInitializedAsync()
     {
+        // Parse query parameters
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        
+        var tab = query["tab"];
+        if (!string.IsNullOrEmpty(tab))
+        {
+            activeTab = tab;
+        }
+        
+        var entityType = query["entityType"];
+        if (!string.IsNullOrEmpty(entityType))
+        {
+            // Don't set auditEntityType yet, will be set based on context below
+        }
+        
+        var entityIdStr = query["entityId"];
+        if (int.TryParse(entityIdStr, out var entityId))
+        {
+            // If entityType is Station, use it as stationId to show all related changes (Station + TimeFrames + Profile)
+            if (entityType == "Station")
+            {
+                auditStationId = entityId;
+                auditEntityType = "all"; // Show all entity types for this station
+                // Don't filter by specific entityId, show all related entities
+            }
+            else
+            {
+                // For other entity types (TimeFrame, etc.), filter by specific entityId
+                auditEntityType = entityType ?? "all";
+                auditEntityId = entityId;
+            }
+            
+            // If we have entityId for audit, extend date range
+            if (activeTab == "audit")
+            {
+                auditStartDate = DateTime.Today.AddDays(-90);
+            }
+        }
+        
+        // Parse stationId from URL for filtering by station (alternative parameter)
+        var stationIdStr = query["stationId"];
+        if (int.TryParse(stationIdStr, out var stationId))
+        {
+            auditStationId = stationId;
+            if (activeTab == "audit")
+            {
+                auditStartDate = DateTime.Today.AddDays(-90);
+            }
+        }
+        
         await LoadStations();
-        await LoadAlertData();
-        await LoadMotionData();
-        await LoadAuditData();
+        
+        // Load data based on active tab
+        if (activeTab == "alerts")
+        {
+            await LoadAlertData();
+        }
+        else if (activeTab == "motion")
+        {
+            await LoadMotionData();
+        }
+        else if (activeTab == "audit")
+        {
+            await LoadAuditData();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender && activeTabIndex == 1 && motionData.Any())
+        if (firstRender)
+        {
+            isFirstRender = false;
+        }
+        
+        // Render chart after motion data is loaded and rendered
+        if (activeTab == "motion" && motionStats.Any() && !isFirstRender)
         {
             await RenderMotionChart();
+        }
+    }
+
+    private async Task SwitchTab(string tab)
+    {
+        activeTab = tab;
+        Navigation.NavigateTo($"/reports?tab={tab}", false);
+        
+        if (tab == "alerts")
+        {
+            await LoadAlertData();
+        }
+        else if (tab == "motion")
+        {
+            await LoadMotionData();
+        }
+        else if (tab == "audit")
+        {
+            await LoadAuditData();
         }
     }
 
     private async Task LoadStations()
     {
         using var context = await DbContextFactory.CreateDbContextAsync();
-        stations = await context.Stations.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
+        stations = await context.Stations
+            .Where(s => s.IsActive)
+            .OrderBy(s => s.Name)
+            .ToListAsync();
     }
-
-    #region Alert Report Methods
 
     private async Task LoadAlertData()
     {
-        using var context = await DbContextFactory.CreateDbContextAsync();
-
-        var query = context.MotionAlerts
-            .Include(a => a.Station)
-            .Include(a => a.TimeFrame)
-            .Where(a => a.AlertTime >= alertFromDate && a.AlertTime <= alertToDate);
-
-        if (selectedAlertStationId.HasValue)
-            query = query.Where(a => a.StationId == selectedAlertStationId.Value);
-
-        if (!string.IsNullOrEmpty(selectedSeverity))
+        isLoadingAlerts = true;
+        try
         {
-            var severity = Enum.Parse<AlertSeverity>(selectedSeverity);
-            query = query.Where(a => a.Severity == severity);
-        }
+            using var context = await DbContextFactory.CreateDbContextAsync();
 
-        if (!string.IsNullOrEmpty(selectedStatus))
-        {
-            if (selectedStatus == "Đang hoạt động")
+            var (startDate, endDate) = GetDateRange(alertPeriod, alertStartDate, alertEndDate);
+
+            var query = context.MotionAlerts
+                .Include(a => a.TimeFrame)
+                .Where(a => a.AlertTime >= startDate && a.AlertTime <= endDate.AddDays(1));
+
+            if (selectedStationId > 0)
+            {
+                query = query.Where(a => a.StationId == selectedStationId);
+            }
+
+            if (alertStatus == "active")
+            {
                 query = query.Where(a => !a.IsResolved);
-            else if (selectedStatus == "Đã xử lý")
+            }
+            else if (alertStatus == "resolved")
+            {
                 query = query.Where(a => a.IsResolved);
+            }
+
+            alerts = await query.OrderByDescending(a => a.AlertTime).ToListAsync();
         }
+        finally
+        {
+            isLoadingAlerts = false;
+        }
+    }
 
-        // Materialize the data before context disposal
-        var alerts = await query.OrderByDescending(a => a.AlertTime).ToListAsync();
-        alertData = alerts;
+    private async Task LoadMotionData()
+    {
+        isLoadingMotion = true;
+        try
+        {
+            using var context = await DbContextFactory.CreateDbContextAsync();
 
-        // Calculate statistics from materialized data
-        alertStats = (
-            ActiveCount: alertData.Count(a => !a.IsResolved),
-            ResolvedCount: alertData.Count(a => a.IsResolved),
-            CriticalCount: alertData.Count(a => a.Severity == AlertSeverity.Critical),
-            WarningCount: alertData.Count(a => a.Severity == AlertSeverity.Warning)
-        );
+            var (startDate, endDate) = GetDateRange(motionPeriod, motionStartDate, motionEndDate);
+
+            var motionData = await context.MotionEvents
+                .Include(m => m.Station)
+                .Where(m => m.DetectedAt >= startDate && m.DetectedAt <= endDate.AddDays(1) && m.StationId != null)
+                .GroupBy(m => new { m.StationId, StationName = m.Station!.Name, Date = m.DetectedAt.Date })
+                .Select(g => new
+                {
+                    g.Key.StationId,
+                    g.Key.StationName,
+                    g.Key.Date,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            var days = (endDate - startDate).Days + 1;
+
+            motionStats = motionData
+                .GroupBy(m => new { m.StationId, m.StationName })
+                .Select(g => new MotionStatistic
+                {
+                    StationId = g.Key.StationId ?? 0,
+                    StationName = g.Key.StationName ?? "Unknown",
+                    TotalCount = g.Sum(x => x.Count),
+                    AveragePerDay = g.Sum(x => x.Count) / (double)days,
+                    MaxDate = g.OrderByDescending(x => x.Count).FirstOrDefault()?.Date,
+                    MaxCount = g.Max(x => x.Count)
+                })
+                .OrderByDescending(s => s.TotalCount)
+                .ToList();
+        }
+        finally
+        {
+            isLoadingMotion = false;
+        }
+    }
+
+    private async Task LoadAuditData()
+    {
+        isLoadingAudit = true;
+        auditDateError = false;
+        auditDateErrorMessage = string.Empty;
+        
+        try
+        {
+            // Validate dates
+            if (auditStartDate > auditEndDate)
+            {
+                auditDateError = true;
+                auditDateErrorMessage = "Từ ngày phải nhỏ hơn đến ngày";
+                return;
+            }
+            
+            if (auditStartDate > DateTime.Today || auditEndDate > DateTime.Today)
+            {
+                auditDateError = true;
+                auditDateErrorMessage = "Không được chọn ngày tương lai";
+                return;
+            }
+            
+            using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var query = context.ConfigurationAuditLogs
+                .Where(a => a.ChangedAt >= auditStartDate && a.ChangedAt <= auditEndDate.AddDays(1));
+
+            if (auditEntityType != "all")
+            {
+                query = query.Where(a => a.EntityType == auditEntityType);
+            }
+
+            if (auditActionType != "all")
+            {
+                query = query.Where(a => a.ActionType == auditActionType);
+            }
+
+            if (auditStationId > 0)
+            {
+                // Get TimeFrame IDs for this station
+                var timeFrameIds = await context.TimeFrames
+                    .Where(tf => tf.StationId == auditStationId)
+                    .Select(tf => tf.Id)
+                    .ToListAsync();
+
+                // Filter audit logs: Station changes OR TimeFrame changes for this station
+                query = query.Where(a => 
+                    (a.EntityType == "Station" && a.EntityId == auditStationId) ||
+                    (a.EntityType == "TimeFrame" && timeFrameIds.Contains(a.EntityId)));
+            }
+
+            if (auditEntityId.HasValue)
+            {
+                query = query.Where(a => a.EntityId == auditEntityId.Value);
+            }
+
+            auditLogs = await query
+                .OrderByDescending(a => a.ChangedAt)
+                .Take(500)
+                .ToListAsync();
+        }
+        finally
+        {
+            isLoadingAudit = false;
+        }
+    }
+
+    private (DateTime startDate, DateTime endDate) GetDateRange(string period, DateTime customStart, DateTime customEnd)
+    {
+        return period switch
+        {
+            "today" => (DateTime.Today, DateTime.Today),
+            "week" => (DateTime.Today.AddDays(-7), DateTime.Today),
+            "month" => (DateTime.Today.AddDays(-30), DateTime.Today),
+            "custom" => (customStart, customEnd),
+            _ => (DateTime.Today.AddDays(-7), DateTime.Today)
+        };
     }
 
     private async Task ExportAlertsToExcel()
     {
-        var csv = new StringBuilder();
-        csv.AppendLine("Thời gian,Trạm,Mức độ,Thông báo,Cấu hình,Trạng thái,Ngày xử lý");
-
-        foreach (var alert in alertData)
+        isExporting = true;
+        try
         {
-            csv.AppendLine($"{alert.AlertTime:dd/MM/yyyy HH:mm}," +
-                          $"{alert.Station?.Name ?? "N/A"}," +
-                          $"{alert.Severity}," +
-                          $"\"{alert.Message}\"," +
-                          $"\"{alert.ConfigurationSnapshot ?? "N/A"}\"," +
-                          $"{(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")}," +
-                          $"{(alert.ResolvedAt.HasValue ? alert.ResolvedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")}");
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Báo cáo Cảnh báo");
+
+            // Headers
+            worksheet.Cell(1, 1).Value = "Thời gian";
+            worksheet.Cell(1, 2).Value = "Trạm";
+            worksheet.Cell(1, 3).Value = "Thông điệp";
+            worksheet.Cell(1, 4).Value = "Mức độ";
+            worksheet.Cell(1, 5).Value = "Trạng thái";
+            worksheet.Cell(1, 6).Value = "Thời gian xử lý";
+            worksheet.Cell(1, 7).Value = "Người xử lý";
+
+            // Style header
+            var headerRow = worksheet.Range(1, 1, 1, 7);
+            headerRow.Style.Font.Bold = true;
+            headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            // Data
+            int row = 2;
+            foreach (var alert in alerts)
+            {
+                worksheet.Cell(row, 1).Value = alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss");
+                worksheet.Cell(row, 2).Value = alert.StationName ?? "";
+                worksheet.Cell(row, 3).Value = alert.Message ?? "";
+                worksheet.Cell(row, 4).Value = alert.Severity.ToString();
+                worksheet.Cell(row, 5).Value = alert.IsResolved ? "Đã xử lý" : "Chưa xử lý";
+                worksheet.Cell(row, 6).Value = alert.ResolvedAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? "";
+                worksheet.Cell(row, 7).Value = alert.ResolvedBy ?? "";
+                row++;
+            }
+
+            // Auto-fit columns
+            worksheet.Columns().AdjustToContents();
+
+            // Save to memory stream
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            // Download file
+            var fileName = $"BaoCaoCanhBao_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content));
         }
-
-        var bytes = Encoding.UTF8.GetBytes("\uFEFF" + csv.ToString());
-        var base64 = Convert.ToBase64String(bytes);
-        await JS.InvokeVoidAsync("downloadFile", "BaoCaoCanhBao.csv", base64);
-    }
-
-    #endregion
-
-    #region Motion Frequency Report Methods
-
-    private async Task LoadMotionData()
-    {
-        using var context = await DbContextFactory.CreateDbContextAsync();
-
-        var query = context.MotionEvents
-            .Include(e => e.Station)
-            .Where(e => e.DetectedAt >= motionFromDate && e.DetectedAt <= motionToDate);
-
-        if (selectedMotionStationId.HasValue)
-            query = query.Where(e => e.StationId == selectedMotionStationId.Value);
-
-        // Materialize all data before context disposal
-        var events = await query.ToListAsync();
-
-        // Group data based on selection
-        motionData = selectedGroupBy switch
+        finally
         {
-            "Ngày" => events.GroupBy(e => e.DetectedAt.Date)
-                           .Select(g => new MotionFrequencyData
-                           {
-                               GroupKey = g.Key.ToString("dd/MM/yyyy"),
-                               EventCount = g.Count()
-                           }).ToList(),
-            "Trạm" => events.GroupBy(e => e.Station != null ? e.Station.Name : "N/A")
-                           .Select(g => new MotionFrequencyData
-                           {
-                               GroupKey = g.Key,
-                               EventCount = g.Count()
-                           }).ToList(),
-            "Giờ" => events.GroupBy(e => e.DetectedAt.Hour)
-                          .Select(g => new MotionFrequencyData
-                          {
-                              GroupKey = $"{g.Key:D2}:00",
-                              EventCount = g.Count()
-                          }).ToList(),
-            _ => new List<MotionFrequencyData>()
-        };
-
-        // Calculate statistics
-        var totalDays = (motionToDate - motionFromDate).Days + 1;
-        var distinctStations = events.Select(e => e.StationId).Distinct().Count();
-
-        motionStats = (
-            TotalEvents: events.Count,
-            DistinctStations: distinctStations,
-            AveragePerDay: totalDays > 0 ? (double)events.Count / totalDays : 0,
-            AveragePerStation: distinctStations > 0 ? (double)events.Count / distinctStations : 0
-        );
-
-        if (motionData.Any())
-        {
-            await RenderMotionChart();
+            isExporting = false;
         }
     }
 
     private async Task RenderMotionChart()
     {
-        var labels = JsonSerializer.Serialize(motionData.Select(d => d.GroupKey).ToArray());
-        var data = JsonSerializer.Serialize(motionData.Select(d => d.EventCount).ToArray());
+        var labels = motionStats.Select(s => s.StationName).ToArray();
+        var data = motionStats.Select(s => s.TotalCount).ToArray();
 
-        var chartScript = $@"
-            const ctx = document.getElementById('motionChart');
-            if (ctx) {{
-                if (window.motionChartInstance) {{
-                    window.motionChartInstance.destroy();
-                }}
-                window.motionChartInstance = new Chart(ctx, {{
-                    type: 'bar',
-                    data: {{
-                        labels: {labels},
-                        datasets: [{{
-                            label: 'Số sự kiện',
-                            data: {data},
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }}]
-                    }},
-                    options: {{
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        scales: {{
-                            y: {{
-                                beginAtZero: true
-                            }}
-                        }}
-                    }}
-                }});
-            }}
-        ";
-
-        await JS.InvokeVoidAsync("eval", chartScript);
+        await JS.InvokeVoidAsync("renderMotionChart", labels, data);
     }
 
-    private async Task ExportMotionToExcel()
+    private void OnCustomizeAuditGridElement(GridCustomizeElementEventArgs e)
     {
-        var csv = new StringBuilder();
-        var header = selectedGroupBy switch
+        if (e.ElementType == GridElementType.DataRow)
         {
-            "Ngày" => "Ngày,Số sự kiện",
-            "Trạm" => "Trạm,Số sự kiện",
-            "Giờ" => "Giờ,Số sự kiện",
-            _ => "Nhóm,Số sự kiện"
-        };
-        csv.AppendLine(header);
-
-        foreach (var item in motionData)
-        {
-            csv.AppendLine($"{item.GroupKey},{item.EventCount}");
+            e.CssClass = "cursor-pointer";
+            e.Attributes["onclick"] = EventCallback.Factory.Create<MouseEventArgs>(this, async () =>
+            {
+                var log = (ConfigurationAuditLog)e.Grid.GetDataItem(e.VisibleIndex);
+                if (log != null)
+                {
+                    await ShowAuditDetailModal(log);
+                }
+            });
         }
-
-        var bytes = Encoding.UTF8.GetBytes("\uFEFF" + csv.ToString());
-        var base64 = Convert.ToBase64String(bytes);
-        await JS.InvokeVoidAsync("downloadFile", "BaoCaoTanSuat.csv", base64);
     }
 
-    #endregion
-
-    #region Audit Log Methods
-
-    private async Task LoadAuditData()
+    private async Task ShowAuditDetailModal(ConfigurationAuditLog log)
     {
-        using var context = await DbContextFactory.CreateDbContextAsync();
+        selectedAuditLog = log;
+        showAuditDetailModal = true;
+        await Task.CompletedTask;
+    }
 
-        var stationHistories = context.StationHistories
-            .Include(sh => sh.Station)
-            .Where(sh => sh.ChangedAt >= auditFromDate && sh.ChangedAt <= auditToDate)
-            .AsQueryable();
+    private void CloseAuditDetailModal()
+    {
+        showAuditDetailModal = false;
+        selectedAuditLog = null;
+    }
 
-        var timeFrameHistories = context.TimeFrameHistories
-            .Include(tfh => tfh.Station)
-            .Include(tfh => tfh.TimeFrame)
-            .Where(tfh => tfh.ChangedAt >= auditFromDate && tfh.ChangedAt <= auditToDate)
-            .AsQueryable();
-
-        if (selectedAuditStationId.HasValue)
+    private string GetRowHighlightClass(string key, string oldVal, string newVal)
+    {
+        // Highlight if values are different
+        if (oldVal != newVal)
         {
-            stationHistories = stationHistories.Where(sh => sh.StationId == selectedAuditStationId.Value);
-            timeFrameHistories = timeFrameHistories.Where(tfh => tfh.StationId == selectedAuditStationId.Value);
+            return "table-warning";
         }
-
-        // Materialize both lists before context disposal
-        var stationAudits = await stationHistories.ToListAsync();
-        var timeFrameAudits = await timeFrameHistories.ToListAsync();
-
-        // Now build the audit data from materialized lists (context can be disposed)
-        auditData = stationAudits.Select(sh => new AuditLogData
-        {
-            ChangedAt = sh.ChangedAt,
-            Type = "Station",
-            Action = sh.Action,
-            ObjectName = $"{sh.StationCode} - {sh.StationName}",
-            ChangeDescription = sh.ChangeDescription ?? "",
-            ChangedBy = sh.ChangedBy,
-            ConfigSnapshot = sh.ConfigurationSnapshot
-        }).Concat(timeFrameAudits.Select(tfh => new AuditLogData
-        {
-            ChangedAt = tfh.ChangedAt,
-            Type = "TimeFrame",
-            Action = tfh.Action,
-            ObjectName = $"{tfh.Station?.StationCode ?? "N/A"} - {tfh.TimeFrame?.Name ?? "Deleted"}",
-            ChangeDescription = tfh.ChangeDescription ?? "",
-            ChangedBy = tfh.ChangedBy,
-            ConfigSnapshot = tfh.ConfigurationSnapshot
-        })).ToList();
-
-        // Apply filters
-        if (!string.IsNullOrEmpty(selectedAuditType))
-            auditData = auditData.Where(a => a.Type == selectedAuditType).ToList();
-
-        if (!string.IsNullOrEmpty(selectedActionType))
-            auditData = auditData.Where(a => a.Action == selectedActionType).ToList();
-
-        // Sort by time descending
-        auditData = auditData.OrderByDescending(a => a.ChangedAt).ToList();
-
-        // Calculate statistics
-        auditStats = (
-            TotalChanges: auditData.Count,
-            StationChanges: auditData.Count(a => a.Type == "Station"),
-            TimeFrameChanges: auditData.Count(a => a.Type == "TimeFrame"),
-            DistinctUsers: auditData.Select(a => a.ChangedBy).Distinct().Count()
-        );
+        return "";
     }
 
-    private async Task ExportAuditToExcel()
+    private Dictionary<string, string>? FormatJsonValue(string jsonValue)
     {
-        var csv = new StringBuilder();
-        csv.AppendLine("Thời gian,Loại,Hành động,Đối tượng,Mô tả thay đổi,Người thực hiện,Chi tiết");
+        if (string.IsNullOrWhiteSpace(jsonValue))
+            return null;
 
-        foreach (var audit in auditData)
+        try
         {
-            csv.AppendLine($"{audit.ChangedAt:dd/MM/yyyy HH:mm:ss}," +
-                          $"{audit.Type}," +
-                          $"{audit.Action}," +
-                          $"\"{audit.ObjectName}\"," +
-                          $"\"{audit.ChangeDescription}\"," +
-                          $"{audit.ChangedBy}," +
-                          $"\"{audit.ConfigSnapshot}\"");
+            var data = new Dictionary<string, string>();
+            
+            // Properties to exclude from display
+            var excludedProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "CameraStations", "StationEmployees", "TimeSchedules", "TimeFrames",
+                "CreatedAt", "ModifiedAt", "CreatedBy", "ModifiedBy",
+                "Stations", "ProfileId", "Profile"
+            };
+            
+            // Try to parse JSON-like value
+            var lines = jsonValue.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim().TrimEnd(',').Trim('{', '}');
+                if (trimmed.Contains(':'))
+                {
+                    var parts = trimmed.Split(':', 2);
+                    if (parts.Length == 2)
+                    {
+                        var key = parts[0].Trim().Trim('"');
+                        var value = parts[1].Trim().Trim('"', ' ');
+                        
+                        // Skip excluded properties
+                        if (excludedProperties.Contains(key))
+                            continue;
+                        
+                        // Format special keys
+                        if (key == "IsActive" || key == "IsEnabled")
+                        {
+                            value = value.ToLower() == "true" ? "✓ Có" : "✗ Không";
+                        }
+                        else if (key == "DaysOfWeek" && !string.IsNullOrEmpty(value))
+                        {
+                            // Convert days array to readable format
+                            value = value.Replace("[", "").Replace("]", "");
+                            var days = value.Split(',');
+                            var dayNames = new List<string>();
+                            foreach (var day in days)
+                            {
+                                var dayNum = day.Trim();
+                                dayNames.Add(dayNum switch
+                                {
+                                    "0" => "CN",
+                                    "1" => "T2",
+                                    "2" => "T3",
+                                    "3" => "T4",
+                                    "4" => "T5",
+                                    "5" => "T6",
+                                    "6" => "T7",
+                                    _ => dayNum
+                                });
+                            }
+                            value = string.Join(", ", dayNames);
+                        }
+                        else if ((key.Contains("Time") || key.Contains("Date")) && DateTime.TryParse(value, out var dateValue))
+                        {
+                            // Convert UTC time to local time for display
+                            value = ConvertToLocalTime(dateValue);
+                        }
+                        
+                        data[key] = value;
+                    }
+                }
+            }
+            
+            return data.Any() ? data : null;
         }
-
-        var bytes = Encoding.UTF8.GetBytes("\uFEFF" + csv.ToString());
-        var base64 = Convert.ToBase64String(bytes);
-        await JS.InvokeVoidAsync("downloadFile", "AuditLog.csv", base64);
+        catch
+        {
+            return null;
+        }
     }
 
-    #endregion
-
-    public class MotionFrequencyData
+    private string ConvertToLocalTime(DateTime utcTime)
     {
-        public string GroupKey { get; set; } = string.Empty;
-        public int EventCount { get; set; }
+        // Convert UTC to local time (Vietnam is UTC+7)
+        var localTime = utcTime.AddHours(7);
+        return localTime.ToString("dd/MM/yyyy HH:mm:ss");
     }
 
-    public class AuditLogData
+    public class MotionStatistic
     {
-        public DateTime ChangedAt { get; set; }
-        public string Type { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty;
-        public string ObjectName { get; set; } = string.Empty;
-        public string ChangeDescription { get; set; } = string.Empty;
-        public string ChangedBy { get; set; } = string.Empty;
-        public string ConfigSnapshot { get; set; } = string.Empty;
+        public int StationId { get; set; }
+        public string StationName { get; set; } = string.Empty;
+        public int TotalCount { get; set; }
+        public double AveragePerDay { get; set; }
+        public DateTime? MaxDate { get; set; }
+        public int MaxCount { get; set; }
     }
 }

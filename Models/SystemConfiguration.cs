@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
     /// <summary>
     /// System-wide configuration settings
     /// </summary>
-    public class SystemConfiguration : AuditableEntity
+    public class SystemConfiguration
     {
         [Key]
         public int Id { get; set; }
@@ -52,5 +51,11 @@ namespace StationCheck.Models
         /// Whether this setting can be edited by admin
         /// </summary>
         public bool IsEditable { get; set; } = true;
+
+        // Audit fields
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string CreatedBy { get; set; } = "System";
+        public DateTime? ModifiedAt { get; set; }
+        public string? ModifiedBy { get; set; }
     }
 }

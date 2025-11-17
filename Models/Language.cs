@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
-    public class Language : AuditableEntity
+    public class Language
     {
         [Key]
         [MaxLength(10)]
@@ -21,6 +20,8 @@ namespace StationCheck.Models
         
         [MaxLength(10)]
         public string? FlagIcon { get; set; } // vi, us, gb
+        
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         // Navigation
         public virtual ICollection<Translation> Translations { get; set; } = new List<Translation>();

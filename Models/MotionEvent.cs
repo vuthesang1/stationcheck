@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
-    public class MotionEvent : AuditableEntity
+    public class MotionEvent
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -17,7 +16,7 @@ namespace StationCheck.Models
         public string? CameraName { get; set; }
 
         // ✅ NEW: Station reference (primary for monitoring)
-        public Guid? StationId { get; set; }
+        public int? StationId { get; set; }
         
         [ForeignKey(nameof(StationId))]
         public Station? Station { get; set; }
@@ -44,5 +43,7 @@ namespace StationCheck.Models
         public DateTime DetectedAt { get; set; } = DateTime.Now;
 
         public bool IsProcessed { get; set; } = false;
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

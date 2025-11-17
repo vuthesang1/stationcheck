@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
-    public class Translation : AuditableEntity
+    public class Translation
     {
         [Key]
         public int Id { get; set; }
@@ -22,6 +21,9 @@ namespace StationCheck.Models
         
         [MaxLength(100)]
         public string? Category { get; set; } // menu, button, label, message, etc.
+        
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ModifiedAt { get; set; }
         
         // Navigation
         [ForeignKey(nameof(LanguageCode))]

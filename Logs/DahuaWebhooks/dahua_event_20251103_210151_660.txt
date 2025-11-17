@@ -1,0 +1,41 @@
+================================================================================
+DAHUA WEBHOOK EVENT - 2025-11-03 21:01:51.660
+================================================================================
+
+--- REQUEST HEADERS ---
+Accept: */*
+Host: noncollusive-digitiform-elouise.ngrok-free.dev
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9
+Cookie: abuse_interstitial=noncollusive-digitiform-elouise.ngrok-free.dev
+Origin: https://noncollusive-digitiform-elouise.ngrok-free.dev
+Referer: https://noncollusive-digitiform-elouise.ngrok-free.dev/api/docs/index.html
+Content-Length: 0
+Priority: u=1, i
+Sec-Ch-Ua: "Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+X-Forwarded-For: 2405:4803:b49b:2860:f584:7f64:69fa:9214
+X-Forwarded-Host: noncollusive-digitiform-elouise.ngrok-free.dev
+X-Forwarded-Proto: https
+
+--- REQUEST BODY ---
+Content-Type: 
+Content-Length: 0
+
+(Empty body)
+
+--- CONNECTION INFO ---
+Remote IP: ::1
+Remote Port: 53987
+Local IP: ::1
+Local Port: 55703
+Protocol: HTTP/1.1
+Method: POST
+Path: /api/DahuaWebhook/event
+
+================================================================================

@@ -1,289 +1,302 @@
 @using StationCheck.Models
-@using StationCheck.Data
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@using StationCheck.Interfaces
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components.Forms
+@inject IMonitoringService MonitoringService
+@inject IStationService StationService
 @inject IJSRuntime JS
-@inject LocalizationStateService LocalizationState
 
-<div class="timeframe-config-container">
-    @if (timeFrames == null)
-    {
-        <div class="text-center p-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Đang tải...</span>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="mb-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">@GetText("timeframe.list_title", "Danh sách Khung giờ")</h5>
-            <button class="btn btn-primary btn-sm" @onclick="ShowAddModal">
-                <i class="fas fa-plus me-1"></i>@GetText("button.add", "Thêm mới")
-            </button>
-        </div>
-
-        @if (!timeFrames.Any())
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>@GetText("timeframe.no_data", "Chưa có khung giờ giám sát nào. Nhấn 'Thêm mới' để tạo.")
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>@GetText("timeframe.name", "Tên")</th>
-                            <th>@GetText("timeframe.time", "Thời gian")</th>
-                            <th>@GetText("timeframe.days", "Ngày áp dụng")</th>
-                            <th>@GetText("timeframe.buffer", "Dung sai (phút)")</th>
-                            <th>@GetText("timeframe.frequency", "Tần suất (phút)")</th>
-                            <th>@GetText("timeframe.active", "Kích hoạt")</th>
-                            <th width="120">@GetText("timeframe.actions", "Thao tác")</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var tf in timeFrames.OrderBy(t => t.StartTime))
-                        {
-                            <tr>
-                                <td>@tf.Name</td>
-                                <td>@tf.StartTime.ToString(@"hh\:mm") - @tf.EndTime.ToString(@"hh\:mm")</td>
-                                <td>@FormatDaysOfWeek(tf)</td>
-                                <td class="text-center">@tf.BufferMinutes</td>
-                                <td class="text-center">@tf.FrequencyMinutes</td>
-                                <td class="text-center">
-                                    <i class="fas @(tf.IsEnabled ? "fa-check-circle text-success" : "fa-times-circle text-danger")"></i>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary" @onclick="() => ShowEditModal(tf)" title="@GetText("button.edit", "Sửa")">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-outline-danger" @onclick="() => DeleteTimeFrame(tf.Id)" title="@GetText("button.delete", "Xóa")">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    }
-</div>
-
-<!-- Add/Edit TimeFrame Modal -->
-@if (showEditModal)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@(editingTimeFrame?.Id == Guid.Empty ? GetText("timeframe.add_title", "Thêm Khung giờ") : GetText("timeframe.edit_title", "Sửa Khung giờ"))</h5>
-                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
-                </div>
-                <EditForm Model="@timeFrameForm" OnValidSubmit="SaveTimeFrame">
-                    <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label class="form-label">@GetText("timeframe.name", "Tên") *</label>
-                                <input type="text" class="form-control" @bind="timeFrameForm.Name" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">@GetText("timeframe.start_time", "Giờ bắt đầu") *</label>
-                                <input type="time" class="form-control" value="@startTimeString" @onchange="@((e) => startTimeString = e.Value?.ToString() ?? "08:00")" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">@GetText("timeframe.end_time", "Giờ kết thúc") *</label>
-                                <input type="time" class="form-control" value="@endTimeString" @onchange="@((e) => endTimeString = e.Value?.ToString() ?? "17:00")" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">@GetText("timeframe.frequency_minutes", "Tần suất (phút)") *</label>
-                                <input type="number" class="form-control" @bind="timeFrameForm.FrequencyMinutes" min="1" max="1440" required />
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label">@GetText("timeframe.buffer_minutes", "Dung sai (phút)") *</label>
-                                <input type="number" class="form-control" @bind="timeFrameForm.BufferMinutes" min="0" max="120" required />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label d-block mb-2">@GetText("timeframe.days_of_week", "Ngày áp dụng") *</label>
-                                <div class="btn-group btn-group-sm d-flex flex-wrap gap-2" role="group">
-                                    @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
-                                    {
-                                        var isSelected = timeFrameForm.DaysOfWeek.Contains((int)day);
-                                        <button type="button" 
-                                                class="btn @(isSelected ? "btn-primary" : "btn-outline-secondary")" 
-                                                @onclick="() => ToggleDay(day)"
-                                                style="flex: 1; min-width: 70px;">
-                                            @GetDayName(day)
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" @bind="timeFrameForm.IsEnabled" id="isEnabledCheck" />
-                                    <label class="form-check-label" for="isEnabledCheck">@GetText("timeframe.is_enabled", "Kích hoạt")</label>
-                                </div>
-                            </div>
-                        </div>
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="@($"⏰ {Title}")"
+         ShowCloseButton="true"
+         Width="900px"
+         MaxWidth="95%"
+         Height="600px"
+         CloseOnOutsideClick="false">
+    <BodyContentTemplate Context="popupContext">
+        <div class="p-3">
+            @if (isLoading)
+            {
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">@GetText("button.cancel", "Hủy")</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>@GetText("button.save", "Lưu")
+                </div>
+            }
+            else
+            {
+                <!-- Toolbar with actions -->
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <button class="btn btn-success btn-sm me-2" @onclick="ShowAddForm">
+                            <i class="fas fa-plus"></i> Thêm khung thời gian
+                        </button>
+                        @if (timeFrames.Any())
+                        {
+                            <button class="btn btn-primary btn-sm me-2" @onclick="() => BulkToggle(true)">
+                                <i class="fas fa-check-circle"></i> Bật tất cả
+                            </button>
+                            <button class="btn btn-secondary btn-sm me-2" @onclick="() => BulkToggle(false)">
+                                <i class="fas fa-times-circle"></i> Tắt tất cả
+                            </button>
+                        }
+                        <button class="btn btn-info btn-sm" @onclick="ShowCopyDialog">
+                            <i class="fas fa-copy"></i> Copy từ trạm khác
                         </button>
                     </div>
-                </EditForm>
-            </div>
+                    <span class="badge bg-info">@timeFrames.Count khung thời gian</span>
+                </div>
+
+                <!-- TimeFrames List -->
+                @if (!timeFrames.Any())
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        Chưa có khung thời gian nào. Nhấn "Thêm khung thời gian" để bắt đầu.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 20%;">Tên khung</th>
+                                    <th style="width: 18%;">Thời gian</th>
+                                    <th style="width: 12%;">Tần suất</th>
+                                    <th style="width: 10%;">Buffer</th>
+                                    <th style="width: 25%;">Ngày trong tuần</th>
+                                    <th style="width: 10%;">Trạng thái</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tf in timeFrames)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@tf.Name</strong>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-clock text-primary"></i>
+                                            @tf.StartTime.ToString(@"hh\:mm") - @tf.EndTime.ToString(@"hh\:mm")
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@tf.FrequencyMinutes phút</span>
+                                        </td>
+                                        <td>
+                                            @if (tf.BufferMinutes > 0)
+                                            {
+                                                <span class="badge bg-warning text-dark">+@tf.BufferMinutes phút</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@GetDaysOfWeekText(tf.DaysOfWeek ?? "127")</small>
+                                        </td>
+                                        <td>
+                                            @if (tf.IsEnabled)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Bật
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-times"></i> Tắt
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" title="Sửa" @onclick="() => ShowEditForm(tf)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" title="Xóa" @onclick="() => DeleteTimeFrame(tf)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
         </div>
-    </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+<!-- TimeFrame Add/Edit Form -->
+@if (Visible && showFormModal)
+{
+    <TimeFrameForm @bind-Visible="showFormModal" 
+                   StationId="@StationId" 
+                   TimeFrame="@currentTimeFrame" 
+                   OnSaved="HandleFormSaved" />
 }
 
-<style>
-    .timeframe-config-container {
-        min-height: 300px;
-    }
-    
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-</style>
+<!-- Copy Dialog -->
+@if (Visible && showCopyModal)
+{
+    <DxPopup @bind-Visible="showCopyModal"
+             HeaderText="📋 Copy khung thời gian"
+             ShowCloseButton="true"
+             Width="600px"
+             MaxWidth="95%">
+        <BodyContentTemplate>
+        <div class="p-3">
+            <div class="mb-3">
+                <label class="form-label">Chọn trạm nguồn:</label>
+                <select value="@sourceStationId" @onchange="OnSourceStationChanged" class="form-select">
+                    <option value="0">-- Chọn trạm --</option>
+                    @foreach (var station in availableStations)
+                    {
+                        <option value="@station.Id">@station.Name</option>
+                    }
+                </select>
+            </div>
+            
+            @if (sourceTimeFrames.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Chọn khung thời gian cần copy:</label>
+                    
+                    <!-- Select All Checkbox -->
+                    <div class="form-check mb-2 bg-light p-2 rounded">
+                        <input type="checkbox" class="form-check-input" id="selectAll" 
+                               checked="@IsAllSelected()"
+                               @onchange="ToggleSelectAll" />
+                        <label class="form-check-label fw-bold" for="selectAll">
+                            Chọn tất cả (@sourceTimeFrames.Count khung thời gian)
+                        </label>
+                    </div>
+                    
+                    <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+                        @foreach (var tf in sourceTimeFrames)
+                        {
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="tf_@tf.Id" 
+                                       checked="@selectedTimeFrameIds.Contains(tf.Id)"
+                                       @onchange="e => ToggleTimeFrameSelection(tf.Id, (bool)e.Value!)" />
+                                <label class="form-check-label" for="tf_@tf.Id">
+                                    <strong>@tf.Name</strong> - 
+                                    @tf.StartTime.ToString(@"hh\:mm") → @tf.EndTime.ToString(@"hh\:mm") 
+                                    (@tf.FrequencyMinutes phút) - 
+                                    <small class="text-muted">@GetDaysOfWeekText(tf.DaysOfWeek ?? "127")</small>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                    <small class="form-text text-muted">
+                        Đã chọn: @selectedTimeFrameIds.Count / @sourceTimeFrames.Count khung thời gian
+                    </small>
+                </div>
+            }
+            else if (sourceStationId > 0)
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Trạm này chưa có khung thời gian nào.
+                </div>
+            }
+            
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary" @onclick="CloseCopyDialog">Hủy</button>
+                <button class="btn btn-primary" @onclick="HandleCopy" disabled="@(!selectedTimeFrameIds.Any())">
+                    <i class="fas fa-copy"></i> Copy (@selectedTimeFrameIds.Count)
+                </button>
+            </div>
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+}
 
 @code {
-    [Parameter] public Guid StationId { get; set; }
-    [Parameter] public string StationName { get; set; } = "";
-    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public int StationId { get; set; }
+    [Parameter] public string Title { get; set; } = "Cấu hình khung thời gian";
 
-    private List<TimeFrame>? timeFrames;
-    private bool showEditModal = false;
-    private TimeFrame? editingTimeFrame;
-    private TimeFrameFormModel timeFrameForm = new();
-    private string startTimeString = "08:00";
-    private string endTimeString = "17:00";
+    private bool isLoading = true;
+    private List<TimeFrame> timeFrames = new();
+    
+    private bool showFormModal = false;
+    private bool showCopyModal = false;
+    private TimeFrame currentTimeFrame = new();
+    private int sourceStationId = 0;
+    private List<Station> availableStations = new();
+    private List<TimeFrame> sourceTimeFrames = new();
+    private HashSet<int> selectedTimeFrameIds = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        if (Visible && StationId > 0)
+        {
+            isLoading = true;
+            await LoadTimeFrames();
+            await LoadAvailableStations();
+            isLoading = false;
+        }
+        else if (!Visible)
+        {
+            // Reset ALL state when modal closes
+            showFormModal = false;
+            showCopyModal = false;
+            currentTimeFrame = new();
+            sourceStationId = 0;
+            sourceTimeFrames = new();
+            selectedTimeFrameIds = new();
+            timeFrames = new();
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadAvailableStations()
+    {
+        var allStations = await StationService.GetAllStationsAsync();
+        availableStations = allStations.Where(s => s.Id != StationId).ToList();
+    }
+
+    private async Task HandleFormSaved()
+    {
+        showFormModal = false;
         await LoadTimeFrames();
     }
 
     private async Task LoadTimeFrames()
     {
-        using var context = await DbContextFactory.CreateDbContextAsync();
-        timeFrames = await context.TimeFrames
-            .Where(tf => tf.StationId == StationId)
-            .OrderBy(tf => tf.StartTime)
-            .ToListAsync();
-    }
-
-    private void ShowAddModal()
-    {
-        editingTimeFrame = new TimeFrame
+        isLoading = true;
+        try
         {
-            Id = Guid.Empty,
-            StationId = StationId,
-            IsEnabled = true,
-            FrequencyMinutes = 5,
-            BufferMinutes = 5
-        };
-        timeFrameForm = new TimeFrameFormModel
+            timeFrames = await MonitoringService.GetTimeFramesByStationIdAsync(StationId);
+        }
+        finally
         {
-            Name = "",
-            StartTime = new TimeSpan(8, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
-            FrequencyMinutes = 5,
-            BufferMinutes = 5,
-            IsEnabled = true,
-            DaysOfWeek = new List<int>()
-        };
-        startTimeString = "08:00";
-        endTimeString = "17:00";
-        showEditModal = true;
+            isLoading = false;
+        }
     }
 
-    private void ShowEditModal(TimeFrame timeFrame)
+    private async Task BulkToggle(bool enabled)
     {
-        editingTimeFrame = timeFrame;
-        timeFrameForm = new TimeFrameFormModel
+        // Close other modals first
+        showFormModal = false;
+        showCopyModal = false;
+        
+        if (!await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn {(enabled ? "bật" : "tắt")} tất cả {timeFrames.Count} khung thời gian?"))
         {
-            Name = timeFrame.Name,
-            StartTime = timeFrame.StartTime,
-            EndTime = timeFrame.EndTime,
-            FrequencyMinutes = timeFrame.FrequencyMinutes,
-            BufferMinutes = timeFrame.BufferMinutes,
-            IsEnabled = timeFrame.IsEnabled,
-            DaysOfWeek = ParseDaysOfWeek(timeFrame.DaysOfWeek ?? "")
-        };
-        startTimeString = timeFrame.StartTime.ToString(@"hh\:mm");
-        endTimeString = timeFrame.EndTime.ToString(@"hh\:mm");
-        showEditModal = true;
-    }
-
-    private void CloseEditModal()
-    {
-        showEditModal = false;
-        editingTimeFrame = null;
-    }
-
-    private async Task SaveTimeFrame()
-    {
-        if (editingTimeFrame == null) return;
+            return;
+        }
 
         try
         {
-            // Parse time strings
-            if (TimeSpan.TryParse(startTimeString, out var startTime))
-                timeFrameForm.StartTime = startTime;
-            if (TimeSpan.TryParse(endTimeString, out var endTime))
-                timeFrameForm.EndTime = endTime;
-
-            using var context = await DbContextFactory.CreateDbContextAsync();
-
-            if (editingTimeFrame.Id == Guid.Empty)
-            {
-                // Add new
-                var newTimeFrame = new TimeFrame
-                {
-                    Id = Guid.NewGuid(),
-                    StationId = StationId,
-                    Name = timeFrameForm.Name,
-                    StartTime = timeFrameForm.StartTime,
-                    EndTime = timeFrameForm.EndTime,
-                    DaysOfWeek = FormatDaysOfWeekToString(timeFrameForm.DaysOfWeek),
-                    FrequencyMinutes = timeFrameForm.FrequencyMinutes,
-                    BufferMinutes = timeFrameForm.BufferMinutes,
-                    IsEnabled = timeFrameForm.IsEnabled,
-                    CreatedAt = DateTime.UtcNow,
-                    CreatedBy = "System" // TODO: Get from auth
-                };
-                context.TimeFrames.Add(newTimeFrame);
-            }
-            else
-            {
-                // Update existing
-                var existing = await context.TimeFrames.FindAsync(editingTimeFrame.Id);
-                if (existing != null)
-                {
-                    existing.Name = timeFrameForm.Name;
-                    existing.StartTime = timeFrameForm.StartTime;
-                    existing.EndTime = timeFrameForm.EndTime;
-                    existing.DaysOfWeek = FormatDaysOfWeekToString(timeFrameForm.DaysOfWeek);
-                    existing.FrequencyMinutes = timeFrameForm.FrequencyMinutes;
-                    existing.BufferMinutes = timeFrameForm.BufferMinutes;
-                    existing.IsEnabled = timeFrameForm.IsEnabled;
-                    existing.ModifiedAt = DateTime.UtcNow;
-                    existing.ModifiedBy = "System"; // TODO: Get from auth
-                }
-            }
-
-            await context.SaveChangesAsync();
+            await MonitoringService.BulkToggleTimeFramesAsync(StationId, enabled);
             await LoadTimeFrames();
-            CloseEditModal();
+            await JS.InvokeVoidAsync("alert", $"Đã {(enabled ? "bật" : "tắt")} thành công!");
         }
         catch (Exception ex)
         {
@@ -291,86 +304,207 @@
         }
     }
 
-    private async Task DeleteTimeFrame(Guid id)
+    private void ShowAddForm()
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", GetText("message.confirm_delete", "Bạn có chắc chắn muốn xóa?"));
-        if (!confirmed) return;
+        // Close other modals first
+        showCopyModal = false;
+        
+        currentTimeFrame = new TimeFrame { StationId = StationId };
+        showFormModal = true;
+    }
+
+    private void ShowEditForm(TimeFrame tf)
+    {
+        // Close other modals first
+        showCopyModal = false;
+        
+        currentTimeFrame = new TimeFrame
+        {
+            Id = tf.Id,
+            Name = tf.Name,
+            StartTime = tf.StartTime,
+            EndTime = tf.EndTime,
+            FrequencyMinutes = tf.FrequencyMinutes,
+            BufferMinutes = tf.BufferMinutes,
+            DaysOfWeek = tf.DaysOfWeek,
+            IsEnabled = tf.IsEnabled,
+            StationId = tf.StationId
+        };
+        showFormModal = true;
+    }
+
+    private async Task DeleteTimeFrame(TimeFrame tf)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn xóa khung '{tf.Name}'?"))
+        {
+            return;
+        }
 
         try
         {
-            using var context = await DbContextFactory.CreateDbContextAsync();
-            var timeFrame = await context.TimeFrames.FindAsync(id);
-            if (timeFrame != null)
-            {
-                context.TimeFrames.Remove(timeFrame);
-                await context.SaveChangesAsync();
-                await LoadTimeFrames();
-            }
+            await MonitoringService.DeleteTimeFrameAsync(tf.Id);
+            await LoadTimeFrames();
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Lỗi khi xóa: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
         }
     }
 
-    private void ToggleDay(DayOfWeek day)
+    private void ShowCopyDialog()
     {
-        var dayInt = (int)day;
-        if (timeFrameForm.DaysOfWeek.Contains(dayInt))
-            timeFrameForm.DaysOfWeek.Remove(dayInt);
-        else
-            timeFrameForm.DaysOfWeek.Add(dayInt);
-    }
-
-    private string FormatDaysOfWeek(TimeFrame tf)
-    {
-        if (string.IsNullOrEmpty(tf.DaysOfWeek)) return "N/A";
+        // Close other modals first
+        showFormModal = false;
         
-        var days = ParseDaysOfWeek(tf.DaysOfWeek);
-        if (days.Count == 7) return GetText("timeframe.all_days", "Tất cả các ngày");
+        sourceStationId = 0;
+        sourceTimeFrames = new();
+        selectedTimeFrameIds = new();
+        showCopyModal = true;
+    }
+
+    private async Task OnSourceStationChanged(ChangeEventArgs e)
+    {
+        sourceStationId = int.Parse(e.Value?.ToString() ?? "0");
+        selectedTimeFrameIds.Clear();
         
-        return string.Join(", ", days.OrderBy(d => d).Select(d => GetDayName((DayOfWeek)d)));
-    }
-
-    private List<int> ParseDaysOfWeek(string daysOfWeek)
-    {
-        if (string.IsNullOrEmpty(daysOfWeek)) return new List<int>();
-        return daysOfWeek.Split(',').Select(int.Parse).ToList();
-    }
-
-    private string FormatDaysOfWeekToString(List<int> days)
-    {
-        return string.Join(",", days.OrderBy(d => d));
-    }
-
-    private string GetDayName(DayOfWeek day)
-    {
-        return day switch
+        if (sourceStationId > 0)
         {
-            DayOfWeek.Sunday => "CN",
-            DayOfWeek.Monday => "T2",
-            DayOfWeek.Tuesday => "T3",
-            DayOfWeek.Wednesday => "T4",
-            DayOfWeek.Thursday => "T5",
-            DayOfWeek.Friday => "T6",
-            DayOfWeek.Saturday => "T7",
-            _ => day.ToString()
-        };
+            await LoadSourceTimeFrames();
+        }
+        else
+        {
+            sourceTimeFrames = new();
+        }
     }
 
-    private string GetText(string key, string fallback)
+    private async Task LoadSourceTimeFrames()
     {
-        return fallback; // TODO: Implement localization
+        if (sourceStationId > 0)
+        {
+            sourceTimeFrames = await MonitoringService.GetTimeFramesByStationIdAsync(sourceStationId);
+        }
     }
 
-    public class TimeFrameFormModel
+    private void ToggleTimeFrameSelection(int timeFrameId, bool isChecked)
     {
-        public string Name { get; set; } = "";
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
-        public int FrequencyMinutes { get; set; } = 5;
-        public int BufferMinutes { get; set; } = 0;
-        public bool IsEnabled { get; set; } = true;
-        public List<int> DaysOfWeek { get; set; } = new();
+        if (isChecked)
+        {
+            selectedTimeFrameIds.Add(timeFrameId);
+        }
+        else
+        {
+            selectedTimeFrameIds.Remove(timeFrameId);
+        }
+    }
+
+    private bool IsAllSelected()
+    {
+        return sourceTimeFrames.Any() && selectedTimeFrameIds.Count == sourceTimeFrames.Count;
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        var isChecked = (bool)e.Value!;
+        
+        if (isChecked)
+        {
+            // Chọn tất cả
+            selectedTimeFrameIds.Clear();
+            foreach (var tf in sourceTimeFrames)
+            {
+                selectedTimeFrameIds.Add(tf.Id);
+            }
+        }
+        else
+        {
+            // Bỏ chọn tất cả
+            selectedTimeFrameIds.Clear();
+        }
+    }
+
+    private void CloseCopyDialog()
+    {
+        showCopyModal = false;
+        sourceStationId = 0;
+        sourceTimeFrames = new();
+        selectedTimeFrameIds.Clear();
+    }
+
+    private async Task HandleCopy()
+    {
+        if (!selectedTimeFrameIds.Any())
+        {
+            await JS.InvokeVoidAsync("alert", "Vui lòng chọn ít nhất 1 khung thời gian!");
+            return;
+        }
+
+        if (!await JS.InvokeAsync<bool>("confirm", $"Copy {selectedTimeFrameIds.Count} khung thời gian đã chọn sang '{Title}'?"))
+        {
+            return;
+        }
+
+        try
+        {
+            // Copy từng timeframe được chọn
+            var selectedTimeFrames = sourceTimeFrames.Where(tf => selectedTimeFrameIds.Contains(tf.Id)).ToList();
+            
+            foreach (var tf in selectedTimeFrames)
+            {
+                var newTimeFrame = new TimeFrame
+                {
+                    Name = tf.Name,
+                    StartTime = tf.StartTime,
+                    EndTime = tf.EndTime,
+                    FrequencyMinutes = tf.FrequencyMinutes,
+                    DaysOfWeek = tf.DaysOfWeek,
+                    IsEnabled = tf.IsEnabled
+                };
+                
+                await MonitoringService.CreateTimeFrameForStationAsync(StationId, newTimeFrame);
+            }
+            
+            await LoadTimeFrames();
+            CloseCopyDialog();
+            await JS.InvokeVoidAsync("alert", $"Đã copy thành công {selectedTimeFrames.Count} khung thời gian!");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private string GetDaysOfWeekText(string daysOfWeek)
+    {
+        if (string.IsNullOrEmpty(daysOfWeek))
+        {
+            return "Mỗi ngày";
+        }
+
+        // Parse bitmask or comma-separated format
+        List<int> days;
+        if (daysOfWeek.Contains(","))
+        {
+            days = daysOfWeek.Split(',').Select(int.Parse).ToList();
+        }
+        else
+        {
+            int bitmask = int.Parse(daysOfWeek);
+            days = new List<int>();
+            for (int i = 1; i <= 7; i++)
+            {
+                if ((bitmask & (1 << (i - 1))) != 0)
+                {
+                    days.Add(i);
+                }
+            }
+        }
+
+        if (days.Count == 7)
+        {
+            return "Mỗi ngày";
+        }
+
+        var dayNames = new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" };
+        return string.Join(", ", days.Select(d => dayNames[d - 1]));
     }
 }

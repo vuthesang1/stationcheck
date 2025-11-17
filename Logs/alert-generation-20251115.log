@@ -1,0 +1,614 @@
+2025-11-15 11:42:00.535 [INF] [AlertGeneration] Service started
+2025-11-15 11:42:00.745 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:42:30.753 [INF] [AlertGeneration] Running check at "2025-11-15T11:42:30.7529419+07:00"
+2025-11-15 11:42:31.024 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:42:31.083 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1158, Tolerance: 3 min (Frequency: 2 + Buffer: 1)
+2025-11-15 11:42:31.356 [WRN] [AlertGeneration] Created alert f714d6cb-e5f5-493f-b9ca-68abf077e9e8 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 2, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1158
+2025-11-15 11:42:31.400 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:42:31.403 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:44:31.415 [INF] [AlertGeneration] Running check at "2025-11-15T11:44:31.4153398+07:00"
+2025-11-15 11:44:31.423 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:44:31.440 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1160, Tolerance: 3 min (Frequency: 2 + Buffer: 1)
+2025-11-15 11:44:31.479 [WRN] [AlertGeneration] Created alert 58587f59-5e2a-4528-864c-afa78c0879e8 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 2, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1160
+2025-11-15 11:44:31.493 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:44:31.502 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:46:31.519 [INF] [AlertGeneration] Running check at "2025-11-15T11:46:31.5194791+07:00"
+2025-11-15 11:46:31.528 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:46:31.545 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1162, Tolerance: 3 min (Frequency: 2 + Buffer: 1)
+2025-11-15 11:46:31.570 [WRN] [AlertGeneration] Created alert cff8fb9e-d2a9-47af-9d87-12a5260e5ac0 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 2, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1162
+2025-11-15 11:46:31.582 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:46:31.590 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:48:31.596 [INF] [AlertGeneration] Running check at "2025-11-15T11:48:31.5968656+07:00"
+2025-11-15 11:48:31.601 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:48:31.614 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1164, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 11:48:31.630 [WRN] [AlertGeneration] Created alert b475678f-1769-4f44-8db9-abcfabb5e806 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1164
+2025-11-15 11:48:31.639 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:48:31.646 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:50:31.663 [INF] [AlertGeneration] Running check at "2025-11-15T11:50:31.6633760+07:00"
+2025-11-15 11:50:31.668 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:50:31.675 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1166, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 11:50:31.688 [WRN] [AlertGeneration] Created alert 604ffb2c-0795-4755-99b8-3c336a579ee5 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1166
+2025-11-15 11:50:31.695 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:50:31.698 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 11:52:31.701 [INF] [AlertGeneration] Running check at "2025-11-15T11:52:31.7016363+07:00"
+2025-11-15 11:52:31.735 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 11:52:31.762 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1168, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 11:52:31.865 [WRN] [AlertGeneration] Created alert 2b53ce06-1c9d-40aa-b112-1d033ae2efe3 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1168
+2025-11-15 11:52:31.871 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 11:52:31.897 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:47:08.507 [INF] [AlertGeneration] Service started
+2025-11-15 17:47:08.672 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:47:38.681 [INF] [AlertGeneration] Running check at "2025-11-15T17:47:38.6811852+07:00"
+2025-11-15 17:47:38.707 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:47:38.738 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1524, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:47:38.990 [WRN] [AlertGeneration] Created alert f690e70b-b734-4ffa-8d9d-ae262cc3a840 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1523
+2025-11-15 17:47:39.011 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:47:39.017 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:49:39.022 [INF] [AlertGeneration] Running check at "2025-11-15T17:49:39.0224777+07:00"
+2025-11-15 17:49:39.033 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:49:39.063 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1526, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:49:39.104 [WRN] [AlertGeneration] Created alert fab43a49-5f51-48e3-9b0c-be2e93e620f9 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1525
+2025-11-15 17:49:39.166 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:49:39.186 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:51:39.213 [INF] [AlertGeneration] Running check at "2025-11-15T17:51:39.2135448+07:00"
+2025-11-15 17:51:39.218 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:51:39.225 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1528, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:51:39.241 [WRN] [AlertGeneration] Created alert 8b476481-3976-49aa-82bd-e97bb38bb99d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1527
+2025-11-15 17:51:39.250 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:51:39.255 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:53:39.262 [INF] [AlertGeneration] Running check at "2025-11-15T17:53:39.2622126+07:00"
+2025-11-15 17:53:39.267 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:53:39.280 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1530, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:53:39.325 [WRN] [AlertGeneration] Created alert 01f48e18-15f8-48e1-a428-cb6071e93de4 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1529
+2025-11-15 17:53:39.335 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:53:39.340 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:55:39.354 [INF] [AlertGeneration] Running check at "2025-11-15T17:55:39.3548748+07:00"
+2025-11-15 17:55:39.359 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:55:39.365 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1532, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:55:39.376 [WRN] [AlertGeneration] Created alert 104feb4a-bc52-4bda-8cb7-1439d295cd57 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1531
+2025-11-15 17:55:39.384 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:55:39.387 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:57:39.396 [INF] [AlertGeneration] Running check at "2025-11-15T17:57:39.3969461+07:00"
+2025-11-15 17:57:39.402 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:57:39.409 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1534, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:57:39.421 [WRN] [AlertGeneration] Created alert 15031e31-a2e0-4d08-9925-f4476cfe56f0 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1533
+2025-11-15 17:57:39.428 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:57:39.433 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 17:59:39.435 [INF] [AlertGeneration] Running check at "2025-11-15T17:59:39.4355276+07:00"
+2025-11-15 17:59:39.442 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 17:59:39.451 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1536, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 17:59:39.475 [WRN] [AlertGeneration] Created alert 924ccc89-83dd-4d25-90f6-7d330a6fd7f6 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1535
+2025-11-15 17:59:39.505 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 17:59:39.534 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:01:39.548 [INF] [AlertGeneration] Running check at "2025-11-15T18:01:39.5480647+07:00"
+2025-11-15 18:01:39.551 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:01:39.560 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1538, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 18:01:39.582 [WRN] [AlertGeneration] Created alert 16549fc6-a918-4259-bc20-d69a0364bcba for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1537
+2025-11-15 18:01:39.588 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:01:39.592 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:03:39.596 [INF] [AlertGeneration] Running check at "2025-11-15T18:03:39.5964385+07:00"
+2025-11-15 18:03:39.602 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:03:39.611 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1540, Tolerance: 15 min (Frequency: 10 + Buffer: 5)
+2025-11-15 18:03:39.642 [WRN] [AlertGeneration] Created alert c0381947-e537-42ae-8b75-3c6e6cbfba5a for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1539
+2025-11-15 18:03:39.654 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:03:39.660 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:05:39.675 [INF] [AlertGeneration] Running check at "2025-11-15T18:05:39.6752561+07:00"
+2025-11-15 18:05:39.682 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:05:39.690 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1542, Tolerance: 13 min (Frequency: 9 + Buffer: 4)
+2025-11-15 18:05:39.706 [WRN] [AlertGeneration] Created alert 9a3c981a-1234-4fbe-9742-4fe1f7ea3d8d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 4, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1541
+2025-11-15 18:05:39.720 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:05:39.728 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:07:39.738 [INF] [AlertGeneration] Running check at "2025-11-15T18:07:39.7388972+07:00"
+2025-11-15 18:07:39.744 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:07:39.752 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1544, Tolerance: 13 min (Frequency: 9 + Buffer: 4)
+2025-11-15 18:07:39.767 [WRN] [AlertGeneration] Created alert 182479e8-e077-4d42-b84d-276fff00485d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 4, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1543
+2025-11-15 18:07:39.776 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:07:39.780 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:22:55.028 [INF] [AlertGeneration] Service started
+2025-11-15 18:22:55.263 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:23:25.273 [INF] [AlertGeneration] Running check at "2025-11-15T18:23:25.2732683+07:00"
+2025-11-15 18:23:25.289 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:23:25.315 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1559, Tolerance: 13 min (Frequency: 9 + Buffer: 4)
+2025-11-15 18:23:25.542 [WRN] [AlertGeneration] Created alert 8ad82783-39fe-444c-ac0f-00b149fdba17 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 4, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1559
+2025-11-15 18:23:25.566 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:23:25.571 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:25:25.578 [INF] [AlertGeneration] Running check at "2025-11-15T18:25:25.5783686+07:00"
+2025-11-15 18:25:25.583 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:25:25.591 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1561, Tolerance: 13 min (Frequency: 9 + Buffer: 4)
+2025-11-15 18:25:25.610 [WRN] [AlertGeneration] Created alert 148ab141-f2d6-4f23-bf53-eddb6843b43b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 4, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1561
+2025-11-15 18:25:25.619 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:25:25.624 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:27:25.634 [INF] [AlertGeneration] Running check at "2025-11-15T18:27:25.6343329+07:00"
+2025-11-15 18:27:25.643 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:27:25.653 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1563, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 18:27:25.674 [WRN] [AlertGeneration] Created alert 28552e23-6a11-4b78-a0a7-99a2855c2a4f for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1563
+2025-11-15 18:27:25.684 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:27:25.690 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:29:25.697 [INF] [AlertGeneration] Running check at "2025-11-15T18:29:25.6979414+07:00"
+2025-11-15 18:29:25.704 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:29:25.713 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1565, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 18:29:25.730 [WRN] [AlertGeneration] Created alert a1768010-4c93-4a5f-bf96-a3aa2da63a44 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1565
+2025-11-15 18:29:25.738 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:29:25.743 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:31:25.748 [INF] [AlertGeneration] Running check at "2025-11-15T18:31:25.7482071+07:00"
+2025-11-15 18:31:25.754 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:31:25.762 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1567, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 18:31:25.777 [WRN] [AlertGeneration] Created alert c0afa60d-d075-47a1-8adc-b31f8109df91 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1567
+2025-11-15 18:31:25.787 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:31:25.792 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 18:33:25.804 [INF] [AlertGeneration] Running check at "2025-11-15T18:33:25.8043628+07:00"
+2025-11-15 18:33:25.811 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 18:33:25.820 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1569, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 18:33:25.840 [WRN] [AlertGeneration] Created alert b8c59c47-8dd0-4f86-b34f-e3464ed1ae98 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1569
+2025-11-15 18:33:25.848 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 18:33:25.852 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:31:15.482 [INF] [AlertGeneration] Service started
+2025-11-15 19:31:15.662 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:31:45.686 [INF] [AlertGeneration] Running check at "2025-11-15T19:31:45.6856819+07:00"
+2025-11-15 19:31:45.993 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:31:46.121 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1628, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 19:31:46.548 [WRN] [AlertGeneration] Created alert 1d2e46dc-4bd1-4bf2-8186-b4c3d06d1a3b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1627
+2025-11-15 19:31:46.591 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:31:46.597 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:33:46.599 [INF] [AlertGeneration] Running check at "2025-11-15T19:33:46.5998674+07:00"
+2025-11-15 19:33:46.606 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:33:46.615 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1630, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 19:33:47.058 [WRN] [AlertGeneration] Created alert 57cca099-0771-4071-9375-4b415b51167e for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1629
+2025-11-15 19:33:47.068 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:33:47.076 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:35:47.099 [INF] [AlertGeneration] Running check at "2025-11-15T19:35:47.0991489+07:00"
+2025-11-15 19:35:47.104 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:35:47.111 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1632, Tolerance: 15 min (Frequency: 11 + Buffer: 4)
+2025-11-15 19:35:47.125 [WRN] [AlertGeneration] Created alert 8af71e5c-a34b-4bb7-bb22-6cb9da0e3bd8 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 5, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1631
+2025-11-15 19:35:47.198 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:35:47.201 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:37:47.215 [INF] [AlertGeneration] Running check at "2025-11-15T19:37:47.2151131+07:00"
+2025-11-15 19:37:47.221 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:37:47.230 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1634, Tolerance: 24 min (Frequency: 20 + Buffer: 4)
+2025-11-15 19:37:47.250 [WRN] [AlertGeneration] Created alert cfe5b34a-508d-46ec-90dc-1668251cea2d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 6, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1633
+2025-11-15 19:37:47.261 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:37:47.267 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:39:47.282 [INF] [AlertGeneration] Running check at "2025-11-15T19:39:47.2827785+07:00"
+2025-11-15 19:39:47.287 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:39:47.293 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1636, Tolerance: 30 min (Frequency: 25 + Buffer: 5)
+2025-11-15 19:39:47.305 [WRN] [AlertGeneration] Created alert 4a2d8352-e70c-4488-950d-213cc3a92222 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 8, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1635
+2025-11-15 19:39:47.312 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:39:47.315 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:41:47.326 [INF] [AlertGeneration] Running check at "2025-11-15T19:41:47.3259977+07:00"
+2025-11-15 19:41:47.332 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:41:47.340 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1638, Tolerance: 30 min (Frequency: 25 + Buffer: 5)
+2025-11-15 19:41:47.361 [WRN] [AlertGeneration] Created alert a8a76585-d6ad-455a-bbf8-500ae0005391 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 8, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1637
+2025-11-15 19:41:47.369 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:41:47.374 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:44:25.426 [INF] [AlertGeneration] Service started
+2025-11-15 19:44:25.676 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:44:55.690 [INF] [AlertGeneration] Running check at "2025-11-15T19:44:55.6901500+07:00"
+2025-11-15 19:44:55.704 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:44:55.725 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1641, Tolerance: 30 min (Frequency: 25 + Buffer: 5)
+2025-11-15 19:44:57.071 [WRN] [AlertGeneration] Created alert fc20baa4-9f1a-4a86-ac41-e990d5da4f62 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 8, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1640
+2025-11-15 19:44:57.137 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:44:57.190 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:46:57.205 [INF] [AlertGeneration] Running check at "2025-11-15T19:46:57.2052452+07:00"
+2025-11-15 19:46:57.210 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:46:57.218 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1643, Tolerance: 30 min (Frequency: 25 + Buffer: 5)
+2025-11-15 19:46:57.233 [WRN] [AlertGeneration] Created alert 84ba4c54-1855-4fd7-b565-cbe8258afc3b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 8, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1642
+2025-11-15 19:46:57.241 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:46:57.246 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:48:57.251 [INF] [AlertGeneration] Running check at "2025-11-15T19:48:57.2517109+07:00"
+2025-11-15 19:48:57.257 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:48:57.268 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1645, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 19:48:57.281 [WRN] [AlertGeneration] Created alert b567d7c9-fbaf-4cd9-8325-689d67ca6467 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1644
+2025-11-15 19:48:57.290 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:48:57.295 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:50:57.304 [INF] [AlertGeneration] Running check at "2025-11-15T19:50:57.3044672+07:00"
+2025-11-15 19:50:57.310 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 19:50:57.315 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 19:50:57.318 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:52:57.331 [INF] [AlertGeneration] Running check at "2025-11-15T19:52:57.3316088+07:00"
+2025-11-15 19:52:57.340 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 19:52:57.345 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 19:52:57.351 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:54:57.359 [INF] [AlertGeneration] Running check at "2025-11-15T19:54:57.3593333+07:00"
+2025-11-15 19:54:57.366 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:54:57.374 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1651, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 19:54:57.393 [WRN] [AlertGeneration] Created alert 0a3ab772-e2a0-44e5-8745-049ba7712858 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1650
+2025-11-15 19:54:57.402 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:54:57.408 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:57:19.632 [INF] [AlertGeneration] Service started
+2025-11-15 19:57:19.873 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:57:49.889 [INF] [AlertGeneration] Running check at "2025-11-15T19:57:49.8894680+07:00"
+2025-11-15 19:57:50.132 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:57:50.232 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1654, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 19:57:50.728 [WRN] [AlertGeneration] Created alert b57b1b9a-3ba2-432a-8cdd-52ea4e68447a for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1653
+2025-11-15 19:57:50.780 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:57:50.787 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 19:59:50.800 [INF] [AlertGeneration] Running check at "2025-11-15T19:59:50.8006571+07:00"
+2025-11-15 19:59:50.811 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 19:59:50.820 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1656, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 19:59:50.836 [WRN] [AlertGeneration] Created alert 45558171-7af4-4a66-8594-3301422db60b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1655
+2025-11-15 19:59:50.846 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 19:59:50.852 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:01:50.864 [INF] [AlertGeneration] Running check at "2025-11-15T20:01:50.8648445+07:00"
+2025-11-15 20:01:50.871 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:01:50.879 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1658, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:01:50.893 [WRN] [AlertGeneration] Created alert fa70f183-93e5-4273-9e4d-21098292d3d1 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1657
+2025-11-15 20:01:50.901 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:01:50.906 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:03:50.917 [INF] [AlertGeneration] Running check at "2025-11-15T20:03:50.9175921+07:00"
+2025-11-15 20:03:50.923 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:03:50.931 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1660, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:03:50.942 [WRN] [AlertGeneration] Created alert a6ed26f3-d699-4194-aad7-c5a93b1a7eba for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1659
+2025-11-15 20:03:50.949 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:03:50.953 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:05:50.964 [INF] [AlertGeneration] Running check at "2025-11-15T20:05:50.9646100+07:00"
+2025-11-15 20:05:50.969 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:05:50.975 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1662, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:05:50.986 [WRN] [AlertGeneration] Created alert 40b3b16e-41e7-46a4-8ea2-6634a61c2e86 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1661
+2025-11-15 20:05:50.994 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:05:50.998 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:07:51.014 [INF] [AlertGeneration] Running check at "2025-11-15T20:07:51.0141084+07:00"
+2025-11-15 20:07:51.019 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:07:51.027 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1664, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:07:51.042 [WRN] [AlertGeneration] Created alert ed17ae52-174c-497a-bb4b-9a2d55baca26 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1663
+2025-11-15 20:07:51.051 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:07:51.055 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:09:51.071 [INF] [AlertGeneration] Running check at "2025-11-15T20:09:51.0717090+07:00"
+2025-11-15 20:09:51.076 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:09:51.084 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1666, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:09:51.098 [WRN] [AlertGeneration] Created alert 03775fdf-c77f-4517-848b-a6f057b44aa0 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1665
+2025-11-15 20:09:51.106 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:09:51.110 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:11:51.125 [INF] [AlertGeneration] Running check at "2025-11-15T20:11:51.1254750+07:00"
+2025-11-15 20:11:51.131 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:11:51.139 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1668, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:11:51.155 [WRN] [AlertGeneration] Created alert dfed5602-a031-4ef3-9955-e3ab323a5265 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1667
+2025-11-15 20:11:51.162 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:11:51.167 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:13:51.170 [INF] [AlertGeneration] Running check at "2025-11-15T20:13:51.1699782+07:00"
+2025-11-15 20:13:51.174 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:13:51.181 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1670, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:13:51.193 [WRN] [AlertGeneration] Created alert 6fcbe0ac-1d52-4872-88f7-c70bb1b99ebc for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1669
+2025-11-15 20:13:51.200 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:13:51.205 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:15:51.207 [INF] [AlertGeneration] Running check at "2025-11-15T20:15:51.2071156+07:00"
+2025-11-15 20:15:51.212 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:15:51.221 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1672, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:15:51.233 [WRN] [AlertGeneration] Created alert cc463024-a0b1-4045-b7d3-118b82338cf7 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1671
+2025-11-15 20:15:51.241 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:15:51.245 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:17:51.260 [INF] [AlertGeneration] Running check at "2025-11-15T20:17:51.2603902+07:00"
+2025-11-15 20:17:51.265 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:17:51.272 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1674, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:17:51.285 [WRN] [AlertGeneration] Created alert 8ff11987-d9b9-431f-ae60-f2aec340e57e for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1673
+2025-11-15 20:17:51.291 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:17:51.296 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:19:51.304 [INF] [AlertGeneration] Running check at "2025-11-15T20:19:51.3043598+07:00"
+2025-11-15 20:19:51.310 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:19:51.318 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1676, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:19:51.330 [WRN] [AlertGeneration] Created alert d20603fa-110f-4307-8f93-ef527f28ffc1 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1675
+2025-11-15 20:19:51.338 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:19:51.343 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:21:51.345 [INF] [AlertGeneration] Running check at "2025-11-15T20:21:51.3453711+07:00"
+2025-11-15 20:21:51.350 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:21:51.358 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1678, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:21:51.371 [WRN] [AlertGeneration] Created alert e270785e-76a0-4523-99d7-baee4316e221 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1677
+2025-11-15 20:21:51.379 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:21:51.383 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:23:51.394 [INF] [AlertGeneration] Running check at "2025-11-15T20:23:51.3943479+07:00"
+2025-11-15 20:23:51.401 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:23:51.409 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1680, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:23:51.424 [WRN] [AlertGeneration] Created alert 1c31d2a8-b6e1-4da6-ae4e-7cc494358aeb for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1679
+2025-11-15 20:23:51.431 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:23:51.436 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:25:51.439 [INF] [AlertGeneration] Running check at "2025-11-15T20:25:51.4397626+07:00"
+2025-11-15 20:25:51.445 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:25:51.452 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1682, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:25:51.465 [WRN] [AlertGeneration] Created alert 92f5b597-cfb9-41eb-a565-bb9bd0f8edd6 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1681
+2025-11-15 20:25:51.472 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:25:51.477 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:27:51.490 [INF] [AlertGeneration] Running check at "2025-11-15T20:27:51.4902831+07:00"
+2025-11-15 20:27:51.496 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:27:51.503 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1684, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:27:51.516 [WRN] [AlertGeneration] Created alert 74e1629f-f232-4c1e-882a-37dc6710e079 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1683
+2025-11-15 20:27:51.525 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:27:51.529 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:29:51.541 [INF] [AlertGeneration] Running check at "2025-11-15T20:29:51.5418185+07:00"
+2025-11-15 20:29:51.546 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:29:51.553 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1686, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:29:51.564 [WRN] [AlertGeneration] Created alert f020e4de-f1f0-4ae8-904c-c90fe90c992d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1685
+2025-11-15 20:29:51.571 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:29:51.574 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:31:51.586 [INF] [AlertGeneration] Running check at "2025-11-15T20:31:51.5861949+07:00"
+2025-11-15 20:31:51.591 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:31:51.597 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1688, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:31:51.608 [WRN] [AlertGeneration] Created alert 63f884b2-ecb1-4dd5-aaa8-86373e975a7a for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1687
+2025-11-15 20:31:51.616 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:31:51.620 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:33:51.624 [INF] [AlertGeneration] Running check at "2025-11-15T20:33:51.6243312+07:00"
+2025-11-15 20:33:51.630 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:33:51.640 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1690, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:33:51.655 [WRN] [AlertGeneration] Created alert c70955a5-3bf7-495f-bfde-db6830a15357 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1689
+2025-11-15 20:33:51.665 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:33:51.671 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:35:51.686 [INF] [AlertGeneration] Running check at "2025-11-15T20:35:51.6862617+07:00"
+2025-11-15 20:35:51.691 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:35:51.699 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1692, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:35:51.711 [WRN] [AlertGeneration] Created alert 4c8de163-6d15-4e43-9396-a09be97a1f65 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1691
+2025-11-15 20:35:51.718 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:35:51.722 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:37:51.734 [INF] [AlertGeneration] Running check at "2025-11-15T20:37:51.7344638+07:00"
+2025-11-15 20:37:51.739 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:37:51.745 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1694, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:37:51.756 [WRN] [AlertGeneration] Created alert ae4a7296-7c1d-46f9-87be-d63254784b02 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1693
+2025-11-15 20:37:51.764 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:37:51.768 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:39:51.769 [INF] [AlertGeneration] Running check at "2025-11-15T20:39:51.7690875+07:00"
+2025-11-15 20:39:51.775 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:39:51.782 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1696, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:39:51.796 [WRN] [AlertGeneration] Created alert 4c928e50-030c-45b5-9040-e110f9cb5db3 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1695
+2025-11-15 20:39:51.805 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:39:51.809 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:41:51.810 [INF] [AlertGeneration] Running check at "2025-11-15T20:41:51.8102615+07:00"
+2025-11-15 20:41:51.815 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:41:51.823 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1698, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:41:51.836 [WRN] [AlertGeneration] Created alert 395e90ab-bd12-4703-af45-ae6d7f75bf8d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1697
+2025-11-15 20:41:51.846 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:41:51.851 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:43:51.867 [INF] [AlertGeneration] Running check at "2025-11-15T20:43:51.8675591+07:00"
+2025-11-15 20:43:51.873 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:43:51.880 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1700, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:43:51.892 [WRN] [AlertGeneration] Created alert 914ade37-f955-4a2e-bb61-b6f963ffac02 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1699
+2025-11-15 20:43:51.900 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:43:51.903 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:45:51.916 [INF] [AlertGeneration] Running check at "2025-11-15T20:45:51.9162639+07:00"
+2025-11-15 20:45:51.922 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:45:51.930 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1702, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:45:51.945 [WRN] [AlertGeneration] Created alert b70a9e99-0fb5-4b3e-ac19-ab4fdbe9570f for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1701
+2025-11-15 20:45:51.953 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:45:51.958 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:47:51.966 [INF] [AlertGeneration] Running check at "2025-11-15T20:47:51.9665116+07:00"
+2025-11-15 20:47:51.972 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:47:51.978 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1704, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:47:51.990 [WRN] [AlertGeneration] Created alert d133dd0b-7fae-4867-a0b1-908f3773ce51 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1703
+2025-11-15 20:47:51.998 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:47:52.003 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:49:52.004 [INF] [AlertGeneration] Running check at "2025-11-15T20:49:52.0044371+07:00"
+2025-11-15 20:49:52.011 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:49:52.020 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1706, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:49:52.034 [WRN] [AlertGeneration] Created alert ad5dabee-1fac-4864-ae40-aa141a23278e for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1705
+2025-11-15 20:49:52.044 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:49:52.049 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:51:52.051 [INF] [AlertGeneration] Running check at "2025-11-15T20:51:52.0518851+07:00"
+2025-11-15 20:51:52.058 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:51:52.066 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1708, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:51:52.110 [WRN] [AlertGeneration] Created alert 49ef0f30-06a0-4feb-b289-65bbfb7f299e for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1707
+2025-11-15 20:51:52.117 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:51:52.122 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:53:52.129 [INF] [AlertGeneration] Running check at "2025-11-15T20:53:52.1294078+07:00"
+2025-11-15 20:53:52.134 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:53:52.141 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1710, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:53:52.152 [WRN] [AlertGeneration] Created alert a2e89921-d30a-452b-9b23-0695c796f2a5 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1709
+2025-11-15 20:53:52.159 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:53:52.163 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:55:52.178 [INF] [AlertGeneration] Running check at "2025-11-15T20:55:52.1780110+07:00"
+2025-11-15 20:55:52.192 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:55:52.203 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1712, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:55:52.300 [WRN] [AlertGeneration] Created alert 9afc1c2b-67e9-4136-8174-37b160865759 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1711
+2025-11-15 20:55:52.310 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:55:52.314 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:57:52.319 [INF] [AlertGeneration] Running check at "2025-11-15T20:57:52.3190243+07:00"
+2025-11-15 20:57:52.324 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:57:52.332 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1714, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:57:52.344 [WRN] [AlertGeneration] Created alert 2c887aab-8987-4300-85f7-53be0db2d156 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1713
+2025-11-15 20:57:52.353 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:57:52.357 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 20:59:52.365 [INF] [AlertGeneration] Running check at "2025-11-15T20:59:52.3656531+07:00"
+2025-11-15 20:59:52.370 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 20:59:52.376 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1716, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 20:59:52.387 [WRN] [AlertGeneration] Created alert 47369051-34a2-4fdd-854a-0660adca7e3b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1715
+2025-11-15 20:59:52.395 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 20:59:52.399 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:01:52.403 [INF] [AlertGeneration] Running check at "2025-11-15T21:01:52.4033610+07:00"
+2025-11-15 21:01:52.407 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:01:52.413 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1718, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:01:52.424 [WRN] [AlertGeneration] Created alert 9b7e179d-259a-48dd-90bb-0a75d2ac09ba for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1717
+2025-11-15 21:01:52.432 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:01:52.435 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:03:52.440 [INF] [AlertGeneration] Running check at "2025-11-15T21:03:52.4402764+07:00"
+2025-11-15 21:03:52.445 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:03:52.451 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1720, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:03:52.462 [WRN] [AlertGeneration] Created alert 09f687ed-42d6-439b-b99c-d418bf481567 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1719
+2025-11-15 21:03:52.469 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:03:52.472 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:05:52.524 [INF] [AlertGeneration] Running check at "2025-11-15T21:05:52.5246679+07:00"
+2025-11-15 21:05:52.553 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:05:52.563 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1722, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:05:52.577 [WRN] [AlertGeneration] Created alert 5a70b944-fdc2-4a73-b611-9ef6c17b239d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1721
+2025-11-15 21:05:52.598 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:05:52.603 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:07:52.605 [INF] [AlertGeneration] Running check at "2025-11-15T21:07:52.6054416+07:00"
+2025-11-15 21:07:52.610 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:07:52.617 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1724, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:07:52.632 [WRN] [AlertGeneration] Created alert a6105584-8389-4c35-a752-338d98ad49f5 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1723
+2025-11-15 21:07:52.642 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:07:52.650 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:09:52.663 [INF] [AlertGeneration] Running check at "2025-11-15T21:09:52.6635915+07:00"
+2025-11-15 21:09:52.671 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:09:52.681 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1726, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:09:52.695 [WRN] [AlertGeneration] Created alert 72f8eba5-e5a8-4a0e-90ef-579dee315d81 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1725
+2025-11-15 21:09:52.705 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:09:52.718 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:11:52.719 [INF] [AlertGeneration] Running check at "2025-11-15T21:11:52.7197448+07:00"
+2025-11-15 21:11:52.725 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:11:52.731 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1728, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:11:52.742 [WRN] [AlertGeneration] Created alert c28c41db-a2b4-4419-b7eb-2e695a531dc7 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1727
+2025-11-15 21:11:52.750 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:11:52.754 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:13:52.768 [INF] [AlertGeneration] Running check at "2025-11-15T21:13:52.7686250+07:00"
+2025-11-15 21:13:52.773 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:13:52.780 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1730, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:13:52.792 [WRN] [AlertGeneration] Created alert 5447f563-5ed9-4a79-a7fe-36c9613be921 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1729
+2025-11-15 21:13:52.801 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:13:52.804 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:15:52.809 [INF] [AlertGeneration] Running check at "2025-11-15T21:15:52.8094411+07:00"
+2025-11-15 21:15:52.814 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:15:52.820 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1732, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:15:52.830 [WRN] [AlertGeneration] Created alert c4b779c0-567f-4480-a568-a88d535dec13 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1731
+2025-11-15 21:15:52.837 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:15:52.841 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:17:52.849 [INF] [AlertGeneration] Running check at "2025-11-15T21:17:52.8492704+07:00"
+2025-11-15 21:17:52.853 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:17:52.860 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1734, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:17:52.871 [WRN] [AlertGeneration] Created alert db1db110-195c-4239-99f9-06f998c23e65 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1733
+2025-11-15 21:17:52.880 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:17:52.884 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:19:52.896 [INF] [AlertGeneration] Running check at "2025-11-15T21:19:52.8969355+07:00"
+2025-11-15 21:19:52.901 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:19:52.908 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1736, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:19:52.920 [WRN] [AlertGeneration] Created alert 63483643-4a76-4e80-a513-c5d89eeaf258 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1735
+2025-11-15 21:19:52.928 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:19:52.932 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:21:52.934 [INF] [AlertGeneration] Running check at "2025-11-15T21:21:52.9347815+07:00"
+2025-11-15 21:21:52.939 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:21:52.945 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1738, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:21:52.959 [WRN] [AlertGeneration] Created alert abeb82bf-e196-4c0a-a3b1-c4c43b95a914 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1737
+2025-11-15 21:21:52.966 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:21:52.969 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:23:52.976 [INF] [AlertGeneration] Running check at "2025-11-15T21:23:52.9767351+07:00"
+2025-11-15 21:23:52.982 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:23:52.990 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1740, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:23:53.005 [WRN] [AlertGeneration] Created alert 0371b31c-8acb-4093-9489-b4af86bada9a for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1739
+2025-11-15 21:23:53.013 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:23:53.017 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:25:53.028 [INF] [AlertGeneration] Running check at "2025-11-15T21:25:53.0279887+07:00"
+2025-11-15 21:25:53.034 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:25:53.043 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1742, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:25:53.060 [WRN] [AlertGeneration] Created alert 98b7ff1d-c5c2-4b4c-b716-2f2b49c6762b for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1741
+2025-11-15 21:25:53.068 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:25:53.072 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:27:53.084 [INF] [AlertGeneration] Running check at "2025-11-15T21:27:53.0845177+07:00"
+2025-11-15 21:27:53.089 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:27:53.096 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1744, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:27:53.107 [WRN] [AlertGeneration] Created alert a73d771f-fbb5-42aa-8860-c52751aa7273 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1743
+2025-11-15 21:27:53.115 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:27:53.119 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:29:53.135 [INF] [AlertGeneration] Running check at "2025-11-15T21:29:53.1357410+07:00"
+2025-11-15 21:29:53.141 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:29:53.148 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1746, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:29:53.159 [WRN] [AlertGeneration] Created alert 9d8e4f87-82ec-4898-8e26-ea90d39c8f84 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1745
+2025-11-15 21:29:53.167 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:29:53.171 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:31:53.178 [INF] [AlertGeneration] Running check at "2025-11-15T21:31:53.1780418+07:00"
+2025-11-15 21:31:53.183 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:31:53.191 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1748, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:31:53.202 [WRN] [AlertGeneration] Created alert 66ee1096-f8b8-4e9c-8413-7a42ad64eab7 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1747
+2025-11-15 21:31:53.209 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:31:53.213 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:33:53.227 [INF] [AlertGeneration] Running check at "2025-11-15T21:33:53.2278218+07:00"
+2025-11-15 21:33:53.232 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:33:53.238 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1750, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:33:53.251 [WRN] [AlertGeneration] Created alert 0030c5b4-b0aa-4ef8-90cf-caed5c041a8d for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1749
+2025-11-15 21:33:53.259 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:33:53.263 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:35:53.273 [INF] [AlertGeneration] Running check at "2025-11-15T21:35:53.2738430+07:00"
+2025-11-15 21:35:53.278 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:35:53.285 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1752, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:35:53.295 [WRN] [AlertGeneration] Created alert e94bba9c-ab9c-4c3f-a615-aaf4823ceddf for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1751
+2025-11-15 21:35:53.302 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:35:53.306 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:37:53.319 [INF] [AlertGeneration] Running check at "2025-11-15T21:37:53.3194645+07:00"
+2025-11-15 21:37:53.324 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:37:53.331 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1754, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:37:53.341 [WRN] [AlertGeneration] Created alert 536fb390-5ade-4a9d-b315-7b3ac90b54f3 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1753
+2025-11-15 21:37:53.349 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:37:53.352 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:39:53.367 [INF] [AlertGeneration] Running check at "2025-11-15T21:39:53.3677642+07:00"
+2025-11-15 21:39:53.372 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:39:53.379 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1756, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:39:53.390 [WRN] [AlertGeneration] Created alert 1a9a75ca-7643-4fea-8cf2-3de9afc3ff1f for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1755
+2025-11-15 21:39:53.399 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:39:53.403 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:41:53.417 [INF] [AlertGeneration] Running check at "2025-11-15T21:41:53.4172631+07:00"
+2025-11-15 21:41:53.424 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:41:53.434 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1758, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:41:53.453 [WRN] [AlertGeneration] Created alert fae07703-480b-4337-9e0f-7448f4ee6c42 for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1757
+2025-11-15 21:41:53.461 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:41:53.468 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:43:53.481 [INF] [AlertGeneration] Running check at "2025-11-15T21:43:53.4818976+07:00"
+2025-11-15 21:43:53.489 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:43:53.497 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1760, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:43:53.516 [WRN] [AlertGeneration] Created alert 2a1b713d-d11a-4620-90c5-a2b5fb47af4c for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1759
+2025-11-15 21:43:53.527 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:43:53.532 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:46:09.085 [INF] [AlertGeneration] Service started
+2025-11-15 21:46:09.229 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:46:39.245 [INF] [AlertGeneration] Running check at "2025-11-15T21:46:39.2449146+07:00"
+2025-11-15 21:46:39.426 [INF] [AlertGeneration] Found 2 active stations
+2025-11-15 21:46:39.487 [INF] [AlertGeneration] Station 7 exceeds tolerance window. Last motion: 2025-11-14 16:24:04, Minutes: 1763, Tolerance: 35 min (Frequency: 30 + Buffer: 5)
+2025-11-15 21:46:39.776 [WRN] [AlertGeneration] Created alert f86dfb3d-0eb6-4afb-839a-503422b13b6a for Station 7 (123123123). ProfileVersion: N/A, TimeFrameVersion: 9, Last motion: 14/11/2025 4:24:04 PM, Minutes since: 1762
+2025-11-15 21:46:39.817 [INF] [AlertGeneration] Check completed. Alerts generated: 1, Alerts resolved: 0
+2025-11-15 21:46:39.821 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:47:55.762 [INF] [AlertGeneration] Service started
+2025-11-15 21:47:55.921 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:48:25.942 [INF] [AlertGeneration] Running check at "2025-11-15T21:48:25.9420812+07:00"
+2025-11-15 21:48:25.965 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:48:25.984 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:48:25.991 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:50:26.004 [INF] [AlertGeneration] Running check at "2025-11-15T21:50:26.0040327+07:00"
+2025-11-15 21:50:26.013 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:50:26.019 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:50:26.025 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:52:26.035 [INF] [AlertGeneration] Running check at "2025-11-15T21:52:26.0356218+07:00"
+2025-11-15 21:52:26.042 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:52:26.046 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:52:26.050 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:54:26.052 [INF] [AlertGeneration] Running check at "2025-11-15T21:54:26.0529140+07:00"
+2025-11-15 21:54:26.057 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:54:26.061 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:54:26.065 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:56:26.078 [INF] [AlertGeneration] Running check at "2025-11-15T21:56:26.0783029+07:00"
+2025-11-15 21:56:26.084 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:56:26.088 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:56:26.092 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 21:58:26.096 [INF] [AlertGeneration] Running check at "2025-11-15T21:58:26.0966160+07:00"
+2025-11-15 21:58:26.101 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 21:58:26.105 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 21:58:26.109 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:00:26.121 [INF] [AlertGeneration] Running check at "2025-11-15T22:00:26.1214835+07:00"
+2025-11-15 22:00:26.126 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:00:26.130 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:00:26.133 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:02:26.139 [INF] [AlertGeneration] Running check at "2025-11-15T22:02:26.1399332+07:00"
+2025-11-15 22:02:26.145 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:02:26.149 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:02:26.154 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:04:26.157 [INF] [AlertGeneration] Running check at "2025-11-15T22:04:26.1576756+07:00"
+2025-11-15 22:04:26.162 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:04:26.166 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:04:26.169 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:06:26.172 [INF] [AlertGeneration] Running check at "2025-11-15T22:06:26.1720355+07:00"
+2025-11-15 22:06:26.179 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:06:26.183 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:06:26.188 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:08:26.201 [INF] [AlertGeneration] Running check at "2025-11-15T22:08:26.2011583+07:00"
+2025-11-15 22:08:26.206 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:08:26.210 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:08:26.215 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:16:35.864 [INF] [AlertGeneration] Service started
+2025-11-15 22:16:36.066 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:17:06.076 [INF] [AlertGeneration] Running check at "2025-11-15T22:17:06.0762847+07:00"
+2025-11-15 22:17:06.188 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:17:06.209 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:17:06.218 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:19:06.225 [INF] [AlertGeneration] Running check at "2025-11-15T22:19:06.2250497+07:00"
+2025-11-15 22:19:06.231 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:19:06.235 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:19:06.241 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:21:06.256 [INF] [AlertGeneration] Running check at "2025-11-15T22:21:06.2561307+07:00"
+2025-11-15 22:21:06.261 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:21:06.265 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:21:06.269 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-15 22:23:06.270 [INF] [AlertGeneration] Running check at "2025-11-15T22:23:06.2702930+07:00"
+2025-11-15 22:23:06.277 [INF] [AlertGeneration] Found 1 active stations
+2025-11-15 22:23:06.282 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-15 22:23:06.286 [INF] [AlertGeneration] Loaded interval from config: 120 seconds

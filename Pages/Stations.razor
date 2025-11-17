@@ -12,6 +12,8 @@
 @inject IStationService StationService
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>@GetText("station.page_title", "Quản lý Trạm")</PageTitle>
 
@@ -94,22 +96,40 @@
                     <DxGridDataColumn FieldName="Description" Caption="@DescriptionColumnCaption" Visible="false" />
                     <DxGridDataColumn FieldName="Address" Caption="@AddressColumnCaption" MinWidth="200" />
                     <DxGridDataColumn FieldName="ContactPerson" Caption="@ContactColumnCaption" Width="150px" />
-                    <DxGridDataColumn FieldName="ContactPhone" Caption="@PhoneColumnCaption" Width="130px" />
-                    <DxGridDataColumn FieldName="IsActive" Caption="@StatusColumnCaption" Visible="false" />
+                    <DxGridDataColumn FieldName="ContactPhone" Caption="@PhoneColumnCaption" Width="150" />
+                    <DxGridDataColumn FieldName="IsActive" Caption="@MonitoringStatusColumnCaption" Width="150">
+                        <CellDisplayTemplate>
+                            @{
+                                var isActive = (bool)context.Value;
+                            }
+                            @if (isActive)
+                            {
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> @GetText("station.monitoring_active", "Đang giám sát")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">
+                                    <i class="fas fa-pause-circle"></i> @GetText("station.monitoring_inactive", "Tạm dừng")
+                                </span>
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
                     <DxGridDataColumn FieldName="CreatedAt" Caption="@CreatedAtColumnCaption" DisplayFormat="dd/MM/yyyy" Visible="false" />
                     <DxGridDataColumn FieldName="ModifiedAt" Caption="@ModifiedAtColumnCaption" DisplayFormat="dd/MM/yyyy" Visible="false" />
 
-                    <DxGridDataColumn FieldName="Id" Caption="@GetText("station.actions_column", "Thao tác")" Width="250px" AllowSort="false">
+                    <DxGridDataColumn FieldName="Id" Caption="@GetText("station.actions_column", "Thao tác")" Width="225px" AllowSort="false">
                         <CellDisplayTemplate>
                             @{
-                                var stationId = (Guid)context.Value;
+                                var stationId = (int)context.Value;
                             }
                             <div class="d-flex justify-content-center gap-1">
-                                <button class="btn btn-primary btn-sm" title="@GetText("station.config_timeframes_tooltip", "Cấu hình giám sát")" @onclick="@(() => ShowTimeFramesModalAsync(stationId))">
+                                <button class="btn btn-primary btn-sm" title="@GetText("station.config_monitoring_tooltip", "Cấu hình giám sát")" @onclick="@(() => ShowTimeFramesModalAsync(stationId))">
                                     <i class="fas fa-clock"></i>
                                 </button>
-                                <button class="btn btn-info btn-sm" title="@GetText("station.manage_cameras_tooltip", "Quản lý Camera")" @onclick="@(() => ShowCamerasModalAsync(stationId))">
-                                    <i class="fas fa-video"></i>
+                                <button class="btn btn-info btn-sm" title="Xem lịch sử thay đổi" @onclick="@(() => ShowAuditLog(stationId))">
+                                    <i class="fas fa-history"></i>
                                 </button>
                                 <button class="btn btn-warning btn-sm" title="@GetText("station.edit_tooltip", "Chỉnh sửa")" @onclick="@(() => ShowEditModalAsync(stationId))">
                                     <i class="fas fa-edit"></i>
@@ -238,31 +258,22 @@
     </BodyContentTemplate>
 </DxPopup>
 
-<!-- TimeFrames Configuration Modal -->
-<DxPopup @bind-Visible="@showTimeFramesModal"
-         HeaderText="@($"{GetText("timeframe.config_title", "Cấu hình Giám sát")} - {selectedStationName}")"
-         ShowCloseButton="true"
-         Width="900px"
-         MaxWidth="95%"
-         CloseOnOutsideClick="false">
-    <BodyContentTemplate>
-        @if (selectedStationId != Guid.Empty)
-        {
-            <TimeFrameConfigModal StationId="@selectedStationId" 
-                                  StationName="@selectedStationName" 
-                                  OnClose="@CloseTimeFramesModal" />
-        }
-    </BodyContentTemplate>
-</DxPopup>
+<!-- TimeFrame Configuration Modal -->
+@if (showTimeFramesModal)
+{
+    <TimeFrameConfigModal 
+        StationId="@selectedStationId"
+        @bind-Visible="@showTimeFramesModal" />
+}
 
 @code {
     private bool showModal = false;
     private Station? editingStation = null;
     private StationFormModel stationForm = new();
     
-    // TimeFrames Modal state
+    // TimeFrames modal fields
     private bool showTimeFramesModal = false;
-    private Guid selectedStationId = Guid.Empty;
+    private int selectedStationId = 0;
     private string selectedStationName = string.Empty;
     
     // Prevent multiple modals opening simultaneously
@@ -288,6 +299,7 @@
     private string AddressColumnCaption => GetText("station.address_column", "Địa chỉ");
     private string ContactColumnCaption => GetText("station.contact_column", "Người liên hệ");
     private string PhoneColumnCaption => GetText("station.phone_column", "Điện thoại");
+    private string MonitoringStatusColumnCaption => GetText("station.monitoring_status_column", "Trạng thái giám sát");
     private string StatusColumnCaption => GetText("station.status_column", "Trạng thái");
     private string CreatedAtColumnCaption => GetText("station.created_column", "Ngày tạo");
     private string ModifiedAtColumnCaption => GetText("station.modified_column", "Ngày cập nhật");
@@ -363,11 +375,6 @@
         {
             isModalOperationInProgress = true;
             
-            // Close all other modals first
-            showTimeFramesModal = false;
-            selectedStationId = Guid.Empty;
-            selectedStationName = string.Empty;
-            
             // Reset state
             editingStation = null;
             stationForm = new StationFormModel { IsActive = true };
@@ -381,7 +388,7 @@
         }
     }
 
-    private async Task ShowEditModalAsync(Guid stationId)
+    private async Task ShowEditModalAsync(int stationId)
     {
         if (isModalOperationInProgress) return;
         
@@ -389,10 +396,7 @@
         {
             isModalOperationInProgress = true;
             
-            // Close all other modals first
-            showTimeFramesModal = false;
-            selectedStationId = Guid.Empty;
-            selectedStationName = string.Empty;
+            // Close edit modal
             showModal = false;
             
             var station = await StationService.GetStationByIdAsync(stationId);
@@ -423,18 +427,14 @@
         editingStation = null;
         stationForm = new StationFormModel { IsActive = true };
     }
-    
-    private void CloseTimeFramesModal()
-    {
-        showTimeFramesModal = false;
-        selectedStationId = Guid.Empty;
-        selectedStationName = string.Empty;
-    }
 
     private async Task SaveStation()
     {
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userName = authState.User.Identity?.Name ?? "System";
+            
             if (editingStation == null)
             {
                 // Create new
@@ -445,9 +445,12 @@
                     Description = stationForm.Description,
                     ContactPerson = stationForm.ContactPerson,
                     ContactPhone = stationForm.ContactPhone,
-                    IsActive = stationForm.IsActive
+                    IsActive = stationForm.IsActive,
+                    CreatedBy = userName,
+                    CreatedAt = DateTime.Now
                 };
                 await StationService.CreateStationAsync(newStation);
+                await JS.InvokeVoidAsync("showToast", "Tạo trạm thành công", "success", 3000);
             }
             else
             {
@@ -458,11 +461,26 @@
                 editingStation.ContactPerson = stationForm.ContactPerson;
                 editingStation.ContactPhone = stationForm.ContactPhone;
                 editingStation.IsActive = stationForm.IsActive;
-                await StationService.UpdateStationAsync(editingStation);
+                editingStation.ModifiedBy = userName;
+                editingStation.ModifiedAt = DateTime.Now;
+                await StationService.UpdateStationAsync(editingStation.Id, editingStation);
+                await JS.InvokeVoidAsync("showToast", "Cập nhật trạm thành công", "success", 3000);
             }
 
-            InstantFeedbackSource?.Refresh();
             CloseModal();
+            
+            // Refresh grid after modal closes - force reload from database
+            await Task.Delay(100);
+            
+            // Recreate InstantFeedbackSource to force data reload
+            var stationService = ScopedServices.GetRequiredService<IStationService>();
+            InstantFeedbackSource?.Dispose();
+            InstantFeedbackSource = new EntityInstantFeedbackSource(e => {
+                e.KeyExpression = nameof(Station.Id);
+                e.QueryableSource = stationService.GetStationsQueryable();
+            });
+            
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -470,7 +488,7 @@
         }
     }
 
-    private async Task DeleteStation(Guid stationId)
+    private async Task DeleteStation(int stationId)
     {
         var confirmed = await JS.InvokeAsync<bool>("confirm", GetText("message.confirm_delete_station", "Bạn có chắc chắn muốn xóa trạm này?"));
         if (confirmed)
@@ -481,12 +499,21 @@
                 if (showTimeFramesModal && selectedStationId == stationId)
                 {
                     showTimeFramesModal = false;
-                    selectedStationId = Guid.Empty;
+                    selectedStationId = 0;
                     selectedStationName = string.Empty;
                 }
                 
                 await StationService.DeleteStationAsync(stationId);
-                InstantFeedbackSource?.Refresh();
+                
+                // Recreate InstantFeedbackSource to force data reload
+                var stationService = ScopedServices.GetRequiredService<IStationService>();
+                InstantFeedbackSource?.Dispose();
+                InstantFeedbackSource = new EntityInstantFeedbackSource(e => {
+                    e.KeyExpression = nameof(Station.Id);
+                    e.QueryableSource = stationService.GetStationsQueryable();
+                });
+                
+                StateHasChanged();
             }
             catch (Exception ex)
             {
@@ -495,7 +522,13 @@
         }
     }
 
-    private async Task ShowCamerasModalAsync(Guid stationId)
+    private void ShowAuditLog(int stationId)
+    {
+        // Navigate to reports page with station filter
+        Navigation.NavigateTo($"/reports?tab=audit&entityType=Station&entityId={stationId}");
+    }
+
+    private async Task ShowCamerasModalAsync(int stationId)
     {
         if (isModalOperationInProgress) return;
         
@@ -506,7 +539,7 @@
             // Close all other modals first
             showModal = false;
             showTimeFramesModal = false;
-            selectedStationId = Guid.Empty;
+            selectedStationId = 0;
             selectedStationName = string.Empty;
             
             // TODO: Navigate to camera assignment page
@@ -518,7 +551,7 @@
         }
     }
 
-    private async Task ShowTimeFramesModalAsync(Guid stationId)
+    private async Task ShowTimeFramesModalAsync(int stationId)
     {
         if (isModalOperationInProgress) return;
         
@@ -569,6 +602,19 @@
         public string? ContactPhone { get; set; }
 
         public bool IsActive { get; set; } = true;
+    }
+
+    private Station? GetStationFromContext(GridDataColumnCellDisplayTemplateContext context)
+    {
+        try
+        {
+            var dataItem = context.DataItem;
+            return dataItem as Station;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private string GetText(string key, string defaultText)

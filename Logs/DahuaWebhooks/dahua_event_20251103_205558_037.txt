@@ -1,0 +1,38 @@
+================================================================================
+DAHUA WEBHOOK EVENT - 2025-11-03 20:55:58.037
+================================================================================
+
+--- REQUEST HEADERS ---
+Accept: */*
+Host: localhost:55703
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9
+Cookie: DXBZCurrentTheme_Opts=%7B%22Mode%22%3A0%2C%22CustomAccentColor%22%3Anull%7D; DXBZCurrentTheme=fluent-moss
+Origin: https://localhost:55703
+Referer: https://localhost:55703/api/docs/index.html
+Content-Length: 0
+sec-ch-ua-platform: "Windows"
+sec-ch-ua: "Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+sec-ch-ua-mobile: ?0
+sec-fetch-site: same-origin
+sec-fetch-mode: cors
+sec-fetch-dest: empty
+priority: u=1, i
+
+--- REQUEST BODY ---
+Content-Type: 
+Content-Length: 0
+
+(Empty body)
+
+--- CONNECTION INFO ---
+Remote IP: ::1
+Remote Port: 52709
+Local IP: ::1
+Local Port: 55703
+Protocol: HTTP/2
+Method: POST
+Path: /api/DahuaWebhook/event
+
+================================================================================

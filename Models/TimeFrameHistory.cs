@@ -15,13 +15,13 @@ namespace StationCheck.Models
         /// <summary>
         /// Reference tới TimeFrame (có thể null nếu TimeFrame đã bị xóa)
         /// </summary>
-        public Guid? TimeFrameId { get; set; }
+        public int? TimeFrameId { get; set; }
 
         /// <summary>
         /// Reference tới Station
         /// </summary>
         [Required]
-        public Guid StationId { get; set; }
+        public int StationId { get; set; }
 
         /// <summary>
         /// Version number - tăng dần cho mỗi TimeFrame
@@ -52,10 +52,10 @@ namespace StationCheck.Models
         public string? ChangeDescription { get; set; }
 
         /// <summary>
-        /// User ID thực hiện thay đổi
+        /// User thực hiện thay đổi
         /// </summary>
         [Required]
-        [MaxLength(50)]
+        [MaxLength(200)]
         public string ChangedBy { get; set; } = string.Empty;
 
         /// <summary>

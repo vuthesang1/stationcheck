@@ -156,8 +156,9 @@ namespace StationCheck.Services
                 // Extract StationId from subject with [stm] prefix
                 // Format examples: 
                 //   - "[stm] ST000001"
+                //   - "[stm] 4" 
                 //   - "[STM] ST000001"
-                Guid? stationId = null;
+                int? stationId = null;
                 string? stationCode = null;
                 
                 // Remove [stm] prefix (case insensitive) and trim
@@ -179,6 +180,25 @@ namespace StationCheck.Services
                     else
                     {
                         _logger.LogWarning("[EmailService] Station not found for code: {StationCode}", stationCode);
+                    }
+                }
+                else
+                {
+                    // Try to parse as direct StationId (number only)
+                    var stationIdMatch = Regex.Match(subjectWithoutPrefix, @"^\d+");
+                    if (stationIdMatch.Success && int.TryParse(stationIdMatch.Value, out int id))
+                    {
+                        var station = await _context.Stations.FindAsync(id);
+                        if (station != null)
+                        {
+                            stationId = id;
+                            stationCode = station.StationCode;
+                            _logger.LogInformation("[EmailService] Found station by ID: {StationId} -> StationCode={StationCode}", stationId, stationCode);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("[EmailService] Station not found for ID: {StationId}", id);
+                        }
                     }
                 }
 
@@ -279,12 +299,12 @@ namespace StationCheck.Services
                 if (alarmDetails.ContainsKey("AlarmInputChannelName"))
                 {
                     cameraName = alarmDetails["AlarmInputChannelName"]?.ToString();
-                    cameraId = $"STATION_{stationId:N}_{cameraName}";
+                    cameraId = $"STATION_{stationId}_{cameraName}";
                 }
                 else
                 {
-                    cameraId = $"STATION_{stationId:N}_EMAIL";
-                    cameraName = $"Email Detector - Station {stationCode}";
+                    cameraId = $"STATION_{stationId}_EMAIL";
+                    cameraName = $"Email Detector - Station {stationId}";
                 }
 
                 // Create MotionEvent (no need for separate EmailEvent table)

@@ -1,19 +1,18 @@
 using System.ComponentModel.DataAnnotations;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
-    public class TimeFrame : AuditableEntity
+    public class TimeFrame
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
         // Link directly to Station (nullable for backward compatibility)
-        public Guid? StationId { get; set; }
+        public int? StationId { get; set; }
         public Station? Station { get; set; }
 
         // Keep ProfileId for backward compatibility (will be deprecated)
@@ -44,5 +43,16 @@ namespace StationCheck.Models
         public string? DaysOfWeek { get; set; } = "1,2,3,4,5,6,7"; // All days by default
 
         public bool IsEnabled { get; set; } = true;
+
+        // Audit fields
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        [MaxLength(50)]
+        public string? CreatedBy { get; set; }
+        
+        public DateTime? ModifiedAt { get; set; }
+        
+        [MaxLength(50)]
+        public string? ModifiedBy { get; set; }
     }
 }

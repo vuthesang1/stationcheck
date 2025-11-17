@@ -1,6 +1,389 @@
-2025-11-16 16:32:13.012 [INF] [AlertGeneration] Service started
-2025-11-16 16:32:13.248 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
-2025-11-16 16:32:43.305 [INF] [AlertGeneration] Running check at "2025-11-16T16:32:43.3048795+07:00"
-2025-11-16 16:32:43.650 [INF] [AlertGeneration] Found 2 active stations
-2025-11-16 16:32:43.822 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
-2025-11-16 16:32:43.831 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 10:28:23.926 [INF] [AlertGeneration] Service started
+2025-11-16 10:28:24.212 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:28:54.225 [INF] [AlertGeneration] Running check at "2025-11-16T10:28:54.2248041+07:00"
+2025-11-16 10:28:54.604 [INF] [AlertGeneration] Found 1 active stations
+2025-11-16 10:28:54.624 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:28:54.630 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:30:54.640 [INF] [AlertGeneration] Running check at "2025-11-16T10:30:54.6407536+07:00"
+2025-11-16 10:30:54.648 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:30:54.691 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:30:54.712 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:32:54.754 [INF] [AlertGeneration] Running check at "2025-11-16T10:32:54.7544264+07:00"
+2025-11-16 10:32:54.759 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:32:54.764 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:32:54.768 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:34:54.773 [INF] [AlertGeneration] Running check at "2025-11-16T10:34:54.7732418+07:00"
+2025-11-16 10:34:54.778 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:34:54.783 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:34:54.787 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:36:54.790 [INF] [AlertGeneration] Running check at "2025-11-16T10:36:54.7903087+07:00"
+2025-11-16 10:36:54.817 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:36:54.824 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:36:54.832 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:38:54.841 [INF] [AlertGeneration] Running check at "2025-11-16T10:38:54.8417442+07:00"
+2025-11-16 10:38:54.844 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:38:54.846 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:38:54.849 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:40:54.855 [INF] [AlertGeneration] Running check at "2025-11-16T10:40:54.8552307+07:00"
+2025-11-16 10:40:54.860 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:40:54.864 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:40:54.867 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:42:54.882 [INF] [AlertGeneration] Running check at "2025-11-16T10:42:54.8827685+07:00"
+2025-11-16 10:42:54.888 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:42:54.893 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:42:54.898 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:44:54.910 [INF] [AlertGeneration] Running check at "2025-11-16T10:44:54.9101785+07:00"
+2025-11-16 10:44:54.915 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:44:54.919 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:44:54.922 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:46:54.942 [INF] [AlertGeneration] Running check at "2025-11-16T10:46:54.9428522+07:00"
+2025-11-16 10:46:54.966 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:46:54.988 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:46:55.007 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:48:55.026 [INF] [AlertGeneration] Running check at "2025-11-16T10:48:55.0260056+07:00"
+2025-11-16 10:48:55.088 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:48:55.100 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:48:55.150 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:50:55.161 [INF] [AlertGeneration] Running check at "2025-11-16T10:50:55.1618508+07:00"
+2025-11-16 10:50:55.167 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:50:55.172 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:50:55.178 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:52:55.190 [INF] [AlertGeneration] Running check at "2025-11-16T10:52:55.1900975+07:00"
+2025-11-16 10:52:55.194 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:52:55.199 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:52:55.203 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:54:55.218 [INF] [AlertGeneration] Running check at "2025-11-16T10:54:55.2186213+07:00"
+2025-11-16 10:54:55.224 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:54:55.229 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:54:55.234 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:56:55.249 [INF] [AlertGeneration] Running check at "2025-11-16T10:56:55.2490928+07:00"
+2025-11-16 10:56:55.253 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:56:55.260 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:56:55.264 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 10:58:55.279 [INF] [AlertGeneration] Running check at "2025-11-16T10:58:55.2798066+07:00"
+2025-11-16 10:58:55.284 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 10:58:55.288 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 10:58:55.291 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:00:55.302 [INF] [AlertGeneration] Running check at "2025-11-16T11:00:55.3021597+07:00"
+2025-11-16 11:00:55.306 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:00:55.310 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:00:55.314 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:02:58.383 [INF] [AlertGeneration] Service started
+2025-11-16 11:02:58.681 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:03:28.713 [INF] [AlertGeneration] Running check at "2025-11-16T11:03:28.7133361+07:00"
+2025-11-16 11:03:28.731 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:03:28.741 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:03:28.747 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:05:28.766 [INF] [AlertGeneration] Running check at "2025-11-16T11:05:28.7661556+07:00"
+2025-11-16 11:05:29.120 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:05:29.396 [ERR] [AlertGeneration] Error processing station 1
+System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GetMatchingTimeFramesAsync(ApplicationDbContext context, Int32 stationId, DateTime now, CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 187
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 115
+2025-11-16 11:05:29.826 [ERR] [AlertGeneration] Error processing station 7
+System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GetMatchingTimeFramesAsync(ApplicationDbContext context, Int32 stationId, DateTime now, CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 187
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 115
+2025-11-16 11:05:29.835 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:05:29.885 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:22:49.165 [INF] [AlertGeneration] Service started
+2025-11-16 11:22:49.311 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:23:19.331 [INF] [AlertGeneration] Running check at "2025-11-16T11:23:19.3315840+07:00"
+2025-11-16 11:23:19.390 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:23:19.403 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:23:19.406 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:25:19.421 [INF] [AlertGeneration] Running check at "2025-11-16T11:25:19.4211100+07:00"
+2025-11-16 11:25:19.424 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:25:19.427 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:25:19.431 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:26:27.172 [INF] [AlertGeneration] Service started
+2025-11-16 11:26:27.469 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:26:57.488 [INF] [AlertGeneration] Running check at "2025-11-16T11:26:57.4884290+07:00"
+2025-11-16 11:26:57.679 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:26:57.697 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:26:57.701 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:28:57.714 [INF] [AlertGeneration] Running check at "2025-11-16T11:28:57.7141828+07:00"
+2025-11-16 11:28:57.717 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:28:57.720 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:28:57.724 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:30:57.729 [INF] [AlertGeneration] Running check at "2025-11-16T11:30:57.7293145+07:00"
+2025-11-16 11:30:57.732 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:30:57.736 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:30:57.740 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:32:57.747 [INF] [AlertGeneration] Running check at "2025-11-16T11:32:57.7472474+07:00"
+2025-11-16 11:32:57.750 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:32:57.753 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:32:57.756 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:34:57.772 [INF] [AlertGeneration] Running check at "2025-11-16T11:34:57.7727632+07:00"
+2025-11-16 11:34:57.775 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:34:57.778 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:34:57.781 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:36:57.795 [INF] [AlertGeneration] Running check at "2025-11-16T11:36:57.7952501+07:00"
+2025-11-16 11:36:57.798 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:36:57.802 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:36:57.805 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:38:57.817 [INF] [AlertGeneration] Running check at "2025-11-16T11:38:57.8170741+07:00"
+2025-11-16 11:38:57.820 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:38:57.824 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:38:57.826 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:40:57.829 [INF] [AlertGeneration] Running check at "2025-11-16T11:40:57.8296905+07:00"
+2025-11-16 11:40:57.832 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:40:57.834 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:40:57.837 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:42:57.842 [INF] [AlertGeneration] Running check at "2025-11-16T11:42:57.8425917+07:00"
+2025-11-16 11:42:57.845 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:42:57.848 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:42:57.850 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:44:57.851 [INF] [AlertGeneration] Running check at "2025-11-16T11:44:57.8516370+07:00"
+2025-11-16 11:44:57.854 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:44:57.857 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:44:57.860 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:46:57.867 [INF] [AlertGeneration] Running check at "2025-11-16T11:46:57.8671342+07:00"
+2025-11-16 11:46:57.872 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:46:57.877 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:46:57.885 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:48:57.892 [INF] [AlertGeneration] Running check at "2025-11-16T11:48:57.8922394+07:00"
+2025-11-16 11:48:57.897 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:48:57.902 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:48:57.905 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:50:57.919 [INF] [AlertGeneration] Running check at "2025-11-16T11:50:57.9192646+07:00"
+2025-11-16 11:50:57.925 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:50:57.929 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:50:57.932 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:52:57.943 [INF] [AlertGeneration] Running check at "2025-11-16T11:52:57.9439736+07:00"
+2025-11-16 11:52:57.949 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:52:57.955 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:52:57.960 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:54:12.450 [INF] [AlertGeneration] Service started
+2025-11-16 11:54:12.791 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:54:42.821 [INF] [AlertGeneration] Running check at "2025-11-16T11:54:42.8209786+07:00"
+2025-11-16 11:54:42.837 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:54:42.861 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:54:42.868 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:56:42.874 [INF] [AlertGeneration] Running check at "2025-11-16T11:56:42.8742203+07:00"
+2025-11-16 11:56:42.881 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:56:42.888 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:56:42.897 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 11:58:42.901 [INF] [AlertGeneration] Running check at "2025-11-16T11:58:42.9013041+07:00"
+2025-11-16 11:58:42.905 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 11:58:42.909 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 11:58:42.913 [INF] [AlertGeneration] Loaded interval from config: 120 seconds
+2025-11-16 12:28:48.940 [INF] [AlertGeneration] Service started
+2025-11-16 12:28:49.335 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 12:29:19.502 [INF] [AlertGeneration] Running check at "2025-11-16T12:29:19.5014682+07:00"
+2025-11-16 12:29:19.829 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 12:29:19.888 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 12:29:19.915 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 12:40:31.491 [INF] [AlertGeneration] Service started
+2025-11-16 12:40:31.660 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 12:41:01.674 [INF] [AlertGeneration] Running check at "2025-11-16T12:41:01.6747087+07:00"
+2025-11-16 12:41:01.688 [INF] [AlertGeneration] Found 52 active stations
+2025-11-16 12:41:01.791 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 12:41:01.796 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 13:23:06.418 [INF] [AlertGeneration] Service started
+2025-11-16 13:23:06.640 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 13:23:36.655 [INF] [AlertGeneration] Running check at "2025-11-16T13:23:36.6551630+07:00"
+2025-11-16 13:23:36.750 [INF] [AlertGeneration] Found 52 active stations
+2025-11-16 13:23:36.863 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 13:23:36.867 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 13:36:35.511 [INF] [AlertGeneration] Service started
+2025-11-16 13:36:35.760 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 13:37:05.774 [INF] [AlertGeneration] Running check at "2025-11-16T13:37:05.7742534+07:00"
+2025-11-16 13:37:05.901 [INF] [AlertGeneration] Found 52 active stations
+2025-11-16 13:37:06.021 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 13:37:06.026 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 13:52:09.281 [INF] [AlertGeneration] Service started
+2025-11-16 13:52:09.289 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 13:52:39.349 [INF] [AlertGeneration] Running check at "2025-11-16T13:52:39.3497372+07:00"
+2025-11-16 13:52:39.555 [ERR] [AlertGeneration] Error in alert generation
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'TimeSchedules'.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 100
+ClientConnectionId:81c6c00e-be0e-4769-813d-9455ae606fb9
+Error Number:208,State:1,Class:16
+2025-11-16 13:52:39.569 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 13:54:38.725 [INF] [AlertGeneration] Service started
+2025-11-16 13:54:38.734 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 13:55:08.763 [INF] [AlertGeneration] Running check at "2025-11-16T13:55:08.7631022+07:00"
+2025-11-16 13:55:08.995 [ERR] [AlertGeneration] Error in alert generation
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'TimeSchedules'.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 100
+ClientConnectionId:b6fb9f2d-2415-4137-a8f0-d8da586ac958
+Error Number:208,State:1,Class:16
+2025-11-16 13:55:09.008 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 13:56:58.899 [INF] [AlertGeneration] Service started
+2025-11-16 13:56:58.911 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 13:57:28.977 [INF] [AlertGeneration] Running check at "2025-11-16T13:57:28.9777448+07:00"
+2025-11-16 13:57:28.997 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 13:57:29.019 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 13:57:29.022 [ERR] [AlertGeneration] Error loading interval config, using default
+System.InvalidOperationException: No service for type 'StationCheck.Services.SystemConfigurationService' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at StationCheck.BackgroundServices.AlertGenerationService.LoadIntervalAsync() in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 63
+2025-11-16 15:34:05.037 [INF] [AlertGeneration] Service started
+2025-11-16 15:34:05.482 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 15:34:35.498 [INF] [AlertGeneration] Running check at "2025-11-16T15:34:35.4985629+07:00"
+2025-11-16 15:34:35.729 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 15:34:35.758 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 15:34:35.763 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 15:57:38.608 [INF] [AlertGeneration] Service started
+2025-11-16 15:57:38.792 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 15:58:08.806 [INF] [AlertGeneration] Running check at "2025-11-16T15:58:08.8068082+07:00"
+2025-11-16 15:58:08.890 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 15:58:08.909 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 15:58:08.915 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:10:42.725 [INF] [AlertGeneration] Service started
+2025-11-16 16:10:42.852 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:11:12.878 [INF] [AlertGeneration] Running check at "2025-11-16T16:11:12.8782462+07:00"
+2025-11-16 16:11:12.995 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 16:11:13.015 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 16:11:13.028 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:15:15.333 [INF] [AlertGeneration] Service started
+2025-11-16 16:15:15.533 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:15:54.698 [INF] [AlertGeneration] Service started
+2025-11-16 16:15:54.942 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:16:28.336 [INF] [AlertGeneration] Service started
+2025-11-16 16:16:28.549 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 16:16:58.584 [INF] [AlertGeneration] Running check at "2025-11-16T16:16:58.5843534+07:00"
+2025-11-16 16:16:59.319 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 16:16:59.468 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 16:16:59.788 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:10:08.783 [INF] [AlertGeneration] Service started
+2025-11-16 21:10:09.050 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:10:39.057 [INF] [AlertGeneration] Running check at "2025-11-16T21:10:39.0569015+07:00"
+2025-11-16 21:10:39.165 [ERR] [AlertGeneration] Error in alert generation
+System.InvalidOperationException: The expression 's.TimeSchedules' is invalid inside an 'Include' operation, since it does not represent a property access: 't => t.MyProperty'. To target navigations declared on derived types, use casting ('t => ((Derived)t).MyProperty') or the 'as' operator ('t => (t as Derived).MyProperty'). Collection navigation access can be filtered by composing Where, OrderBy(Descending), ThenBy(Descending), Skip or Take operations. For more information on including related data, see https://go.microsoft.com/fwlink/?LinkID=746393.
+   at Microsoft.EntityFrameworkCore.Query.Internal.NavigationExpandingExpressionVisitor.PopulateIncludeTree(IncludeTreeNode includeTreeNode, Expression expression, Boolean setLoaded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.NavigationExpandingExpressionVisitor.ProcessInclude(NavigationExpansionExpression source, Expression expression, Boolean thenInclude, Boolean setLoaded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.NavigationExpandingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.Internal.NavigationExpandingExpressionVisitor.Expand(Expression query)
+   at Microsoft.EntityFrameworkCore.Query.QueryTranslationPreprocessor.Process(Expression query)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.IncludableQueryable`2.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 100
+2025-11-16 21:10:39.186 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:23:05.804 [INF] [AlertGeneration] Service started
+2025-11-16 21:23:06.090 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:23:36.112 [INF] [AlertGeneration] Running check at "2025-11-16T21:23:36.1125319+07:00"
+2025-11-16 21:23:36.308 [ERR] [AlertGeneration] Error in alert generation
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid object name 'TimeSchedule'.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 100
+ClientConnectionId:84468a8d-c6f1-4368-8e4d-55d531f7e9de
+Error Number:208,State:1,Class:16
+2025-11-16 21:23:36.352 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:25:04.600 [INF] [AlertGeneration] Service started
+2025-11-16 21:25:04.993 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:25:41.218 [INF] [AlertGeneration] Service started
+2025-11-16 21:25:41.441 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:26:11.456 [INF] [AlertGeneration] Running check at "2025-11-16T21:26:11.4565866+07:00"
+2025-11-16 21:26:11.557 [ERR] [AlertGeneration] Error in alert generation
+System.InvalidCastException: Unable to cast object of type 'System.Guid' to type 'System.Int32'.
+   at Microsoft.Data.SqlClient.SqlBuffer.get_Int32()
+   at Microsoft.Data.SqlClient.SqlDataReader.GetInt32(Int32 i)
+   at lambda_method299(Closure, QueryContext, DbDataReader, ResultContext, SingleQueryResultCoordinator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 100
+2025-11-16 21:26:11.644 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:29:13.321 [INF] [AlertGeneration] Service started
+2025-11-16 21:29:13.519 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:29:43.533 [INF] [AlertGeneration] Running check at "2025-11-16T21:29:43.5336830+07:00"
+2025-11-16 21:29:43.902 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 21:29:43.938 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 21:29:43.948 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:43:01.677 [INF] [AlertGeneration] Service started
+2025-11-16 21:43:01.912 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-16 21:43:31.925 [INF] [AlertGeneration] Running check at "2025-11-16T21:43:31.9258388+07:00"
+2025-11-16 21:43:31.951 [INF] [AlertGeneration] Found 2 active stations
+2025-11-16 21:43:31.974 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-16 21:43:31.981 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds

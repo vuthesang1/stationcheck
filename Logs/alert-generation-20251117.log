@@ -1,0 +1,50 @@
+2025-11-17 18:18:04.086 [INF] [AlertGeneration] Service started
+2025-11-17 18:18:04.339 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:18:34.361 [INF] [AlertGeneration] Running check at "2025-11-17T18:18:34.3609735+07:00"
+2025-11-17 18:18:34.471 [INF] [AlertGeneration] Found 2 active stations
+2025-11-17 18:18:34.486 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 18:18:34.491 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:20:20.243 [INF] [AlertGeneration] Service started
+2025-11-17 18:20:20.428 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:28:50.672 [INF] [AlertGeneration] Service started
+2025-11-17 18:28:50.822 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:29:20.843 [INF] [AlertGeneration] Running check at "2025-11-17T18:29:20.8430619+07:00"
+2025-11-17 18:29:20.860 [INF] [AlertGeneration] Found 2 active stations
+2025-11-17 18:29:20.877 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 18:29:20.883 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:39:58.747 [INF] [AlertGeneration] Service started
+2025-11-17 18:39:58.983 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:40:29.003 [INF] [AlertGeneration] Running check at "2025-11-17T18:40:29.0034872+07:00"
+2025-11-17 18:40:29.184 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 18:40:29.198 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 18:40:29.205 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:47:18.064 [INF] [AlertGeneration] Service started
+2025-11-17 18:47:18.319 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:47:48.342 [INF] [AlertGeneration] Running check at "2025-11-17T18:47:48.3428147+07:00"
+2025-11-17 18:47:48.359 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 18:47:48.370 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 18:47:48.377 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:51:35.589 [INF] [AlertGeneration] Service started
+2025-11-17 18:51:35.770 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 18:52:05.776 [INF] [AlertGeneration] Running check at "2025-11-17T18:52:05.7762222+07:00"
+2025-11-17 18:52:05.789 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 18:52:05.797 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 18:52:05.802 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 19:05:40.338 [INF] [AlertGeneration] Service started
+2025-11-17 19:05:40.537 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 19:06:10.560 [INF] [AlertGeneration] Running check at "2025-11-17T19:06:10.5597885+07:00"
+2025-11-17 19:06:10.577 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 19:06:10.586 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 19:06:10.591 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 19:56:27.744 [INF] [AlertGeneration] Service started
+2025-11-17 19:56:27.960 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 19:56:57.975 [INF] [AlertGeneration] Running check at "2025-11-17T19:56:57.9755423+07:00"
+2025-11-17 19:56:58.175 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 19:56:58.189 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 19:56:58.198 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 20:04:05.862 [INF] [AlertGeneration] Service started
+2025-11-17 20:04:06.118 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds
+2025-11-17 20:04:36.142 [INF] [AlertGeneration] Running check at "2025-11-17T20:04:36.1426404+07:00"
+2025-11-17 20:04:36.379 [INF] [AlertGeneration] Found 1 active stations
+2025-11-17 20:04:36.396 [INF] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-17 20:04:36.408 [INF] [AlertGeneration] Loaded interval from config: 3600 seconds

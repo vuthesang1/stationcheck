@@ -1,0 +1,580 @@
+@using StationCheck.Models
+@using StationCheck.Interfaces
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
+@inject IMotionDetectionService MotionService
+@inject ApplicationDbContext DbContext
+@implements IDisposable
+
+<div class="motion-alerts-panel">
+    <div class="panel-header">
+        <h4><i class="bi bi-exclamation-triangle-fill"></i> Motion Detection Alerts</h4>
+        <button class="btn btn-sm btn-primary" @onclick="LoadAlerts">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (groupedAlerts.Count == 0)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i> Không có cảnh báo nào. Tất cả camera hoạt động bình thường.
+        </div>
+    }
+    else
+    {
+        <div class="alerts-container">
+            @foreach (var group in groupedAlerts.OrderByDescending(g => g.Alerts.Max(a => a.AlertTime)))
+            {
+                var isExpanded = expandedStations.Contains(group.StationId);
+                var latestAlert = group.Alerts.OrderByDescending(a => a.AlertTime).First();
+                var criticalCount = group.Alerts.Count(a => a.Severity == AlertSeverity.Critical);
+                var warningCount = group.Alerts.Count(a => a.Severity == AlertSeverity.Warning);
+                
+                <div class="station-group @GetStationGroupClass(group.Alerts)">
+                    <div class="station-header" @onclick="() => ToggleStation(group.StationId)">
+                        <div class="station-info">
+                            <div class="station-name">
+                                <i class="bi @(isExpanded ? "bi-chevron-down" : "bi-chevron-right")"></i>
+                                <strong>@group.StationName</strong>
+                            </div>
+                            <div class="station-badges">
+                                @if (criticalCount > 0)
+                                {
+                                    <span class="badge bg-danger">@criticalCount Critical</span>
+                                }
+                                @if (warningCount > 0)
+                                {
+                                    <span class="badge bg-warning text-dark">@warningCount Warning</span>
+                                }
+                                <span class="badge bg-secondary">@group.Alerts.Count total</span>
+                            </div>
+                        </div>
+                        <div class="station-summary">
+                            <small class="text-muted">
+                                Lần cuối: @(latestAlert.LastMotionAt?.ToString("dd/MM HH:mm") ?? "N/A") |
+                                Cảnh báo mới nhất: @latestAlert.AlertTime.ToString("dd/MM HH:mm")
+                            </small>
+                        </div>
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <div class="station-alerts">
+                            @foreach (var alert in group.Alerts.OrderByDescending(a => a.AlertTime))
+                            {
+                                <div class="alert-card @GetSeverityClass(alert.Severity)" @onclick="() => ShowTimeFrameDetails(alert)" style="cursor: pointer;">
+                                    <div class="alert-header">
+                                        <div>
+                                            <span class="badge @GetSeverityBadgeClass(alert.Severity)">
+                                                @alert.Severity
+                                            </span>
+                                            <span class="alert-time">@alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-success" @onclick="(e) => ResolveAlertWithStop(e, alert.Id.ToString())" @onclick:stopPropagation="true">
+                                            <i class="bi bi-check2"></i> Resolve
+                                        </button>
+                                    </div>
+                                    <div class="alert-body">
+                                        <p class="alert-message">@GetAlertMessage(alert)</p>
+                                        <div class="alert-details">
+                                            <div><i class="bi bi-clock-history"></i> Lần cuối phát hiện: @(alert.LastMotionAt?.ToString("HH:mm:ss") ?? "N/A")</div>
+                                            <div><i class="bi bi-hourglass-split"></i> Thời gian không có chuyển động: @alert.MinutesSinceLastMotion phút</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="station-actions">
+                                <button class="btn btn-sm btn-success" @onclick="() => ResolveAllStationAlerts(group.StationId)">
+                                    <i class="bi bi-check-all"></i> Resolve All (@group.Alerts.Count alerts)
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="panel-footer">
+        <small class="text-muted">
+            Last updated: @lastUpdateTime.ToString("HH:mm:ss") | 
+            Total stations: @groupedAlerts.Count | 
+            Total alerts: @totalAlerts
+        </small>
+    </div>
+</div>
+
+@* TimeFrame Details Modal *@
+@if (showTimeFrameModal && selectedTimeFrame != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="CloseTimeFrameModal">
+        <div class="modal-dialog modal-lg" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clock"></i> Cấu hình khung giám sát
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseTimeFrameModal" @onclick:stopPropagation="true"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold">Tên khung giờ:</label>
+                            <p>@selectedTimeFrame.Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold">Trạm:</label>
+                            <p>@selectedStationName</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold">Giờ bắt đầu:</label>
+                            <p>@selectedTimeFrame.StartTime.ToString(@"hh\:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold">Giờ kết thúc:</label>
+                            <p>@selectedTimeFrame.EndTime.ToString(@"hh\:mm")</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold">Tần suất kiểm tra (phút):</label>
+                            <p class="text-primary">@selectedTimeFrame.FrequencyMinutes phút</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold">Thời gian đệm (phút):</label>
+                            <p class="text-warning">@selectedTimeFrame.BufferMinutes phút</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="fw-bold">Cửa sổ chấp nhận (Tolerance Window):</label>
+                            <p class="text-info">
+                                ± @selectedTimeFrame.BufferMinutes phút quanh thời điểm cảnh báo
+                            </p>
+                            <small class="text-muted">
+                                Chuyển động phát hiện trong cửa sổ này sẽ tự động giải quyết cảnh báo
+                            </small>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="fw-bold">Ngày áp dụng:</label>
+                            <p>@GetDaysOfWeekText(selectedTimeFrame.DaysOfWeek)</p>
+                        </div>
+                    </div>
+                    @if (selectedTimeFrameHistory != null)
+                    {
+                        <div class="alert alert-info">
+                            <strong><i class="bi bi-info-circle"></i> Phiên bản cấu hình:</strong> Version @selectedTimeFrameHistory.Version
+                            <br />
+                            <small>Cảnh báo này được tạo dựa trên phiên bản cấu hình này (đã lưu vào lịch sử)</small>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseTimeFrameModal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<MotionAlert> alerts = new();
+    private List<StationAlertGroup> groupedAlerts = new();
+    private HashSet<int?> expandedStations = new();
+    private bool isLoading = false;
+    private DateTime lastUpdateTime = DateTime.Now;
+    private System.Threading.Timer? refreshTimer;
+    private int totalAlerts = 0;
+
+    // Modal state
+    private bool showTimeFrameModal = false;
+    private TimeFrame? selectedTimeFrame = null;
+    private TimeFrameHistory? selectedTimeFrameHistory = null;
+    private string selectedStationName = "";
+
+    private class StationAlertGroup
+    {
+        public int? StationId { get; set; }
+        public string StationName { get; set; } = "";
+        public List<MotionAlert> Alerts { get; set; } = new();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAlerts();
+        
+        // Auto refresh mỗi 30 giây
+        refreshTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadAlerts();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    private async Task LoadAlerts()
+    {
+        isLoading = true;
+        try
+        {
+            // 🔧 Preserve current expanded state
+            var previouslyExpanded = new HashSet<int?>(expandedStations);
+            
+            alerts = await MotionService.GetUnresolvedAlertsAsync();
+            totalAlerts = alerts.Count;
+            
+            // Group alerts by station
+            groupedAlerts = alerts
+                .Where(a => a.StationId > 0) // Filter out invalid stations
+                .GroupBy(a => new { a.StationId, a.StationName })
+                .Select(g => new StationAlertGroup
+                {
+                    StationId = g.Key.StationId,
+                    StationName = g.Key.StationName ?? "Unknown",
+                    Alerts = g.ToList()
+                })
+                .ToList();
+            
+            // 🔧 Restore previously expanded stations (only if they still exist)
+            if (previouslyExpanded.Count > 0)
+            {
+                var existingStationIds = groupedAlerts.Select(g => g.StationId).ToHashSet();
+                expandedStations = previouslyExpanded.Where(id => existingStationIds.Contains(id)).ToHashSet();
+            }
+            else
+            {
+                // First load - collapse all stations by default
+                expandedStations = new HashSet<int?>();
+            }
+            
+            lastUpdateTime = DateTime.Now;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleStation(int? stationId)
+    {
+        if (expandedStations.Contains(stationId))
+        {
+            expandedStations.Remove(stationId);
+        }
+        else
+        {
+            expandedStations.Add(stationId);
+        }
+    }
+
+    private async Task ResolveAlert(string alertId)
+    {
+        var result = await MotionService.ResolveAlertAsync(alertId, "Manual Resolve", "Resolved from dashboard");
+        if (result)
+        {
+            await LoadAlerts();
+        }
+    }
+
+    private async Task ResolveAllStationAlerts(int? stationId)
+    {
+        var group = groupedAlerts.FirstOrDefault(g => g.StationId == stationId);
+        if (group == null) return;
+
+        foreach (var alert in group.Alerts)
+        {
+            await MotionService.ResolveAlertAsync(alert.Id, "Bulk Resolve", $"Resolved all alerts for station {group.StationName}");
+        }
+        
+        await LoadAlerts();
+    }
+
+    private string GetStationGroupClass(List<MotionAlert> alerts)
+    {
+        if (alerts.Any(a => a.Severity == AlertSeverity.Critical))
+            return "station-critical";
+        if (alerts.Any(a => a.Severity == AlertSeverity.Warning))
+            return "station-warning";
+        return "station-info";
+    }
+
+    private string GetSeverityClass(AlertSeverity severity)
+    {
+        return severity switch
+        {
+            AlertSeverity.Critical => "alert-critical",
+            AlertSeverity.Warning => "alert-warning",
+            _ => "alert-info"
+        };
+    }
+
+    private string GetSeverityBadgeClass(AlertSeverity severity)
+    {
+        // ✅ All alerts have red label
+        return "bg-danger";
+    }
+
+    private async Task ShowTimeFrameDetails(MotionAlert alert)
+    {
+        if (alert.TimeFrameId == null) return;
+
+        // Load TimeFrame with Station info
+        selectedTimeFrame = await DbContext.TimeFrames
+            .Include(tf => tf.Station)
+            .FirstOrDefaultAsync(tf => tf.Id == alert.TimeFrameId);
+
+        if (selectedTimeFrame != null)
+        {
+            selectedStationName = selectedTimeFrame.Station?.Name ?? alert.StationName ?? "N/A";
+            
+            // Load TimeFrameHistory if available
+            if (alert.TimeFrameHistoryId != null)
+            {
+                selectedTimeFrameHistory = await DbContext.TimeFrameHistories
+                    .FirstOrDefaultAsync(h => h.Id == alert.TimeFrameHistoryId);
+            }
+            else
+            {
+                selectedTimeFrameHistory = null;
+            }
+
+            showTimeFrameModal = true;
+        }
+    }
+
+    private void CloseTimeFrameModal()
+    {
+        showTimeFrameModal = false;
+        selectedTimeFrame = null;
+        selectedTimeFrameHistory = null;
+        selectedStationName = "";
+    }
+
+    private async Task ResolveAlertWithStop(MouseEventArgs e, string alertId)
+    {
+        // This method prevents the click from bubbling to the parent card
+        await ResolveAlert(alertId);
+    }
+
+    private string GetAlertMessage(MotionAlert alert)
+    {
+        if (alert.TimeFrameId == null)
+        {
+            return alert.Message; // Fallback to original message
+        }
+
+        // Calculate tolerance window
+        var bufferMinutes = alert.TimeFrame?.BufferMinutes ?? 0;
+        var windowStart = alert.AlertTime.AddMinutes(-bufferMinutes);
+        var windowEnd = alert.AlertTime.AddMinutes(bufferMinutes);
+
+        return $"Không phát hiện chuyển động vào lúc [{windowStart:HH:mm} - {windowEnd:HH:mm}]";
+    }
+
+    private string GetDaysOfWeekText(string? daysOfWeek)
+    {
+        if (string.IsNullOrEmpty(daysOfWeek)) return "Không có";
+
+        var days = daysOfWeek.Split(',').Select(d => d.Trim()).ToList();
+        var dayNames = new Dictionary<string, string>
+        {
+            { "1", "T2" }, { "2", "T3" }, { "3", "T4" }, { "4", "T5" },
+            { "5", "T6" }, { "6", "T7" }, { "7", "CN" }
+        };
+
+        if (days.Count == 7) return "Tất cả các ngày";
+        
+        return string.Join(", ", days.Select(d => dayNames.ContainsKey(d) ? dayNames[d] : d));
+    }
+
+    public void Dispose()
+    {
+        refreshTimer?.Dispose();
+    }
+}
+
+<style>
+    .motion-alerts-panel {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .panel-header h4 {
+        margin: 0;
+        color: #333;
+    }
+
+    .alerts-container {
+        max-height: 600px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Station Group Styles */
+    .station-group {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .station-group.station-critical {
+        border-color: #dc3545;
+        background: #fff5f5;
+    }
+
+    .station-group.station-warning {
+        border-color: #ffc107;
+        background: #fffef5;
+    }
+
+    .station-group.station-info {
+        border-color: #17a2b8;
+    }
+
+    .station-header {
+        padding: 15px;
+        cursor: pointer;
+        background: rgba(0,0,0,0.02);
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .station-header:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    .station-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .station-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .station-name i {
+        font-size: 0.9rem;
+        transition: transform 0.2s;
+    }
+
+    .station-badges {
+        display: flex;
+        gap: 6px;
+    }
+
+    .station-summary {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .station-alerts {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: white;
+        max-height: 500px; /* 🔧 Add max height for scrolling */
+        overflow-y: auto; /* 🔧 Enable vertical scroll */
+    }
+
+    .station-actions {
+        padding-top: 10px;
+        border-top: 2px dashed #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* Alert Card Styles */
+    .alert-card {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 12px;
+        background: white;
+    }
+
+    /* ✅ All alerts use red styling */
+    .alert-card.alert-critical,
+    .alert-card.alert-warning,
+    .alert-card.alert-info {
+        border-left: 4px solid #dc3545;
+        background: #fff5f5;
+    }
+
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .alert-time {
+        margin-left: 8px;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .alert-body {
+        margin-bottom: 8px;
+    }
+
+    .alert-message {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .alert-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .alert-details i {
+        margin-right: 5px;
+        color: #999;
+    }
+
+    .panel-footer {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+        text-align: center;
+    }
+</style>

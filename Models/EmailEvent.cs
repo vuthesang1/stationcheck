@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
-    public class EmailEvent : AuditableEntity
+    public class EmailEvent
     {
         [Key]
         public int Id { get; set; }
@@ -12,7 +11,7 @@ namespace StationCheck.Models
         [MaxLength(10)]
         public string StationCode { get; set; } = string.Empty; // ST000001
 
-        public Guid? StationId { get; set; }
+        public int? StationId { get; set; }
         public Station? Station { get; set; }
 
         [MaxLength(200)]
@@ -51,6 +50,8 @@ namespace StationCheck.Models
 
         [MaxLength(4000)]
         public string? RawEmailBody { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsProcessed { get; set; } = false;
     }

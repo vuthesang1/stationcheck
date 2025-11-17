@@ -2,24 +2,33 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StationCheck.Models
 {
-    /// <summary>
-    /// Monitoring Profile - Deprecated, kept for backward compatibility
-    /// Use Station directly instead
-    /// </summary>
-    [Obsolete("Use Station directly. This class is kept for backward compatibility only.")]
     public class MonitoringProfile
     {
         [Key]
         public int Id { get; set; }
-        
+
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
-        
-        public Guid? StationId { get; set; }
-        public Station? Station { get; set; }
-        
+
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
         public bool IsActive { get; set; } = true;
+
+        // ✅ Version control for profile changes
+        [Required]
+        public int Version { get; set; } = 1;
+
+        // Navigation property for time frames
+        public ICollection<TimeFrame> TimeFrames { get; set; } = new List<TimeFrame>();
+
+        // ✅ Navigation property for historical versions
+        public ICollection<MonitoringProfileHistory> History { get; set; } = new List<MonitoringProfileHistory>();
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ModifiedAt { get; set; }
+        public string? CreatedBy { get; set; }
+        public string? ModifiedBy { get; set; }
     }
 }

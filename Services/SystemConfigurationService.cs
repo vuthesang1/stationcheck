@@ -6,14 +6,14 @@ namespace StationCheck.Services
 {
     public class SystemConfigurationService
     {
-        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<SystemConfigurationService> _logger;
 
         public SystemConfigurationService(
-            IDbContextFactory<ApplicationDbContext> contextFactory,
+            ApplicationDbContext context,
             ILogger<SystemConfigurationService> logger)
         {
-            _contextFactory = contextFactory;
+            _context = context;
             _logger = logger;
         }
 
@@ -22,8 +22,7 @@ namespace StationCheck.Services
         /// </summary>
         public async Task<string?> GetValueAsync(string key)
         {
-            using var context = await _contextFactory.CreateDbContextAsync();
-            var config = await context.SystemConfigurations
+            var config = await _context.SystemConfigurations
                 .Where(c => c.Key == key)
                 .FirstOrDefaultAsync();
 
@@ -53,8 +52,7 @@ namespace StationCheck.Services
         /// </summary>
         public async Task<List<SystemConfiguration>> GetAllAsync()
         {
-            using var context = await _contextFactory.CreateDbContextAsync();
-            return await context.SystemConfigurations
+            return await _context.SystemConfigurations
                 .OrderBy(c => c.Category)
                 .ThenBy(c => c.DisplayName)
                 .ToListAsync();
@@ -65,8 +63,7 @@ namespace StationCheck.Services
         /// </summary>
         public async Task<List<SystemConfiguration>> GetByCategoryAsync(string category)
         {
-            using var context = await _contextFactory.CreateDbContextAsync();
-            return await context.SystemConfigurations
+            return await _context.SystemConfigurations
                 .Where(c => c.Category == category)
                 .OrderBy(c => c.DisplayName)
                 .ToListAsync();
@@ -77,8 +74,7 @@ namespace StationCheck.Services
         /// </summary>
         public async Task<bool> UpdateValueAsync(string key, string value, string modifiedBy)
         {
-            using var context = await _contextFactory.CreateDbContextAsync();
-            var config = await context.SystemConfigurations
+            var config = await _context.SystemConfigurations
                 .Where(c => c.Key == key)
                 .FirstOrDefaultAsync();
 
@@ -98,7 +94,7 @@ namespace StationCheck.Services
             config.ModifiedAt = DateTime.UtcNow;
             config.ModifiedBy = modifiedBy;
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation(
                 "Updated configuration '{Key}' = '{Value}' by {User}",
@@ -113,8 +109,7 @@ namespace StationCheck.Services
         /// </summary>
         public async Task<bool> UpdateAsync(int id, string value, string modifiedBy)
         {
-            using var context = await _contextFactory.CreateDbContextAsync();
-            var config = await context.SystemConfigurations.FindAsync(id);
+            var config = await _context.SystemConfigurations.FindAsync(id);
 
             if (config == null)
             {
@@ -132,7 +127,7 @@ namespace StationCheck.Services
             config.ModifiedAt = DateTime.UtcNow;
             config.ModifiedBy = modifiedBy;
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation(
                 "Updated configuration '{Key}' = '{Value}' by {User}",

@@ -1,0 +1,39 @@
+================================================================================
+DAHUA WEBHOOK EVENT - 2025-11-03 21:03:39.640
+================================================================================
+
+--- REQUEST HEADERS ---
+Accept: */*
+Host: noncollusive-digitiform-elouise.ngrok-free.dev
+User-Agent: PostmanRuntime/7.43.0
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json
+Content-Length: 29
+Postman-Token: d05ba121-a13b-49d0-beb4-d36503f09def
+X-Forwarded-For: 42.117.117.74
+X-Forwarded-Host: noncollusive-digitiform-elouise.ngrok-free.dev
+X-Forwarded-Proto: https
+
+--- REQUEST BODY ---
+Content-Type: application/json
+Content-Length: 29
+
+Raw Body:
+{"sang":"test","cai-nay":123}
+
+Parsed JSON (Pretty Print):
+{
+  "sang": "test",
+  "cai-nay": 123
+}
+
+--- CONNECTION INFO ---
+Remote IP: ::1
+Remote Port: 54368
+Local IP: ::1
+Local Port: 55703
+Protocol: HTTP/1.1
+Method: POST
+Path: /api/DahuaWebhook/event
+
+================================================================================

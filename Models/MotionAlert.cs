@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using StationCheck.Models.Common;
 
 namespace StationCheck.Models
 {
@@ -11,13 +10,13 @@ namespace StationCheck.Models
         Critical = 2
     }
 
-    public class MotionAlert : AuditableEntity
+    public class MotionAlert
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        // Station reference
-        public Guid? StationId { get; set; }
+        // ✅ NEW: Station-based (PRIMARY - replaces Camera)
+        public int? StationId { get; set; }
         
         [ForeignKey(nameof(StationId))]
         public Station? Station { get; set; }
@@ -25,13 +24,30 @@ namespace StationCheck.Models
         [MaxLength(200)]
         public string? StationName { get; set; }
 
-        // TimeFrame reference (configuration used when generating alert)
-        public Guid? TimeFrameId { get; set; }
+        // ✅ NEW: Configuration references for audit trail
+        public int? MonitoringConfigurationId { get; set; }
+        
+        [ForeignKey(nameof(MonitoringConfigurationId))]
+        public MonitoringConfiguration? MonitoringConfiguration { get; set; }
+
+        public int? TimeFrameId { get; set; }
         
         [ForeignKey(nameof(TimeFrameId))]
         public TimeFrame? TimeFrame { get; set; }
 
-        // Configuration snapshot (JSON) for audit trail
+        // ✅ NEW: Link to specific profile version that generated this alert
+        public int? ProfileHistoryId { get; set; }
+        
+        [ForeignKey(nameof(ProfileHistoryId))]
+        public MonitoringProfileHistory? ProfileHistory { get; set; }
+
+        // ✅ NEW: Link to specific timeframe version that generated this alert
+        public int? TimeFrameHistoryId { get; set; }
+        
+        [ForeignKey(nameof(TimeFrameHistoryId))]
+        public TimeFrameHistory? TimeFrameHistorySnapshot { get; set; }
+
+        // ✅ NEW: Configuration snapshot (JSON) for audit
         [MaxLength(4000)]
         public string? ConfigurationSnapshot { get; set; }
 
@@ -50,7 +66,7 @@ namespace StationCheck.Models
 
         public int MinutesSinceLastMotion { get; set; }
 
-        // Track which camera had last motion (for multi-camera stations)
+        // ✅ NEW: Track which camera had last motion (for multi-camera stations)
         [MaxLength(50)]
         public string? LastMotionCameraId { get; set; }
 
@@ -67,6 +83,12 @@ namespace StationCheck.Models
 
         [MaxLength(1000)]
         public string? Notes { get; set; }
+
+        // Audit fields
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        
+        [MaxLength(50)]
+        public string? CreatedBy { get; set; }
 
         // Legacy fields (keep for backwards compatibility, mark as obsolete)
         [Obsolete("Use StationId instead. This field is kept for backwards compatibility.")]

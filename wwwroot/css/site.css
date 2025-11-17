@@ -83,3 +83,46 @@ button svg {
     width: 14px !important;
     height: 14px !important;
 }
+
+/* Fix z-index for nested popups - TimeFrameForm inside TimeFrameConfigModal */
+/* DevExpress creates separate elements for backdrop and window */
+/* Target by class name pattern */
+div[class*="timeframe-form-popup"] {
+    z-index: 10000 !important;
+}
+
+/* Backdrop that appears AFTER the popup element */
+.dxbl-popup-backdrop:has(+ div[class*="timeframe-form-popup"]),
+div[class*="timeframe-form-popup"] ~ .dxbl-popup-backdrop:last-of-type {
+    z-index: 9999 !important;
+}
+
+/* All child elements of the popup */
+div[class*="timeframe-form-popup"] * {
+    position: relative;
+    z-index: inherit;
+}
+
+/* GLOBAL FIX: All DevExpress popups should be on top of their backdrop */
+.dxbl-popup,
+[class*="popup"],
+div[class*="-popup"],
+div[role="dialog"] {
+    z-index: 1060 !important;
+}
+
+/* All DevExpress backdrops should be below popups */
+.dxbl-popup-backdrop,
+.dxbl-modal-backdrop {
+    z-index: 1055 !important;
+}
+
+/* For nested/stacked popups, each subsequent one should be higher */
+body > div[class*="popup"]:nth-last-child(1),
+body > div[role="dialog"]:nth-last-child(1) {
+    z-index: 2000 !important;
+}
+
+body > .dxbl-popup-backdrop:nth-last-child(2) {
+    z-index: 1999 !important;
+}

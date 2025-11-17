@@ -66,8 +66,11 @@ namespace StationCheck.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StationId1")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -83,6 +86,8 @@ namespace StationCheck.Migrations
 
                     b.HasIndex("StationId");
 
+                    b.HasIndex("StationId1");
+
                     b.HasIndex("Username")
                         .IsUnique();
 
@@ -92,38 +97,101 @@ namespace StationCheck.Migrations
                         new
                         {
                             Id = "USR001",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9230),
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 70, DateTimeKind.Utc).AddTicks(1970),
                             Email = "admin@stationcheck.com",
                             FullName = "System Administrator",
                             IsActive = true,
-                            PasswordHash = "$2a$12$PdJYccmRTUBakyXhyWwxWOfkMLQiLvSJnGmIP7H/U3kiY66uh5tAi",
+                            PasswordHash = "$2a$12$J5Ugo55sKN.tcOF.NB.dweMp4cxoeH/P9CPHqcRr.KdH5GoV2uwN.",
                             Role = 2,
                             Username = "admin"
                         },
                         new
                         {
                             Id = "USR002",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9237),
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 70, DateTimeKind.Utc).AddTicks(1975),
                             Email = "manager@stationcheck.com",
                             FullName = "Department Manager",
                             IsActive = true,
-                            PasswordHash = "$2a$12$sQAmK/m23FnnNKYhP9KGcOOkd6TsEKoB.ZADChyJdK8XBQhgP683S",
+                            PasswordHash = "$2a$12$AMQ5XhGtxu1bU9Sm1dfw.eLFAvUCsRtpStdJ59CvR8rx5GrhWKk5a",
                             Role = 1,
                             Username = "manager"
                         },
                         new
                         {
                             Id = "USR003",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9251),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 70, DateTimeKind.Utc).AddTicks(1983),
                             Email = "employee1@stationcheck.com",
                             FullName = "Nhân viên Trạm 1",
                             IsActive = true,
-                            PasswordHash = "$2a$12$zXBPTAySnQ/y2W8alLuzeO0Nqgp8ZGN8TS3uhGwBAp8mEPvFsRKNi",
+                            PasswordHash = "$2a$12$d3.x2K0gx3twhZpdUySkSuo7QweW7flZ4SBLiRLxty1utUjb1U0Aq",
                             Role = 0,
-                            StationId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            StationId = 1,
                             Username = "employee1"
                         });
+                });
+
+            modelBuilder.Entity("StationCheck.Models.ConfigurationAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Changes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedAt");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("EntityType");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("ConfigurationAuditLogs");
                 });
 
             modelBuilder.Entity("StationCheck.Models.EmailEvent", b =>
@@ -163,10 +231,6 @@ namespace StationCheck.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("EmailFrom")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -189,24 +253,17 @@ namespace StationCheck.Migrations
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("RawEmailBody")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("StationCode")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -230,10 +287,6 @@ namespace StationCheck.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("FlagIcon")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
@@ -243,13 +296,6 @@ namespace StationCheck.Migrations
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -271,8 +317,7 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "vi",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9385),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(637),
                             FlagIcon = "vn",
                             IsActive = true,
                             IsDefault = true,
@@ -282,14 +327,60 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "en",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9388),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(640),
                             FlagIcon = "us",
                             IsActive = true,
                             IsDefault = false,
                             Name = "English",
                             NativeName = "English"
                         });
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MonitoringConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("StationId");
+
+                    b.ToTable("MonitoringConfiguration");
                 });
 
             modelBuilder.Entity("StationCheck.Models.MonitoringProfile", b =>
@@ -303,22 +394,70 @@ namespace StationCheck.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StationId");
-
                     b.ToTable("MonitoringProfile");
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MonitoringProfileHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChangeNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("MonitoringProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProfileSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonitoringProfileId");
+
+                    b.ToTable("MonitoringProfileHistory");
                 });
 
             modelBuilder.Entity("StationCheck.Models.MotionAlert", b =>
@@ -333,6 +472,7 @@ namespace StationCheck.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("CameraId")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -370,22 +510,21 @@ namespace StationCheck.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MinutesSinceLastMotion")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("MonitoringConfigurationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("ProfileHistoryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ResolvedAt")
                         .HasColumnType("datetime2");
@@ -397,25 +536,36 @@ namespace StationCheck.Migrations
                     b.Property<int>("Severity")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("StationName")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid?>("TimeFrameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("TimeFrameHistoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TimeFrameId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AlertTime");
 
+                    b.HasIndex("CameraId");
+
                     b.HasIndex("IsResolved");
+
+                    b.HasIndex("MonitoringConfigurationId");
+
+                    b.HasIndex("ProfileHistoryId");
 
                     b.HasIndex("Severity");
 
                     b.HasIndex("StationId");
+
+                    b.HasIndex("TimeFrameHistoryId");
 
                     b.HasIndex("TimeFrameId");
 
@@ -429,6 +579,7 @@ namespace StationCheck.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CameraId")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -438,10 +589,6 @@ namespace StationCheck.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("DetectedAt")
                         .ValueGeneratedOnAdd()
@@ -458,18 +605,11 @@ namespace StationCheck.Migrations
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Payload")
                         .HasMaxLength(2000)
@@ -479,8 +619,8 @@ namespace StationCheck.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -495,11 +635,52 @@ namespace StationCheck.Migrations
                     b.ToTable("MotionEvents");
                 });
 
+            modelBuilder.Entity("StationCheck.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("StationCheck.Models.Station", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .HasMaxLength(500)
@@ -561,89 +742,28 @@ namespace StationCheck.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Id = 1,
                             Address = "Quận Hoàn Kiếm, Hà Nội",
                             ContactPerson = "Nguyễn Văn A",
                             ContactPhone = "0123456789",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 6, 507, DateTimeKind.Utc).AddTicks(1003),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 39, 58, DateTimeKind.Utc).AddTicks(2512),
                             Description = "Trạm quan trắc chất lượng nước sông Hồng",
                             IsActive = true,
                             Name = "Trạm Quan Trắc Sông Hồng",
-                            StationCode = "SH01"
+                            StationCode = "123123123"
                         },
                         new
                         {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Id = 2,
                             Address = "Quận Đống Đa, Hà Nội",
                             ContactPerson = "Trần Thị B",
                             ContactPhone = "0987654321",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 6, 507, DateTimeKind.Utc).AddTicks(1006),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 39, 58, DateTimeKind.Utc).AddTicks(2514),
                             Description = "Trạm quan trắc chất lượng nước sông Tô Lịch",
                             IsActive = true,
                             Name = "Trạm Quan Trắc Sông Tô Lịch",
-                            StationCode = "TL01"
+                            StationCode = "121123123"
                         });
-                });
-
-            modelBuilder.Entity("StationCheck.Models.StationHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ChangeDescription")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ChangedBy")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ConfigurationSnapshot")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NewValues")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("OldValues")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("StationCode")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("StationName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChangedAt");
-
-                    b.HasIndex("StationId");
-
-                    b.ToTable("StationHistories");
                 });
 
             modelBuilder.Entity("StationCheck.Models.SystemConfiguration", b =>
@@ -711,7 +831,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 1,
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 382, DateTimeKind.Utc).AddTicks(204),
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(8861),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian quét email mới (giây)",
                             DisplayName = "Email Monitor Interval",
@@ -724,7 +844,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 2,
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 382, DateTimeKind.Utc).AddTicks(208),
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(8863),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)",
                             DisplayName = "Alert Generation Interval",
@@ -737,7 +857,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 3,
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 382, DateTimeKind.Utc).AddTicks(211),
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(8866),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian kiểm tra chuyển động (giây)",
                             DisplayName = "Motion Monitor Interval",
@@ -750,9 +870,11 @@ namespace StationCheck.Migrations
 
             modelBuilder.Entity("StationCheck.Models.TimeFrame", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BufferMinutes")
                         .HasColumnType("int");
@@ -795,8 +917,8 @@ namespace StationCheck.Migrations
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
-                    b.Property<Guid?>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("StationId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -838,11 +960,11 @@ namespace StationCheck.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("StationId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("TimeFrameId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("TimeFrameId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Version")
                         .HasColumnType("int");
@@ -877,10 +999,6 @@ namespace StationCheck.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -893,10 +1011,6 @@ namespace StationCheck.Migrations
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -916,8 +1030,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 1,
                             Category = "menu",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9406),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(707),
                             Key = "menu.dashboard",
                             LanguageCode = "vi",
                             Value = "Trang chủ"
@@ -926,8 +1039,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 2,
                             Category = "menu",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9408),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(709),
                             Key = "menu.stations",
                             LanguageCode = "vi",
                             Value = "Quản lý Trạm"
@@ -935,19 +1047,287 @@ namespace StationCheck.Migrations
                         new
                         {
                             Id = 3,
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(710),
+                            Key = "menu.users",
+                            LanguageCode = "vi",
+                            Value = "Quản lý User"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(712),
+                            Key = "menu.settings",
+                            LanguageCode = "vi",
+                            Value = "Cấu hình"
+                        },
+                        new
+                        {
+                            Id = 5,
                             Category = "button",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9410),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(714),
                             Key = "button.add",
                             LanguageCode = "vi",
                             Value = "Thêm mới"
                         },
                         new
                         {
+                            Id = 6,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(715),
+                            Key = "button.edit",
+                            LanguageCode = "vi",
+                            Value = "Chỉnh sửa"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(717),
+                            Key = "button.delete",
+                            LanguageCode = "vi",
+                            Value = "Xóa"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(719),
+                            Key = "button.save",
+                            LanguageCode = "vi",
+                            Value = "Lưu"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(720),
+                            Key = "button.cancel",
+                            LanguageCode = "vi",
+                            Value = "Hủy"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(725),
+                            Key = "station.name",
+                            LanguageCode = "vi",
+                            Value = "Tên trạm"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(727),
+                            Key = "station.address",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(729),
+                            Key = "station.contact",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(730),
+                            Key = "station.phone",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(732),
+                            Key = "station.page_title",
+                            LanguageCode = "vi",
+                            Value = "Quản lý Trạm"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(734),
+                            Key = "station.list_title",
+                            LanguageCode = "vi",
+                            Value = "Danh sách Trạm Quan Trắc"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(736),
+                            Key = "station.add_button",
+                            LanguageCode = "vi",
+                            Value = "Thêm Trạm Mới"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(737),
+                            Key = "station.edit_title_add",
+                            LanguageCode = "vi",
+                            Value = "Thêm Trạm Mới"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(739),
+                            Key = "station.edit_title_edit",
+                            LanguageCode = "vi",
+                            Value = "Chỉnh sửa Trạm"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(741),
+                            Key = "station.search_placeholder",
+                            LanguageCode = "vi",
+                            Value = "Tìm kiếm..."
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(742),
+                            Key = "station.name_column",
+                            LanguageCode = "vi",
+                            Value = "Tên Trạm"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(744),
+                            Key = "station.address_column",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(746),
+                            Key = "station.contact_column",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(747),
+                            Key = "station.phone_column",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(749),
+                            Key = "station.actions_column",
+                            LanguageCode = "vi",
+                            Value = "Thao tác"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(751),
+                            Key = "station.name_label",
+                            LanguageCode = "vi",
+                            Value = "Tên Trạm:"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(753),
+                            Key = "station.address_label",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ:"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(754),
+                            Key = "station.description_label",
+                            LanguageCode = "vi",
+                            Value = "Mô tả:"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(756),
+                            Key = "station.contact_label",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ:"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(758),
+                            Key = "station.phone_label",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại:"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(759),
+                            Key = "station.active_label",
+                            LanguageCode = "vi",
+                            Value = "Kích hoạt giám sát:"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(761),
+                            Key = "message.confirm_delete_station",
+                            LanguageCode = "vi",
+                            Value = "Bạn có chắc muốn xóa trạm này?"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(763),
+                            Key = "message.delete_error",
+                            LanguageCode = "vi",
+                            Value = "Không thể xóa"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(764),
+                            Key = "message.error",
+                            LanguageCode = "vi",
+                            Value = "Lỗi"
+                        },
+                        new
+                        {
                             Id = 101,
                             Category = "menu",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9412),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(766),
                             Key = "menu.dashboard",
                             LanguageCode = "en",
                             Value = "Dashboard"
@@ -956,8 +1336,7 @@ namespace StationCheck.Migrations
                         {
                             Id = 102,
                             Category = "menu",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9415),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(768),
                             Key = "menu.stations",
                             LanguageCode = "en",
                             Value = "Station Management"
@@ -965,12 +1344,281 @@ namespace StationCheck.Migrations
                         new
                         {
                             Id = 103,
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(769),
+                            Key = "menu.users",
+                            LanguageCode = "en",
+                            Value = "User Management"
+                        },
+                        new
+                        {
+                            Id = 104,
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(771),
+                            Key = "menu.settings",
+                            LanguageCode = "en",
+                            Value = "Settings"
+                        },
+                        new
+                        {
+                            Id = 105,
                             Category = "button",
-                            CreatedAt = new DateTime(2025, 11, 16, 9, 30, 7, 381, DateTimeKind.Utc).AddTicks(9417),
-                            CreatedBy = "System",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(773),
                             Key = "button.add",
                             LanguageCode = "en",
                             Value = "Add New"
+                        },
+                        new
+                        {
+                            Id = 106,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(774),
+                            Key = "button.edit",
+                            LanguageCode = "en",
+                            Value = "Edit"
+                        },
+                        new
+                        {
+                            Id = 107,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(776),
+                            Key = "button.delete",
+                            LanguageCode = "en",
+                            Value = "Delete"
+                        },
+                        new
+                        {
+                            Id = 108,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(778),
+                            Key = "button.save",
+                            LanguageCode = "en",
+                            Value = "Save"
+                        },
+                        new
+                        {
+                            Id = 109,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(780),
+                            Key = "button.cancel",
+                            LanguageCode = "en",
+                            Value = "Cancel"
+                        },
+                        new
+                        {
+                            Id = 110,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(781),
+                            Key = "station.name",
+                            LanguageCode = "en",
+                            Value = "Station Name"
+                        },
+                        new
+                        {
+                            Id = 111,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(783),
+                            Key = "station.address",
+                            LanguageCode = "en",
+                            Value = "Address"
+                        },
+                        new
+                        {
+                            Id = 112,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(785),
+                            Key = "station.contact",
+                            LanguageCode = "en",
+                            Value = "Contact Person"
+                        },
+                        new
+                        {
+                            Id = 113,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(786),
+                            Key = "station.phone",
+                            LanguageCode = "en",
+                            Value = "Phone Number"
+                        },
+                        new
+                        {
+                            Id = 114,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(788),
+                            Key = "station.page_title",
+                            LanguageCode = "en",
+                            Value = "Station Management"
+                        },
+                        new
+                        {
+                            Id = 115,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(790),
+                            Key = "station.list_title",
+                            LanguageCode = "en",
+                            Value = "Monitoring Station List"
+                        },
+                        new
+                        {
+                            Id = 116,
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(791),
+                            Key = "station.add_button",
+                            LanguageCode = "en",
+                            Value = "Add New Station"
+                        },
+                        new
+                        {
+                            Id = 117,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(793),
+                            Key = "station.edit_title_add",
+                            LanguageCode = "en",
+                            Value = "Add New Station"
+                        },
+                        new
+                        {
+                            Id = 118,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(795),
+                            Key = "station.edit_title_edit",
+                            LanguageCode = "en",
+                            Value = "Edit Station"
+                        },
+                        new
+                        {
+                            Id = 119,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(796),
+                            Key = "station.search_placeholder",
+                            LanguageCode = "en",
+                            Value = "Search..."
+                        },
+                        new
+                        {
+                            Id = 120,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(798),
+                            Key = "station.name_column",
+                            LanguageCode = "en",
+                            Value = "Station Name"
+                        },
+                        new
+                        {
+                            Id = 121,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(799),
+                            Key = "station.address_column",
+                            LanguageCode = "en",
+                            Value = "Address"
+                        },
+                        new
+                        {
+                            Id = 122,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(801),
+                            Key = "station.contact_column",
+                            LanguageCode = "en",
+                            Value = "Contact Person"
+                        },
+                        new
+                        {
+                            Id = 123,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(803),
+                            Key = "station.phone_column",
+                            LanguageCode = "en",
+                            Value = "Phone Number"
+                        },
+                        new
+                        {
+                            Id = 124,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(804),
+                            Key = "station.actions_column",
+                            LanguageCode = "en",
+                            Value = "Actions"
+                        },
+                        new
+                        {
+                            Id = 125,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(806),
+                            Key = "station.name_label",
+                            LanguageCode = "en",
+                            Value = "Station Name:"
+                        },
+                        new
+                        {
+                            Id = 126,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(808),
+                            Key = "station.address_label",
+                            LanguageCode = "en",
+                            Value = "Address:"
+                        },
+                        new
+                        {
+                            Id = 127,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(809),
+                            Key = "station.description_label",
+                            LanguageCode = "en",
+                            Value = "Description:"
+                        },
+                        new
+                        {
+                            Id = 128,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(811),
+                            Key = "station.contact_label",
+                            LanguageCode = "en",
+                            Value = "Contact Person:"
+                        },
+                        new
+                        {
+                            Id = 129,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(813),
+                            Key = "station.phone_label",
+                            LanguageCode = "en",
+                            Value = "Phone Number:"
+                        },
+                        new
+                        {
+                            Id = 130,
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(814),
+                            Key = "station.active_label",
+                            LanguageCode = "en",
+                            Value = "Enable Monitoring:"
+                        },
+                        new
+                        {
+                            Id = 131,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(816),
+                            Key = "message.confirm_delete_station",
+                            LanguageCode = "en",
+                            Value = "Are you sure you want to delete this station?"
+                        },
+                        new
+                        {
+                            Id = 132,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(818),
+                            Key = "message.delete_error",
+                            LanguageCode = "en",
+                            Value = "Cannot delete"
+                        },
+                        new
+                        {
+                            Id = 133,
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 17, 11, 38, 40, 74, DateTimeKind.Utc).AddTicks(820),
+                            Key = "message.error",
+                            LanguageCode = "en",
+                            Value = "Error"
                         });
                 });
 
@@ -980,6 +1628,10 @@ namespace StationCheck.Migrations
                         .WithMany()
                         .HasForeignKey("StationId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("StationCheck.Models.Station", null)
+                        .WithMany("StationEmployees")
+                        .HasForeignKey("StationId1");
 
                     b.Navigation("Station");
                 });
@@ -994,7 +1646,69 @@ namespace StationCheck.Migrations
                     b.Navigation("Station");
                 });
 
-            modelBuilder.Entity("StationCheck.Models.MonitoringProfile", b =>
+            modelBuilder.Entity("StationCheck.Models.MonitoringConfiguration", b =>
+                {
+                    b.HasOne("StationCheck.Models.MonitoringProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId");
+
+                    b.HasOne("StationCheck.Models.Station", "Station")
+                        .WithMany()
+                        .HasForeignKey("StationId");
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Station");
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MonitoringProfileHistory", b =>
+                {
+                    b.HasOne("StationCheck.Models.MonitoringProfile", "MonitoringProfile")
+                        .WithMany("History")
+                        .HasForeignKey("MonitoringProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MonitoringProfile");
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MotionAlert", b =>
+                {
+                    b.HasOne("StationCheck.Models.MonitoringConfiguration", "MonitoringConfiguration")
+                        .WithMany()
+                        .HasForeignKey("MonitoringConfigurationId");
+
+                    b.HasOne("StationCheck.Models.MonitoringProfileHistory", "ProfileHistory")
+                        .WithMany("GeneratedAlerts")
+                        .HasForeignKey("ProfileHistoryId");
+
+                    b.HasOne("StationCheck.Models.Station", "Station")
+                        .WithMany()
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("StationCheck.Models.TimeFrameHistory", "TimeFrameHistorySnapshot")
+                        .WithMany()
+                        .HasForeignKey("TimeFrameHistoryId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("StationCheck.Models.TimeFrame", "TimeFrame")
+                        .WithMany()
+                        .HasForeignKey("TimeFrameId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("MonitoringConfiguration");
+
+                    b.Navigation("ProfileHistory");
+
+                    b.Navigation("Station");
+
+                    b.Navigation("TimeFrame");
+
+                    b.Navigation("TimeFrameHistorySnapshot");
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MotionEvent", b =>
                 {
                     b.HasOne("StationCheck.Models.Station", "Station")
                         .WithMany()
@@ -1003,47 +1717,21 @@ namespace StationCheck.Migrations
                     b.Navigation("Station");
                 });
 
-            modelBuilder.Entity("StationCheck.Models.MotionAlert", b =>
+            modelBuilder.Entity("StationCheck.Models.RefreshToken", b =>
                 {
-                    b.HasOne("StationCheck.Models.Station", "Station")
+                    b.HasOne("StationCheck.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("StationCheck.Models.TimeFrame", "TimeFrame")
-                        .WithMany()
-                        .HasForeignKey("TimeFrameId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Station");
-
-                    b.Navigation("TimeFrame");
-                });
-
-            modelBuilder.Entity("StationCheck.Models.MotionEvent", b =>
-                {
-                    b.HasOne("StationCheck.Models.Station", "Station")
-                        .WithMany()
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Station");
-                });
-
-            modelBuilder.Entity("StationCheck.Models.StationHistory", b =>
-                {
-                    b.HasOne("StationCheck.Models.Station", "Station")
-                        .WithMany()
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Station");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StationCheck.Models.TimeFrame", b =>
                 {
                     b.HasOne("StationCheck.Models.MonitoringProfile", "Profile")
-                        .WithMany()
+                        .WithMany("TimeFrames")
                         .HasForeignKey("ProfileId");
 
                     b.HasOne("StationCheck.Models.Station", "Station")
@@ -1061,13 +1749,13 @@ namespace StationCheck.Migrations
                     b.HasOne("StationCheck.Models.Station", "Station")
                         .WithMany()
                         .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("StationCheck.Models.TimeFrame", "TimeFrame")
                         .WithMany()
                         .HasForeignKey("TimeFrameId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Station");
 
@@ -1090,8 +1778,22 @@ namespace StationCheck.Migrations
                     b.Navigation("Translations");
                 });
 
+            modelBuilder.Entity("StationCheck.Models.MonitoringProfile", b =>
+                {
+                    b.Navigation("History");
+
+                    b.Navigation("TimeFrames");
+                });
+
+            modelBuilder.Entity("StationCheck.Models.MonitoringProfileHistory", b =>
+                {
+                    b.Navigation("GeneratedAlerts");
+                });
+
             modelBuilder.Entity("StationCheck.Models.Station", b =>
                 {
+                    b.Navigation("StationEmployees");
+
                     b.Navigation("TimeFrames");
                 });
 #pragma warning restore 612, 618

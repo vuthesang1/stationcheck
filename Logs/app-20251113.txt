@@ -1,0 +1,669 @@
+2025-11-13 17:36:36.807 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 17:36:37.014 [INF] [] Starting StationCheck application
+2025-11-13 17:36:37.056 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 17:36:37.064 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:36:37
+2025-11-13 17:36:37.287 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 17:36:37.290 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 17:36:37.480 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 17:36:37.487 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 17:36:37.489 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 17:36:37.492 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 17:36:37.493 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 17:36:37.536 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:36:37
+2025-11-13 17:36:47.296 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:36:47
+2025-11-13 17:36:47.312 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:36:47.322 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:36:49.329 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:36:49.918 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:36:50.161 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:37:00.419 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 17:37:00.429 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 17:39:40.780 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 17:39:40.995 [INF] [] Starting StationCheck application
+2025-11-13 17:39:41.039 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 17:39:41.046 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:39:41
+2025-11-13 17:39:41.326 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 17:39:41.330 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 17:39:41.475 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 17:39:41.488 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 17:39:41.523 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 17:39:41.529 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 17:39:41.532 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 17:39:41.763 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:39:41
+2025-11-13 17:39:51.341 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:39:51
+2025-11-13 17:39:51.360 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:39:51.367 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:39:53.391 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:39:53.957 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:39:54.280 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:40:11.334 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Running check at "2025-11-13T17:40:11.3343097+07:00"
+2025-11-13 17:40:11.428 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Found 4 active stations
+2025-11-13 17:40:11.451 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-13 17:40:42.056 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:40:42
+2025-11-13 17:40:42.234 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:40:42
+2025-11-13 17:40:49.464 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/stations - null null
+2025-11-13 17:40:52.370 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_Host'
+2025-11-13 17:40:52.398 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Route matched with {page = "/_Host", action = "", controller = ""}. Executing page /_Host
+2025-11-13 17:40:52.420 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executing an implicit handler method - ModelState is "Valid"
+2025-11-13 17:40:52.423 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-11-13 17:40:52.679 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executed page /_Host in 273.9409ms
+2025-11-13 17:40:52.723 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 POST https://localhost:55703/_blazor/disconnect - multipart/form-data; boundary=----WebKitFormBoundary9Q3NUds704kshS7Z 359
+2025-11-13 17:40:52.740 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_Host'
+2025-11-13 17:40:52.750 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint 'Blazor disconnect'
+2025-11-13 17:40:52.844 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/_framework/blazor.server.js - null null
+2025-11-13 17:40:52.869 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/stations - 200 null text/html; charset=utf-8 3408.2291ms
+2025-11-13 17:40:52.908 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint 'Blazor disconnect'
+2025-11-13 17:40:53.113 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint 'Blazor static files'
+2025-11-13 17:40:53.128 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 POST https://localhost:55703/_blazor/disconnect - 200 0 null 405.2484ms
+2025-11-13 17:40:53.213 [INF] [Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware] The file /_framework/blazor.server.js was not modified
+2025-11-13 17:40:53.225 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint 'Blazor static files'
+2025-11-13 17:40:53.228 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/_framework/blazor.server.js - 304 null text/javascript 383.5223ms
+2025-11-13 17:40:53.300 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/_blazor/initializers - null null
+2025-11-13 17:40:53.308 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint 'Blazor initializers'
+2025-11-13 17:40:53.321 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint 'Blazor initializers'
+2025-11-13 17:40:53.322 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/_blazor/initializers - 200 null application/json; charset=utf-8 21.7776ms
+2025-11-13 17:40:53.353 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 POST https://localhost:55703/_blazor/negotiate?negotiateVersion=1 - null 0
+2025-11-13 17:40:53.403 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_blazor/negotiate'
+2025-11-13 17:40:53.437 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_blazor/negotiate'
+2025-11-13 17:40:53.439 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 POST https://localhost:55703/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 86.2357ms
+2025-11-13 17:40:53.451 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 CONNECT https://localhost:55703/_blazor?id=bcaVmr-JAH4VMC58qbKc7A - null null
+2025-11-13 17:40:53.487 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_blazor'
+2025-11-13 17:40:53.844 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 17:40:54.297 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:40:54
+2025-11-13 17:40:54.299 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:40:54.301 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:40:55.215 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 17:40:55.219 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 17:40:55.586 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 17:40:55.654 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 17:40:56.473 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:40:57.085 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:40:57.329 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:40:59.803 [WRN] [Microsoft.EntityFrameworkCore.Query] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-11-13 17:41:15.904 [INF] [StationCheck.Services.MonitoringService] Updated TimeFrame 'ca sáng' (ID: 9)
+2025-11-13 17:41:42.801 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:41:42
+2025-11-13 17:41:42.810 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:41:42
+2025-11-13 17:41:57.345 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:41:57
+2025-11-13 17:41:57.347 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:41:57.348 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:41:59.508 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:42:00.132 [INF] [StationCheck.Services.EmailService] [EmailService] Found 1 unread email(s) with [stm] prefix
+2025-11-13 17:42:00.519 [INF] [StationCheck.Services.EmailService] [EmailService] Processing email: Subject='[stm] ST000002', From='"vu sang" <vuthesang.premium2@gmail.com>'
+2025-11-13 17:42:00.546 [INF] [StationCheck.Services.EmailService] [EmailService] Found station by code: ST000002 -> StationId=7
+2025-11-13 17:42:00.555 [INF] [StationCheck.Services.EmailService] [EmailService] Parsed email to MotionEvent: StationId=7, StationCode=ST000002, AlarmEvent=Motion Detection
+2025-11-13 17:42:00.574 [INF] [StationCheck.Services.EmailService] [EmailService] Updated Station 7 LastMotionDetectedAt to "2025-11-12T16:15:31.0000000"
+2025-11-13 17:42:00.647 [INF] [StationCheck.Services.EmailService] [EmailService] Saved MotionEvent ID=e5dcc05d-d301-4922-af5a-2d34db0e3687 for StationId=7
+2025-11-13 17:42:00.649 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully processed email UID 17786
+2025-11-13 17:42:01.455 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 1 email(s) successfully
+2025-11-13 17:42:01.457 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Processed 1 new motion events from emails
+2025-11-13 17:42:01.458 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] MotionEvent: ID=e5dcc05d-d301-4922-af5a-2d34db0e3687, StationId=7, DetectedAt="2025-11-12T16:15:31.0000000"
+2025-11-13 17:42:42.821 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:42:42
+2025-11-13 17:42:42.829 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:42:42
+2025-11-13 17:43:01.467 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:43:01
+2025-11-13 17:43:01.469 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:43:01.470 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:43:03.317 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:43:04.008 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:43:04.308 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:43:42.849 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:43:42
+2025-11-13 17:43:42.861 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:43:42
+2025-11-13 17:44:04.320 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:44:04
+2025-11-13 17:44:04.321 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:44:04.322 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:44:06.371 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:44:06.912 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:44:07.163 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:44:42.890 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:44:42
+2025-11-13 17:44:42.917 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:44:42
+2025-11-13 17:45:07.171 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:45:07
+2025-11-13 17:45:07.173 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:45:07.173 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:45:09.401 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:45:10.027 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:45:10.286 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:45:42.968 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:45:42
+2025-11-13 17:45:42.994 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:45:42
+2025-11-13 17:46:10.301 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 17:46:10
+2025-11-13 17:46:10.303 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 17:46:10.304 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 17:46:12.400 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 17:46:13.017 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 17:46:13.251 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 17:46:43.033 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 17:46:43
+2025-11-13 17:46:43.044 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 17:46:43
+2025-11-13 17:47:03.677 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 17:47:03.688 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_blazor'
+2025-11-13 17:47:03.691 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 CONNECT https://localhost:55703/_blazor?id=bcaVmr-JAH4VMC58qbKc7A - 200 null null 370239.3188ms
+2025-11-13 17:47:03.696 [INF] [Microsoft.AspNetCore.Server.Kestrel] Connection id "0HNH2K4E562I6", Request id "0HNH2K4E562I6:0000000B": the application completed without reading the entire request body.
+2025-11-13 17:47:03.703 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 19:29:46.025 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 19:29:46.314 [INF] [] Starting StationCheck application
+2025-11-13 19:29:46.380 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 19:29:46.388 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:29:46
+2025-11-13 19:29:46.736 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 19:29:46.740 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 19:29:46.964 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 19:29:46.970 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 19:29:46.972 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 19:29:46.975 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 19:29:46.985 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 19:29:47.110 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:29:46
+2025-11-13 19:29:56.754 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:29:56
+2025-11-13 19:29:56.771 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:29:56.783 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:29:58.979 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:29:59.621 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:29:59.860 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:30:16.754 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Running check at "2025-11-13T19:30:16.7533402+07:00"
+2025-11-13 19:30:16.906 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Found 4 active stations
+2025-11-13 19:30:16.944 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Station 7 exceeds interval. Last motion: "2025-11-12T16:15:31.0000000", Minutes: 1634.76255567, Expected: 60
+2025-11-13 19:30:17.307 [ERR] [Microsoft.EntityFrameworkCore.Database.Command] Failed executing DbCommand (52ms) [Parameters=[@p0='?' (Size = 50), @p1='?' (DbType = DateTime2), @p2='?' (Size = 50), @p3='?' (Size = 200), @p4='?' (Size = 4000), @p5='?' (DbType = Int32), @p6='?' (DbType = Boolean), @p7='?' (DbType = DateTime2), @p8='?' (Size = 50), @p9='?' (Size = 200), @p10='?' (Size = 500), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (Size = 1000), @p14='?' (DbType = Int32), @p15='?' (DbType = DateTime2), @p16='?' (Size = 100), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (Size = 200), @p20='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [MotionAlerts] ([Id], [AlertTime], [CameraId], [CameraName], [ConfigurationSnapshot], [ExpectedFrequencyMinutes], [IsResolved], [LastMotionAt], [LastMotionCameraId], [LastMotionCameraName], [Message], [MinutesSinceLastMotion], [MonitoringConfigurationId], [Notes], [ProfileHistoryId], [ResolvedAt], [ResolvedBy], [Severity], [StationId], [StationName], [TimeFrameId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+2025-11-13 19:30:17.361 [ERR] [Microsoft.EntityFrameworkCore.Update] An exception occurred in the database while saving changes for context type 'StationCheck.Data.ApplicationDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:03990099-fc6b-4a6c-8de5-e1901205f40b
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:03990099-fc6b-4a6c-8de5-e1901205f40b
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+2025-11-13 19:30:17.382 [ERR] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Error processing station 7
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:03990099-fc6b-4a6c-8de5-e1901205f40b
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.CreateAlertAsync(ApplicationDbContext context, Station station, TimeFrame timeFrame, DateTime now, CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 310
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 99
+2025-11-13 19:30:17.458 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-13 19:30:47.358 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:30:47
+2025-11-13 19:30:47.365 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:30:47
+2025-11-13 19:30:59.876 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:30:59
+2025-11-13 19:30:59.878 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:30:59.879 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:31:03.489 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:31:04.399 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:31:04.639 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:31:47.390 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:31:47
+2025-11-13 19:31:47.400 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:31:47
+2025-11-13 19:32:04.654 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:32:04
+2025-11-13 19:32:04.657 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:32:04.658 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:32:06.643 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:32:07.318 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:32:07.557 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:32:47.421 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:32:47
+2025-11-13 19:32:47.429 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:32:47
+2025-11-13 19:33:07.582 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:33:07
+2025-11-13 19:33:07.629 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:33:07.630 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:33:09.781 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:33:10.503 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:33:10.743 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:33:47.436 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:33:47
+2025-11-13 19:33:47.447 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:33:47
+2025-11-13 19:34:10.760 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:34:10
+2025-11-13 19:34:10.761 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:34:10.762 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:34:12.844 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:34:13.403 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:34:13.643 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:34:47.460 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:34:47
+2025-11-13 19:34:47.470 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:34:47
+2025-11-13 19:35:13.660 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:35:13
+2025-11-13 19:35:13.662 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:35:13.663 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:35:15.655 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:35:16.299 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:35:16.535 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:35:47.488 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:35:47
+2025-11-13 19:35:47.499 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:35:47
+2025-11-13 19:35:49.319 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/ - null null
+2025-11-13 19:35:49.412 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_Host'
+2025-11-13 19:35:49.436 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Route matched with {page = "/_Host", action = "", controller = ""}. Executing page /_Host
+2025-11-13 19:35:49.460 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executing an implicit handler method - ModelState is "Valid"
+2025-11-13 19:35:49.468 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-11-13 19:35:49.595 [INF] [Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.PageActionInvoker] Executed page /_Host in 153.4215ms
+2025-11-13 19:35:49.597 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_Host'
+2025-11-13 19:35:49.603 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/ - 200 null text/html; charset=utf-8 286.5915ms
+2025-11-13 19:35:49.627 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/_framework/blazor.server.js - null null
+2025-11-13 19:35:49.641 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint 'Blazor static files'
+2025-11-13 19:35:49.652 [INF] [Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware] The file /_framework/blazor.server.js was not modified
+2025-11-13 19:35:49.658 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint 'Blazor static files'
+2025-11-13 19:35:49.659 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/_framework/blazor.server.js - 304 null text/javascript 32.0378ms
+2025-11-13 19:35:49.699 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 GET https://localhost:55703/_blazor/initializers - null null
+2025-11-13 19:35:49.709 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint 'Blazor initializers'
+2025-11-13 19:35:49.720 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint 'Blazor initializers'
+2025-11-13 19:35:49.721 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 GET https://localhost:55703/_blazor/initializers - 200 null application/json; charset=utf-8 21.8237ms
+2025-11-13 19:35:49.735 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 POST https://localhost:55703/_blazor/negotiate?negotiateVersion=1 - null 0
+2025-11-13 19:35:49.740 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_blazor/negotiate'
+2025-11-13 19:35:49.750 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_blazor/negotiate'
+2025-11-13 19:35:49.752 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 POST https://localhost:55703/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 16.9222ms
+2025-11-13 19:35:50.282 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request starting HTTP/2 CONNECT https://localhost:55703/_blazor?id=JlJfkEqJdz6dYH1ypNofxQ - null null
+2025-11-13 19:35:50.288 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executing endpoint '/_blazor'
+2025-11-13 19:35:50.549 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:35:50.660 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:35:50.671 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:35:50.707 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:35:50.787 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:36:12.916 [INF] [Microsoft.AspNetCore.Authorization.DefaultAuthorizationService] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (StationEmployee)
+2025-11-13 19:36:16.545 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:36:16
+2025-11-13 19:36:16.546 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:36:16.547 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:36:18.371 [WRN] [Microsoft.EntityFrameworkCore.Query] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-11-13 19:36:18.548 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:36:19.091 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:36:19.322 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:36:47.520 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:36:47
+2025-11-13 19:36:47.529 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:36:47
+2025-11-13 19:36:50.191 [INF] [StationCheck.Services.MonitoringService] Updated TimeFrame 'ca sáng' (ID: 9)
+2025-11-13 19:37:19.339 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:37:19
+2025-11-13 19:37:19.340 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:37:19.342 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:37:21.501 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:37:22.047 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:37:22.293 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:37:47.544 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:37:47
+2025-11-13 19:37:47.555 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:37:47
+2025-11-13 19:38:22.296 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:38:22
+2025-11-13 19:38:22.297 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:38:22.299 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:38:24.297 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:38:24.816 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:38:25.046 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:38:47.571 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:38:47
+2025-11-13 19:38:47.581 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:38:47
+2025-11-13 19:39:25.062 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:39:25
+2025-11-13 19:39:25.064 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:39:25.065 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:39:27.032 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:39:27.532 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:39:27.761 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:39:47.599 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:39:47
+2025-11-13 19:39:47.609 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:39:47
+2025-11-13 19:40:27.769 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:40:27
+2025-11-13 19:40:27.775 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:40:27.781 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:40:29.805 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:40:30.316 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:40:30.546 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:40:47.627 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:40:47
+2025-11-13 19:40:47.641 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:40:47
+2025-11-13 19:41:30.564 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:41:30
+2025-11-13 19:41:30.582 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:41:30.584 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:41:32.280 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:41:32.796 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:41:33.034 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:41:47.662 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:41:47
+2025-11-13 19:41:47.674 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:41:47
+2025-11-13 19:42:33.050 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:42:33
+2025-11-13 19:42:33.054 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:42:33.055 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:42:35.420 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:42:36.859 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 unread email(s) with [stm] prefix
+2025-11-13 19:42:37.204 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:42:47.694 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:42:47
+2025-11-13 19:42:47.712 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:42:47
+2025-11-13 19:42:56.646 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 19:42:56.760 [INF] [Microsoft.AspNetCore.Routing.EndpointMiddleware] Executed endpoint '/_blazor'
+2025-11-13 19:42:56.930 [INF] [Microsoft.AspNetCore.Hosting.Diagnostics] Request finished HTTP/2 CONNECT https://localhost:55703/_blazor?id=JlJfkEqJdz6dYH1ypNofxQ - 200 null null 426645.539ms
+2025-11-13 19:42:56.942 [INF] [Microsoft.AspNetCore.Server.Kestrel] Connection id "0HNH2M4MFL2E9", Request id "0HNH2M4MFL2E9:00000009": the application completed without reading the entire request body.
+2025-11-13 19:42:56.981 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 19:46:44.548 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 19:46:44.830 [INF] [] Starting StationCheck application
+2025-11-13 19:46:44.896 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 19:46:44.906 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:46:44
+2025-11-13 19:46:45.168 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 19:46:45.171 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 19:46:45.323 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 19:46:45.327 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 19:46:45.329 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 19:46:45.331 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 19:46:45.333 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 19:46:45.434 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:46:44
+2025-11-13 19:46:55.184 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:46:55
+2025-11-13 19:46:55.284 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:46:55.358 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:46:57.811 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:46:58.125 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:46:58.395 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:46:59.135 [INF] [StationCheck.Services.EmailService] [EmailService] Processing NEW email: Subject='[stm] ST000002', From='"vu sang" <vuthesang.premium2@gmail.com>'
+2025-11-13 19:46:59.265 [INF] [StationCheck.Services.EmailService] [EmailService] Found station by code: ST000002 -> StationId=7
+2025-11-13 19:46:59.468 [INF] [StationCheck.Services.EmailService] [EmailService] Parsed email: StationId=7, StationCode=ST000002, AlarmEvent=Motion Detection
+2025-11-13 19:46:59.580 [INF] [StationCheck.Services.EmailService] [EmailService] Saving EmailEvent for StationId=7, StationCode=ST000002
+2025-11-13 19:46:59.586 [INF] [StationCheck.Services.EmailService] [EmailService] Saving MotionEvent for StationId=7
+2025-11-13 19:46:59.593 [INF] [StationCheck.Services.EmailService] [EmailService] Updated Station 7 LastMotionDetectedAt to "2025-11-12T16:15:31.0000000"
+2025-11-13 19:47:00.450 [INF] [StationCheck.Services.EmailService] [EmailService] ✅ Saved EmailEvent ID=1 and MotionEvent ID=d432c1e7-35c0-47c8-b9e3-4c3586316508 for StationId=7
+2025-11-13 19:47:00.454 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully processed email UID 33505 - Saved to EmailEvents and MotionEvents
+2025-11-13 19:47:01.905 [INF] [StationCheck.Services.EmailService] [EmailService] Processing NEW email: Subject='[stm] ST000002', From='"vu sang" <vuthesang.premium2@gmail.com>'
+2025-11-13 19:47:01.915 [INF] [StationCheck.Services.EmailService] [EmailService] Found station by code: ST000002 -> StationId=7
+2025-11-13 19:47:01.917 [INF] [StationCheck.Services.EmailService] [EmailService] Parsed email: StationId=7, StationCode=ST000002, AlarmEvent=Motion Detection
+2025-11-13 19:47:01.920 [INF] [StationCheck.Services.EmailService] [EmailService] Saving EmailEvent for StationId=7, StationCode=ST000002
+2025-11-13 19:47:01.922 [INF] [StationCheck.Services.EmailService] [EmailService] Saving MotionEvent for StationId=7
+2025-11-13 19:47:01.923 [INF] [StationCheck.Services.EmailService] [EmailService] Updated Station 7 LastMotionDetectedAt to "2025-11-12T16:15:31.0000000"
+2025-11-13 19:47:01.952 [INF] [StationCheck.Services.EmailService] [EmailService] ✅ Saved EmailEvent ID=2 and MotionEvent ID=7ced2423-07c5-4574-b1dd-8675144a935e for StationId=7
+2025-11-13 19:47:01.954 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully processed email UID 33507 - Saved to EmailEvents and MotionEvents
+2025-11-13 19:47:02.691 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 2 email(s) successfully
+2025-11-13 19:47:02.694 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Processed 2 new motion events from emails
+2025-11-13 19:47:02.695 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] MotionEvent: ID=d432c1e7-35c0-47c8-b9e3-4c3586316508, StationId=7, DetectedAt="2025-11-12T16:15:31.0000000"
+2025-11-13 19:47:02.697 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] MotionEvent: ID=7ced2423-07c5-4574-b1dd-8675144a935e, StationId=7, DetectedAt="2025-11-12T16:15:31.0000000"
+2025-11-13 19:47:15.186 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Running check at "2025-11-13T19:47:15.1863422+07:00"
+2025-11-13 19:47:15.505 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Found 4 active stations
+2025-11-13 19:47:16.124 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Station 7 exceeds interval. Last motion: "2025-11-12T16:15:31.0000000", Minutes: 1651.7364390366668, Expected: 2
+2025-11-13 19:47:16.317 [ERR] [Microsoft.EntityFrameworkCore.Database.Command] Failed executing DbCommand (23ms) [Parameters=[@p0='?' (Size = 50), @p1='?' (DbType = DateTime2), @p2='?' (Size = 50), @p3='?' (Size = 200), @p4='?' (Size = 4000), @p5='?' (DbType = Int32), @p6='?' (DbType = Boolean), @p7='?' (DbType = DateTime2), @p8='?' (Size = 50), @p9='?' (Size = 200), @p10='?' (Size = 500), @p11='?' (DbType = Int32), @p12='?' (DbType = Int32), @p13='?' (Size = 1000), @p14='?' (DbType = Int32), @p15='?' (DbType = DateTime2), @p16='?' (Size = 100), @p17='?' (DbType = Int32), @p18='?' (DbType = Int32), @p19='?' (Size = 200), @p20='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [MotionAlerts] ([Id], [AlertTime], [CameraId], [CameraName], [ConfigurationSnapshot], [ExpectedFrequencyMinutes], [IsResolved], [LastMotionAt], [LastMotionCameraId], [LastMotionCameraName], [Message], [MinutesSinceLastMotion], [MonitoringConfigurationId], [Notes], [ProfileHistoryId], [ResolvedAt], [ResolvedBy], [Severity], [StationId], [StationName], [TimeFrameId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+2025-11-13 19:47:16.370 [ERR] [Microsoft.EntityFrameworkCore.Update] An exception occurred in the database while saving changes for context type 'StationCheck.Data.ApplicationDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:0029a769-1c9a-44fa-ab4b-bfb6d4490214
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:0029a769-1c9a-44fa-ab4b-bfb6d4490214
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+2025-11-13 19:47:16.440 [ERR] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Error processing station 7
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert the value NULL into column 'CameraId', table 'StationCheckDb.dbo.MotionAlerts'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__211_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:0029a769-1c9a-44fa-ab4b-bfb6d4490214
+Error Number:515,State:2,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at StationCheck.BackgroundServices.AlertGenerationService.CreateAlertAsync(ApplicationDbContext context, Station station, TimeFrame timeFrame, DateTime now, CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 310
+   at StationCheck.BackgroundServices.AlertGenerationService.GenerateAlertsAsync(CancellationToken cancellationToken) in D:\stationcheck\BackgroundServices\AlertGenerationService.cs:line 99
+2025-11-13 19:47:16.485 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Check completed. Alerts generated: 0, Alerts resolved: 0
+2025-11-13 19:47:45.898 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:47:45
+2025-11-13 19:47:45.911 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:47:45
+2025-11-13 19:48:02.705 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:48:02
+2025-11-13 19:48:02.707 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:48:02.709 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:48:04.721 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:48:05.045 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:48:05.355 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:48:06.204 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:48:45.939 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:48:45
+2025-11-13 19:48:45.956 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:48:45
+2025-11-13 19:49:06.214 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:49:06
+2025-11-13 19:49:06.216 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:49:06.217 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:49:08.149 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:49:08.450 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:49:08.710 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:49:09.449 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:49:45.973 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:49:45
+2025-11-13 19:49:45.990 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:49:45
+2025-11-13 19:50:09.457 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:50:09
+2025-11-13 19:50:09.458 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:50:09.459 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:50:11.206 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:50:11.477 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:50:11.734 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:50:12.472 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:50:46.009 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:50:46
+2025-11-13 19:50:46.018 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:50:46
+2025-11-13 19:51:12.484 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:51:12
+2025-11-13 19:51:12.486 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:51:12.487 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:51:14.534 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:51:14.812 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:51:15.082 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:51:15.853 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:51:46.026 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:51:46
+2025-11-13 19:51:46.044 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:51:46
+2025-11-13 19:52:15.867 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:52:15
+2025-11-13 19:52:15.868 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:52:15.869 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:52:18.048 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:52:18.326 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:52:18.605 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:52:19.407 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:52:46.060 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:52:46
+2025-11-13 19:52:46.070 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:52:46
+2025-11-13 19:53:19.414 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:53:19
+2025-11-13 19:53:19.416 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:53:19.417 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:53:21.222 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:53:21.504 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:53:21.764 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:53:22.543 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:53:46.083 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:53:46
+2025-11-13 19:53:46.100 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:53:46
+2025-11-13 19:54:02.464 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 19:54:02.504 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 19:55:08.801 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 19:55:09.025 [INF] [] Starting StationCheck application
+2025-11-13 19:55:09.076 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 19:55:09.084 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:55:09
+2025-11-13 19:55:09.373 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 19:55:09.375 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 19:55:09.536 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 19:55:09.539 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 19:55:09.540 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 19:55:09.542 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 19:55:09.543 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 19:55:09.586 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:55:09
+2025-11-13 19:55:19.388 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:55:19
+2025-11-13 19:55:19.426 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:55:19.448 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:55:21.596 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:55:21.914 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:55:22.196 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:55:23.227 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:55:26.446 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 19:55:26.457 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 19:55:50.364 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 19:55:50.691 [INF] [] Starting StationCheck application
+2025-11-13 19:55:50.825 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 19:55:50.856 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 19:55:50
+2025-11-13 19:55:51.309 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 19:55:51.372 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 19:55:51.670 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 19:55:51.736 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 19:55:50
+2025-11-13 19:55:51.771 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 19:55:51.774 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 19:55:51.776 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 19:55:51.783 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 19:56:01.388 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 19:56:01
+2025-11-13 19:56:01.431 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 19:56:01.443 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 19:56:03.437 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 19:56:03.768 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 19:56:04.075 [INF] [StationCheck.Services.EmailService] [EmailService] Found 2 email(s) with [stm] prefix in All Mail
+2025-11-13 19:56:05.094 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 19:56:05.659 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 19:56:05.693 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 20:07:36.811 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 20:07:37.069 [INF] [] Starting StationCheck application
+2025-11-13 20:07:37.128 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 20:07:37.135 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 20:07:37
+2025-11-13 20:07:37.373 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 20:07:37.375 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 20:07:37.533 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 20:07:37.538 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 20:07:37.540 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 20:07:37.542 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 20:07:37.545 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 20:07:37.632 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 20:07:37
+2025-11-13 20:07:47.393 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 20:07:47
+2025-11-13 20:07:47.419 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 20:07:47.443 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 20:07:49.430 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 20:07:49.742 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 20:07:50.025 [INF] [StationCheck.Services.EmailService] [EmailService] Found 1 UNREAD email(s) with [stm] prefix in All Mail
+2025-11-13 20:07:50.547 [INF] [StationCheck.Services.EmailService] [EmailService] Processing NEW email: Subject='[stm] ST000002', From='"vu sang" <vuthesang.premium2@gmail.com>', MessageId='CABG9nosZMTHUXp_2aAJ7W8y7XkmAesdg+_mP+fqdQN2aHDgKjw@mail.gmail.com'
+2025-11-13 20:07:50.603 [INF] [StationCheck.Services.EmailService] [EmailService] Found station by code: ST000002 -> StationId=7
+2025-11-13 20:07:50.685 [INF] [StationCheck.Services.EmailService] [EmailService] Parsed email: StationId=7, StationCode=ST000002, AlarmEvent=Motion Detection
+2025-11-13 20:07:50.777 [INF] [StationCheck.Services.EmailService] [EmailService] Saving EmailEvent for StationId=7, StationCode=ST000002
+2025-11-13 20:07:50.797 [INF] [StationCheck.Services.EmailService] [EmailService] Saving MotionEvent for StationId=7
+2025-11-13 20:07:50.844 [INF] [StationCheck.Services.EmailService] [EmailService] Updated Station 7 LastMotionDetectedAt to "2025-11-12T16:15:31.0000000"
+2025-11-13 20:07:51.250 [INF] [StationCheck.Services.EmailService] [EmailService] ✅ Saved EmailEvent ID=3 and MotionEvent ID=36f4944a-abf9-4f34-9615-5b9bd6c0473e for StationId=7
+2025-11-13 20:07:51.256 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully processed email UID 33507 - Saved to EmailEvents and MotionEvents
+2025-11-13 20:07:52.019 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 1 email(s) successfully
+2025-11-13 20:07:52.024 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Processed 1 new motion events from emails
+2025-11-13 20:07:52.025 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] MotionEvent: ID=36f4944a-abf9-4f34-9615-5b9bd6c0473e, StationId=7, DetectedAt="2025-11-12T16:15:31.0000000"
+2025-11-13 20:07:59.403 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 20:07:59.419 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
+2025-11-13 20:14:04.818 [INF] [Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-13 20:14:04.992 [INF] [] Starting StationCheck application
+2025-11-13 20:14:05.039 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Service started
+2025-11-13 20:14:05.046 [INF] [StationCheck.BackgroundServices.MotionMonitoringService] [MotionMonitor] Running check at 2025-11-13 20:14:05
+2025-11-13 20:14:05.221 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service started
+2025-11-13 20:14:05.223 [INF] [StationCheck.BackgroundServices.AlertGenerationService] [AlertGeneration] Service started
+2025-11-13 20:14:05.370 [INF] [Microsoft.Hosting.Lifetime] Now listening on: https://localhost:55703
+2025-11-13 20:14:05.376 [INF] [Microsoft.Hosting.Lifetime] Now listening on: http://localhost:55704
+2025-11-13 20:14:05.379 [INF] [Microsoft.Hosting.Lifetime] Application started. Press Ctrl+C to shut down.
+2025-11-13 20:14:05.380 [INF] [Microsoft.Hosting.Lifetime] Hosting environment: Development
+2025-11-13 20:14:05.380 [INF] [Microsoft.Hosting.Lifetime] Content root path: D:\stationcheck
+2025-11-13 20:14:05.451 [INF] [StationCheck.Services.MonitoringService] [AlertCheck] Checking 1 active monitoring configurations at 20:14:05
+2025-11-13 20:14:15.226 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Running check at 2025-11-13 20:14:15
+2025-11-13 20:14:15.239 [INF] [StationCheck.Services.EmailService] [EmailService] Checking for new emails...
+2025-11-13 20:14:15.248 [INF] [StationCheck.Services.EmailService] [EmailService] Connecting to imap.gmail.com:993
+2025-11-13 20:14:16.492 [INF] [Microsoft.Hosting.Lifetime] Application is shutting down...
+2025-11-13 20:14:17.423 [INF] [StationCheck.Services.EmailService] [EmailService] Successfully authenticated as vuthesang4@gmail.com
+2025-11-13 20:14:17.724 [INF] [StationCheck.Services.EmailService] [EmailService] Opened All Mail folder
+2025-11-13 20:14:17.994 [INF] [StationCheck.Services.EmailService] [EmailService] Found 0 UNREAD email(s) with [stm] prefix in All Mail
+2025-11-13 20:14:18.232 [INF] [StationCheck.Services.EmailService] [EmailService] Processed 0 email(s) successfully
+2025-11-13 20:14:18.235 [INF] [StationCheck.BackgroundServices.EmailMonitoringService] [EmailMonitor] Service stopped
