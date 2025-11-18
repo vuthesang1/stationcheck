@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StationCheck.Data;
 using StationCheck.Interfaces;
 using StationCheck.Models;
+using StationCheck.Helpers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -253,22 +254,29 @@ namespace StationCheck.Services
 
         public async Task DeleteTimeFrameAsync(int id)
         {
-            var timeFrame = await _context.TimeFrames.FindAsync(id);
+            var timeFrame = await _context.TimeFrames
+                .IgnoreQueryFilters() // Include soft-deleted records
+                .FirstOrDefaultAsync(tf => tf.Id == id);
+                
             if (timeFrame == null)
             {
                 throw new KeyNotFoundException($"Time frame with ID {id} not found");
             }
 
-            // ✅ Log history before delete
-            await _historyService.LogDeleteAsync(timeFrame, "System", $"Deleted TimeFrame '{timeFrame.Name}'");
-            
-            _context.TimeFrames.Remove(timeFrame);
-            await _context.SaveChangesAsync();
-            
-            // ✅ Log to ConfigurationAuditLog AFTER SaveChanges
+            // Get current username
+            var username = await GetCurrentUsernameAsync();
+
+            // ✅ Create audit log BEFORE soft delete (so we can capture the data)
             await CreateAuditLogAsync("TimeFrame", timeFrame.Id.ToString(), timeFrame.Name ?? "Unknown", "Delete", timeFrame, null);
             
-            _logger.LogInformation($"Deleted time frame: {timeFrame.Name} (ID: {id})");
+            // ✅ Log to TimeFrameHistory
+            await _historyService.LogDeleteAsync(timeFrame, username, $"Deleted TimeFrame '{timeFrame.Name}'");
+            
+            // ✅ Soft delete instead of hard delete
+            AuditHelper.SetDeleted(timeFrame, username);
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation($"Soft deleted time frame: {timeFrame.Name} (ID: {id}) by {username}");
         }
 
         public async Task ToggleTimeFrameAsync(int timeFrameId, bool isEnabled)
@@ -557,7 +565,7 @@ namespace StationCheck.Services
         {
             try
             {
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
 
                 // Find latest motion from this station (no need to check camera IDs)
                 var latestMotion = await _context.MotionEvents
@@ -655,7 +663,7 @@ namespace StationCheck.Services
                     return;
                 }
 
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
                 foreach (var alert in openAlerts)
                 {
                     alert.IsResolved = true;
@@ -716,7 +724,7 @@ namespace StationCheck.Services
                     OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue, jsonOptions) : null,
                     NewValue = newValue != null ? JsonSerializer.Serialize(newValue, jsonOptions) : null,
                     Changes = changes,
-                    ChangedAt = DateTime.Now,
+                    ChangedAt = DateTime.UtcNow,
                     ChangedBy = userName ?? "System",
                     IpAddress = ipAddress,
                     UserAgent = userAgent
@@ -776,6 +784,20 @@ namespace StationCheck.Services
             }
 
             return changes.Any() ? string.Join("; ", changes) : "No changes";
+        }
+
+        private async Task<string> GetCurrentUsernameAsync()
+        {
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                return user?.Identity?.IsAuthenticated == true ? (user.Identity.Name ?? "System") : "System";
+            }
+            catch
+            {
+                return "System";
+            }
         }
     }
 }

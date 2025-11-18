@@ -3,6 +3,7 @@
 @using StationCheck.Data
 @using Microsoft.EntityFrameworkCore
 @using System.Text
+@using System.Text.Json
 @using ClosedXML.Excel
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JS
@@ -28,6 +29,39 @@
     }
     .modal-header .btn-close:hover {
         opacity: 1;
+    }
+
+    /* Compact page header */
+    .h3.mb-4 {
+        margin-bottom: 0.75rem !important;
+        font-size: 1.5rem !important;
+    }
+
+    /* Compact card header and body */
+    .card-header.py-3 {
+        padding: 0.5rem 1rem !important;
+    }
+
+    .card.shadow.mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    /* Reduce spacing in filter rows */
+    .row.mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .row.g-2 {
+        --bs-gutter-y: 0.5rem !important;
+    }
+
+    /* Compact tabs */
+    .nav-tabs {
+        margin-bottom: 1rem !important;
     }
 
     /* Standardize all form controls height */
@@ -64,9 +98,24 @@
     .row.mb-3 .d-flex.align-items-end {
         padding-bottom: 0 !important;
     }
+
+    /* Auto-height for grids to fill available space */
+    .reports-grid {
+        height: calc(100vh - 340px) !important;
+    }
+
+    .reports-grid .dxbs-grid {
+        height: 100% !important;
+    }
+
+    /* Compact form labels */
+    .form-label {
+        margin-bottom: 0.25rem !important;
+        font-size: 0.9rem !important;
+    }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid pb-0">
     <h1 class="h3 mb-4 text-gray-800">Báo cáo và Lịch sử</h1>
 
     <!-- Report Tabs -->
@@ -146,7 +195,7 @@
                             </button>
                         </div>
                     }
-                    <div class="col-md-@(alertPeriod == "custom" ? "1" : "4") d-flex align-items-end justify-content-end">
+                    <div class="col-md-@(alertPeriod == "custom" ? "1" : "6") d-flex align-items-end justify-content-end">
                         <button class="btn btn-success btn-sm" @onclick="ExportAlertsToExcel" disabled="@isExporting">
                             <i class="fas fa-file-excel me-1"></i>@(isExporting ? "Đang xuất..." : "Xuất Excel")
                         </button>
@@ -163,6 +212,7 @@
                 else
                 {
                     <DxGrid Data="@alerts"
+                            CssClass="reports-grid"
                             PageSize="20"
                             ShowPager="true"
                             PagerNavigationMode="PagerNavigationMode.InputBox"
@@ -314,7 +364,7 @@
                 <div class="row mb-3 g-2">
                     <div class="col-md-2">
                         <label class="form-label">Loại thực thể</label>
-                        <select class="form-select" @bind="auditEntityType" @bind:after="LoadAuditData">
+                        <select class="form-select form-select-sm" @bind="auditEntityType" @bind:after="LoadAuditData">
                             <option value="all">Tất cả</option>
                             <option value="Station">Trạm</option>
                             <option value="TimeFrame">Khung giờ</option>
@@ -323,7 +373,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Hành động</label>
-                        <select class="form-select" @bind="auditActionType" @bind:after="LoadAuditData">
+                        <select class="form-select form-select-sm" @bind="auditActionType" @bind:after="LoadAuditData">
                             <option value="all">Tất cả</option>
                             <option value="Create">Tạo mới</option>
                             <option value="Update">Cập nhật</option>
@@ -332,7 +382,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Trạm</label>
-                        <select class="form-select" @bind="auditStationId" @bind:after="LoadAuditData">
+                        <select class="form-select form-select-sm" @bind="auditStationId" @bind:after="LoadAuditData">
                             <option value="0">Tất cả</option>
                             @foreach (var station in stations)
                             {
@@ -342,7 +392,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Từ ngày</label>
-                        <input type="date" class="form-control" @bind="auditStartDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <input type="date" class="form-control form-control-sm" @bind="auditStartDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
                         @if (auditDateError)
                         {
                             <small class="text-danger">@auditDateErrorMessage</small>
@@ -350,10 +400,10 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Đến ngày</label>
-                        <input type="date" class="form-control" @bind="auditEndDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <input type="date" class="form-control form-control-sm" @bind="auditEndDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="col-md-1 d-flex align-items-end">
-                        <button class="btn btn-primary w-100" @onclick="LoadAuditData">
+                        <button class="btn btn-primary btn-sm w-100" @onclick="LoadAuditData">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
@@ -369,10 +419,13 @@
                 else
                 {
                     <DxGrid Data="@auditLogs"
+                            CssClass="reports-grid"
                             PageSize="20"
                             ShowPager="true"
                             PagerNavigationMode="PagerNavigationMode.InputBox"
                             PageSizeSelectorVisible="true"
+                            PageSizeSelectorItems="@(new int[] { 20, 50, 100, 200 })"
+                            PageSizeSelectorAllItemsText="Tất cả"
                             AllowSelectRowByClick="false"
                             HighlightRowOnHover="true"
                             TextWrapEnabled="false"
@@ -896,8 +949,9 @@
 
             if (auditStationId > 0)
             {
-                // Get TimeFrame IDs for this station
+                // Get TimeFrame IDs for this station (including soft-deleted ones for audit history)
                 var timeFrameIds = await context.TimeFrames
+                    .IgnoreQueryFilters() // ✅ Include soft-deleted TimeFrames in audit logs
                     .Where(tf => tf.StationId == auditStationId)
                     .Select(tf => tf.Id)
                     .ToListAsync();
@@ -915,7 +969,6 @@
 
             auditLogs = await query
                 .OrderByDescending(a => a.ChangedAt)
-                .Take(500)
                 .ToListAsync();
         }
         finally
@@ -1044,6 +1097,10 @@
 
         try
         {
+            // Try to parse as proper JSON first
+            using var doc = JsonDocument.Parse(jsonValue);
+            var root = doc.RootElement;
+            
             var data = new Dictionary<string, string>();
             
             // Properties to exclude from display
@@ -1054,63 +1111,75 @@
                 "Stations", "ProfileId", "Profile", "Station", "TimeFrame", "MotionAlerts"
             };
             
-            // Parse JSON properly - don't split by comma as it breaks arrays
-            var lines = jsonValue.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var line in lines)
+            foreach (var property in root.EnumerateObject())
             {
-                var trimmed = line.Trim().TrimEnd(',').Trim('{', '}');
-                if (trimmed.Contains(':'))
+                var key = property.Name;
+                
+                // Skip excluded properties
+                if (excludedProperties.Contains(key))
+                    continue;
+                
+                var value = property.Value;
+                string displayValue;
+                
+                // Format based on property type
+                if (key == "IsActive" || key == "IsEnabled")
                 {
-                    var colonIndex = trimmed.IndexOf(':');
-                    if (colonIndex > 0)
+                    displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
+                }
+                else if (key == "DaysOfWeek" && value.ValueKind == JsonValueKind.Array)
+                {
+                    var days = new List<string>();
+                    foreach (var day in value.EnumerateArray())
                     {
-                        var key = trimmed.Substring(0, colonIndex).Trim().Trim('"');
-                        var value = trimmed.Substring(colonIndex + 1).Trim().Trim('"', ' ');
-                        
-                        // Skip excluded properties
-                        if (excludedProperties.Contains(key))
-                            continue;
-                        
-                        // Format special keys
-                        if (key == "IsActive" || key == "IsEnabled")
+                        var dayNum = day.GetInt32().ToString();
+                        days.Add(dayNum switch
                         {
-                            value = value.ToLower() == "true" ? "✓ Có" : "✗ Không";
-                        }
-                        else if (key == "DaysOfWeek" && !string.IsNullOrEmpty(value))
-                        {
-                            // Parse array format: [1,2,3,4,5,6] or "[1,2,3,4,5,6]"
-                            value = value.Trim().Trim('[', ']').Trim('"');
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                var days = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                                var dayNames = new List<string>();
-                                foreach (var day in days)
-                                {
-                                    var dayNum = day.Trim();
-                                    dayNames.Add(dayNum switch
-                                    {
-                                        "0" => "CN",
-                                        "1" => "T2",
-                                        "2" => "T3",
-                                        "3" => "T4",
-                                        "4" => "T5",
-                                        "5" => "T6",
-                                        "6" => "T7",
-                                        _ => dayNum
-                                    });
-                                }
-                                value = string.Join(", ", dayNames);
-                            }
-                        }
-                        else if ((key.Contains("Time") || key.Contains("Date")) && DateTime.TryParse(value, out var dateValue))
-                        {
-                            // Convert UTC time to local time for display
-                            value = ConvertToLocalTime(dateValue);
-                        }
-                        
-                        data[key] = value;
+                            "0" => "CN",
+                            "1" => "T2",
+                            "2" => "T3",
+                            "3" => "T4",
+                            "4" => "T5",
+                            "5" => "T6",
+                            "6" => "T7",
+                            _ => dayNum
+                        });
+                    }
+                    displayValue = string.Join(", ", days);
+                }
+                else if ((key.Contains("Time") || key.Contains("Date")) && value.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(value.GetString(), out var dateValue))
+                    {
+                        displayValue = ConvertToLocalTime(dateValue);
+                    }
+                    else
+                    {
+                        displayValue = value.GetString() ?? "";
                     }
                 }
+                else if (value.ValueKind == JsonValueKind.String)
+                {
+                    displayValue = value.GetString() ?? "";
+                }
+                else if (value.ValueKind == JsonValueKind.Number)
+                {
+                    displayValue = value.ToString();
+                }
+                else if (value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False)
+                {
+                    displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
+                }
+                else if (value.ValueKind == JsonValueKind.Null)
+                {
+                    displayValue = "N/A";
+                }
+                else
+                {
+                    displayValue = value.ToString();
+                }
+                
+                data[key] = displayValue;
             }
             
             return data.Any() ? data : null;

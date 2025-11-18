@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StationCheck.Data;
 using StationCheck.Interfaces;
 using StationCheck.Models;
+using StationCheck.Helpers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -56,7 +57,9 @@ namespace StationCheck.Services
                 station.StationCode = await GenerateStationCodeAsync(context);
             }
             
-            station.CreatedAt = DateTime.UtcNow;
+            // Set audit fields
+            var username = await GetCurrentUsernameAsync();
+            AuditHelper.SetCreated(station, username);
             station.IsActive = true;
             
             context.Stations.Add(station);
@@ -65,7 +68,8 @@ namespace StationCheck.Services
             // Create audit log
             await CreateAuditLog(context, "Station", station.Id, station.Name, "Create", null, station);
             
-            _logger.LogInformation("Created station {StationId} - {StationCode} - {StationName}", station.Id, station.StationCode, station.Name);
+            _logger.LogInformation("Created station {StationId} - {StationCode} - {StationName} by {User}", 
+                station.Id, station.StationCode, station.Name, username);
             return station;
         }
 
@@ -127,15 +131,17 @@ namespace StationCheck.Services
             existingStation.ContactPerson = station.ContactPerson;
             existingStation.ContactPhone = station.ContactPhone;
             existingStation.IsActive = station.IsActive;
-            existingStation.ModifiedAt = DateTime.UtcNow;
-            existingStation.ModifiedBy = station.ModifiedBy;
+            
+            // Set audit fields
+            var username = await GetCurrentUsernameAsync();
+            AuditHelper.SetModified(existingStation, username);
 
             await context.SaveChangesAsync();
             
             // Create audit log
             await CreateAuditLog(context, "Station", existingStation.Id, existingStation.Name, "Update", oldStation, existingStation);
             
-            _logger.LogInformation("Updated station {StationId} - {StationName}", id, station.Name);
+            _logger.LogInformation("Updated station {StationId} - {StationName} by {User}", id, station.Name, username);
             return existingStation;
         }
 
@@ -143,36 +149,46 @@ namespace StationCheck.Services
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
-            var station = await context.Stations.FindAsync(id);
+            var station = await context.Stations
+                .IgnoreQueryFilters() // Include soft-deleted records
+                .FirstOrDefaultAsync(s => s.Id == id);
+                
             if (station == null)
             {
                 throw new KeyNotFoundException($"Station with ID {id} not found");
             }
 
-            // Check if there are users assigned to this station
-            var hasUsers = await context.Users.AnyAsync(u => u.StationId == id);
+            // Check if there are active users assigned to this station
+            var hasUsers = await context.Users
+                .AnyAsync(u => u.StationId == id && !u.IsDeleted);
             if (hasUsers)
             {
                 throw new InvalidOperationException("Cannot delete station with assigned employees. Please reassign employees first.");
             }
 
-            // Delete related entities first using ExecuteDelete (EF Core 7+)
-            // This avoids loading entities into memory and deletes them directly in database
+            // Soft delete the station
+            var username = await GetCurrentUsernameAsync();
+            AuditHelper.SetDeleted(station, username);
             
-            // Delete TimeFrames
-            var deletedTimeFrames = await context.TimeFrames
-                .Where(tf => tf.StationId == id)
-                .ExecuteDeleteAsync();
-            if (deletedTimeFrames > 0)
+            // Soft delete related TimeFrames
+            var relatedTimeFrames = await context.TimeFrames
+                .Where(tf => tf.StationId == id && !tf.IsDeleted)
+                .ToListAsync();
+                
+            foreach (var timeFrame in relatedTimeFrames)
             {
-                _logger.LogInformation("Deleted {Count} TimeFrames for station {StationId}", deletedTimeFrames, id);
+                AuditHelper.SetDeleted(timeFrame, username);
+                // Create audit log for TimeFrame deletion
+                await CreateAuditLog(context, "TimeFrame", timeFrame.Id, timeFrame.Name, "Delete", timeFrame, null);
             }
 
-            // Finally, delete the station
-            context.Stations.Remove(station);
             await context.SaveChangesAsync();
             
-            _logger.LogInformation("Deleted station {StationId} - {StationName}", id, station.Name);
+            // Create audit log for Station deletion
+            await CreateAuditLog(context, "Station", station.Id, station.Name, "Delete", station, null);
+            
+            _logger.LogInformation("Soft deleted station {StationId} - {StationName} and {Count} TimeFrames by {User}", 
+                id, station.Name, relatedTimeFrames.Count, username);
         }
 
         public async Task<List<Station>> GetUserStationsAsync(string userId, UserRole userRole)
@@ -229,7 +245,7 @@ namespace StationCheck.Services
                     OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue) : null,
                     NewValue = newValue != null ? JsonSerializer.Serialize(newValue) : null,
                     Changes = changes,
-                    ChangedAt = DateTime.Now,
+                    ChangedAt = DateTime.UtcNow,
                     ChangedBy = userName ?? "System",
                     IpAddress = ipAddress,
                     UserAgent = userAgent
@@ -280,6 +296,20 @@ namespace StationCheck.Services
             }
 
             return changes.Any() ? string.Join("; ", changes) : "No significant changes";
+        }
+
+        private async Task<string> GetCurrentUsernameAsync()
+        {
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                return user?.Identity?.IsAuthenticated == true ? (user.Identity.Name ?? "System") : "System";
+            }
+            catch
+            {
+                return "System";
+            }
         }
     }
 }

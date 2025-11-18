@@ -41,7 +41,7 @@ namespace StationCheck.Services
                 ConfigurationSnapshot = snapshot,
                 ChangeDescription = changeDescription ?? $"Created TimeFrame '{timeFrame.Name}'",
                 ChangedBy = changedBy,
-                ChangedAt = DateTime.Now
+                ChangedAt = DateTime.UtcNow
             };
 
             _context.TimeFrameHistories.Add(history);
@@ -84,7 +84,7 @@ namespace StationCheck.Services
                 ConfigurationSnapshot = snapshot,
                 ChangeDescription = changeDescription,
                 ChangedBy = changedBy,
-                ChangedAt = DateTime.Now
+                ChangedAt = DateTime.UtcNow
             };
 
             _context.TimeFrameHistories.Add(history);
@@ -121,7 +121,7 @@ namespace StationCheck.Services
                 ConfigurationSnapshot = snapshot,
                 ChangeDescription = changeDescription ?? $"Deleted TimeFrame '{timeFrame.Name}'",
                 ChangedBy = changedBy,
-                ChangedAt = DateTime.Now
+                ChangedAt = DateTime.UtcNow
             };
 
             _context.TimeFrameHistories.Add(history);

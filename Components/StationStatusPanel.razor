@@ -2,6 +2,7 @@
 @using StationCheck.Interfaces
 @using StationCheck.Data
 @using Microsoft.EntityFrameworkCore
+@using System.Text.Json
 @using DevExpress.Blazor
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JSRuntime
@@ -252,7 +253,7 @@
                                                             @(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
                                                         </span>
                                                         <span class="badge bg-warning text-dark">@alert.Severity</span>
-                                                        <small class="text-muted">@alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                                        <small class="text-muted">@alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</small>
                                                     </div>
                                                     <div class="mb-2">
                                                         <strong>@alert.Message</strong>
@@ -269,7 +270,7 @@
                                                     {
                                                         <div class="text-success small mt-2">
                                                             <i class="bi bi-check-circle"></i> 
-                                                            @alert.ResolvedAt.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                                            @alert.ResolvedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
                                                             @if (!string.IsNullOrEmpty(alert.ResolvedBy))
                                                             {
                                                                 <text> - @alert.ResolvedBy</text>
@@ -382,13 +383,13 @@
                                                                             <tbody>
                                                                                 <tr>
                                                                                     <td class="text-muted" style="width: 150px;">Ngày tạo:</td>
-                                                                                    <td>@config.GetValueOrDefault("CreatedAt", "N/A")</td>
+                                                                                    <td>@FormatDateTimeFromConfig(config.GetValueOrDefault("CreatedAt", "N/A"))</td>
                                                                                     <td class="text-muted" style="width: 150px;">Người tạo:</td>
                                                                                     <td>@config.GetValueOrDefault("CreatedBy", "N/A")</td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted">Ngày cập nhật:</td>
-                                                                                    <td>@config.GetValueOrDefault("ModifiedAt", "N/A")</td>
+                                                                                    <td>@FormatDateTimeFromConfig(config.GetValueOrDefault("ModifiedAt", "N/A"))</td>
                                                                                     <td class="text-muted">Người cập nhật:</td>
                                                                                     <td>@config.GetValueOrDefault("ModifiedBy", "N/A")</td>
                                                                                 </tr>
@@ -529,7 +530,7 @@
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Thời gian phát hiện:</td>
-                                                <td><strong>@selectedMotionEvent.DetectedAt.ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
+                                                <td><strong>@selectedMotionEvent.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Loại sự kiện:</td>
@@ -1152,7 +1153,7 @@
             if (alert != null && !alert.IsResolved)
             {
                 alert.IsResolved = true;
-                alert.ResolvedAt = DateTime.Now;
+                alert.ResolvedAt = DateTime.UtcNow;
                 alert.ResolvedBy = "System"; // TODO: Get current user name
                 
                 await context.SaveChangesAsync();
@@ -1184,23 +1185,29 @@
 
         try
         {
+            // Use JsonDocument for proper JSON parsing with Unicode support
+            using var doc = JsonDocument.Parse(jsonConfig);
+            var root = doc.RootElement;
+            
             var config = new Dictionary<string, string>();
             
-            // Simple JSON parsing for display purposes
-            var lines = jsonConfig.Split('\n', '\r');
-            foreach (var line in lines)
+            foreach (var property in root.EnumerateObject())
             {
-                var trimmed = line.Trim().TrimEnd(',');
-                if (trimmed.Contains(':'))
+                var key = property.Name;
+                var value = property.Value;
+                
+                // Convert to string based on type
+                string displayValue = value.ValueKind switch
                 {
-                    var parts = trimmed.Split(':', 2);
-                    if (parts.Length == 2)
-                    {
-                        var key = parts[0].Trim().Trim('"');
-                        var value = parts[1].Trim().Trim('"');
-                        config[key] = value;
-                    }
-                }
+                    JsonValueKind.String => value.GetString() ?? "",
+                    JsonValueKind.Number => value.ToString(),
+                    JsonValueKind.True => "true",
+                    JsonValueKind.False => "false",
+                    JsonValueKind.Null => "N/A",
+                    _ => value.ToString()
+                };
+                
+                config[key] = displayValue;
             }
             
             return config.Any() ? config : null;
@@ -1230,61 +1237,92 @@
 
         try
         {
+            // Try to parse as proper JSON first
+            using var doc = JsonDocument.Parse(jsonValue);
+            var root = doc.RootElement;
+            
             var data = new Dictionary<string, string>();
             
-            // Parse JSON properly - don't split by comma as it breaks arrays
-            var lines = jsonValue.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var line in lines)
+            // Properties to exclude from display
+            var excludedProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                var trimmed = line.Trim().TrimEnd(',').Trim('{', '}');
-                if (trimmed.Contains(':'))
+                "Station", "TimeFrames", "StationEmployees", "Profile", "TimeFrame", "MotionAlerts"
+            };
+            
+            foreach (var property in root.EnumerateObject())
+            {
+                var key = property.Name;
+                
+                // Skip excluded properties
+                if (excludedProperties.Contains(key))
+                    continue;
+                
+                var value = property.Value;
+                string displayValue;
+                
+                // Format based on property type
+                if (key == "IsActive" || key == "IsEnabled")
                 {
-                    var colonIndex = trimmed.IndexOf(':');
-                    if (colonIndex > 0)
+                    displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
+                }
+                else if (key == "DaysOfWeek" && value.ValueKind == JsonValueKind.Array)
+                {
+                    var days = new List<string>();
+                    foreach (var day in value.EnumerateArray())
                     {
-                        var key = trimmed.Substring(0, colonIndex).Trim().Trim('"');
-                        var value = trimmed.Substring(colonIndex + 1).Trim().Trim('"', ' ');
-                        
-                        // Skip navigation properties
-                        if (key == "Station" || key == "TimeFrames" || key == "StationEmployees" || 
-                            key == "Profile" || key == "TimeFrame" || key == "MotionAlerts")
-                            continue;
-                        
-                        // Format special keys
-                        if (key == "IsActive" || key == "IsEnabled")
+                        var dayNum = day.GetInt32().ToString();
+                        days.Add(dayNum switch
                         {
-                            value = value.ToLower() == "true" ? "✓ Có" : "✗ Không";
-                        }
-                        else if (key == "DaysOfWeek" && !string.IsNullOrEmpty(value))
+                            "0" => "CN",
+                            "1" => "T2",
+                            "2" => "T3",
+                            "3" => "T4",
+                            "4" => "T5",
+                            "5" => "T6",
+                            "6" => "T7",
+                            _ => dayNum
+                        });
+                    }
+                    displayValue = string.Join(", ", days);
+                }
+                else if ((key.Contains("Time") || key.Contains("Date")) && value.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(value.GetString(), out var dateValue))
+                    {
+                        // ✅ Ensure datetime is treated as UTC before converting to local time
+                        if (dateValue.Kind == DateTimeKind.Unspecified)
                         {
-                            // Parse array format: [1,2,3,4,5,6] or "[1,2,3,4,5,6]"
-                            value = value.Trim().Trim('[', ']').Trim('"');
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                var days = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                                var dayNames = new List<string>();
-                                foreach (var day in days)
-                                {
-                                    var dayNum = day.Trim();
-                                    dayNames.Add(dayNum switch
-                                    {
-                                        "0" => "CN",
-                                        "1" => "T2",
-                                        "2" => "T3",
-                                        "3" => "T4",
-                                        "4" => "T5",
-                                        "5" => "T6",
-                                        "6" => "T7",
-                                        _ => dayNum
-                                    });
-                                }
-                                value = string.Join(", ", dayNames);
-                            }
+                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc);
                         }
-                        
-                        data[key] = value;
+                        displayValue = ConvertToLocalTime(dateValue);
+                    }
+                    else
+                    {
+                        displayValue = value.GetString() ?? "";
                     }
                 }
+                else if (value.ValueKind == JsonValueKind.String)
+                {
+                    displayValue = value.GetString() ?? "";
+                }
+                else if (value.ValueKind == JsonValueKind.Number)
+                {
+                    displayValue = value.ToString();
+                }
+                else if (value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False)
+                {
+                    displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
+                }
+                else if (value.ValueKind == JsonValueKind.Null)
+                {
+                    displayValue = "N/A";
+                }
+                else
+                {
+                    displayValue = value.ToString();
+                }
+                
+                data[key] = displayValue;
             }
             
             return data.Any() ? data : null;
@@ -1300,6 +1338,25 @@
         // Convert UTC to local time for display
         var localTime = utcTime.ToLocalTime();
         return localTime.ToString("dd/MM/yyyy HH:mm:ss");
+    }
+
+    private string FormatDateTimeFromConfig(string dateTimeStr)
+    {
+        if (string.IsNullOrWhiteSpace(dateTimeStr) || dateTimeStr == "N/A")
+            return "N/A";
+            
+        try
+        {
+            if (DateTime.TryParse(dateTimeStr, out var utcTime))
+            {
+                return ConvertToLocalTime(utcTime);
+            }
+            return dateTimeStr;
+        }
+        catch
+        {
+            return dateTimeStr;
+        }
     }
 
     public void Dispose()

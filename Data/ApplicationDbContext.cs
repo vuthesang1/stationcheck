@@ -39,6 +39,13 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Global query filter for soft delete
+        modelBuilder.Entity<Station>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<TimeFrame>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<MonitoringConfiguration>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<MonitoringProfile>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ApplicationUser>().HasQueryFilter(e => !e.IsDeleted);
+
         // MotionEvent configuration
         modelBuilder.Entity<MotionEvent>(entity =>
         {

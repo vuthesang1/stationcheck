@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StationCheck.Models
 {
-    public class TimeFrame
+    public class TimeFrame : BaseAuditEntity
     {
         [Key]
         public int Id { get; set; }
@@ -43,16 +43,5 @@ namespace StationCheck.Models
         public string? DaysOfWeek { get; set; } = "1,2,3,4,5,6,7"; // All days by default
 
         public bool IsEnabled { get; set; } = true;
-
-        // Audit fields
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
-        [MaxLength(50)]
-        public string? CreatedBy { get; set; }
-        
-        public DateTime? ModifiedAt { get; set; }
-        
-        [MaxLength(50)]
-        public string? ModifiedBy { get; set; }
     }
 }

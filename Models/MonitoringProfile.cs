@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StationCheck.Models
 {
-    public class MonitoringProfile
+    public class MonitoringProfile : BaseAuditEntity
     {
         [Key]
         public int Id { get; set; }
@@ -25,10 +25,5 @@ namespace StationCheck.Models
 
         // ✅ Navigation property for historical versions
         public ICollection<MonitoringProfileHistory> History { get; set; } = new List<MonitoringProfileHistory>();
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? ModifiedAt { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? ModifiedBy { get; set; }
     }
 }

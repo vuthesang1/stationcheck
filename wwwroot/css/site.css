@@ -1,13 +1,30 @@
-/* Fix unwanted scrollbar on empty pages */
-html, body {
-    overflow-x: hidden !important;
+/* Fix unwanted scrollbar - Complete solution */
+html {
     height: 100%;
-    margin: 0;
-    padding: 0;
+    overflow: hidden;
 }
 
 body {
-    overflow-y: auto !important;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+}
+
+/* SB Admin 2 wrapper adjustments */
+#wrapper {
+    height: 100vh;
+    overflow: hidden;
+}
+
+#content-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.container-fluid {
+    padding-bottom: 2rem;
 }
 
 .container {
@@ -382,4 +399,8 @@ body > .dxbl-popup-backdrop:nth-last-child(2) {
     .dxbl-popup .dxbl-popup-content {
         max-height: calc(99vh - 60px) !important;
     }
+}
+
+.header-layout{
+    height: 2.5rem;
 }

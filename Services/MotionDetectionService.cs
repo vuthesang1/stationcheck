@@ -42,7 +42,7 @@ public class MotionDetectionService : IMotionDetectionService
             StationId = stationId, // Store StationId
             EventType = eventType,
             Payload = payload,
-            DetectedAt = DateTime.Now,
+            DetectedAt = DateTime.UtcNow,
             IsProcessed = true
         };
 
@@ -68,7 +68,7 @@ public class MotionDetectionService : IMotionDetectionService
         /* COMMENTED OUT - Cameras table removed
         using var context = await _contextFactory.CreateDbContextAsync();
         var cameras = await context.Cameras.ToListAsync();
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var currentTime = now.TimeOfDay;
 
         foreach (var camera in cameras)
@@ -168,7 +168,7 @@ public class MotionDetectionService : IMotionDetectionService
             return false;
 
         alert.IsResolved = true;
-        alert.ResolvedAt = DateTime.Now;
+        alert.ResolvedAt = DateTime.UtcNow;
         alert.ResolvedBy = resolvedBy;
         alert.Notes = notes;
 

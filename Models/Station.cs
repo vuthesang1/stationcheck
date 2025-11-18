@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StationCheck.Models
 {
-    public class Station
+    public class Station : BaseAuditEntity
     {
         [Key]
         public int Id { get; set; }
@@ -31,17 +31,6 @@ namespace StationCheck.Models
 
         // ✅ Track last motion detection time for alert generation
         public DateTime? LastMotionDetectedAt { get; set; }
-
-        // Audit fields
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        
-        [MaxLength(50)]
-        public string? CreatedBy { get; set; }
-
-        public DateTime? ModifiedAt { get; set; }
-
-        [MaxLength(50)]
-        public string? ModifiedBy { get; set; }
 
         // Navigation properties
         public ICollection<ApplicationUser> StationEmployees { get; set; } = new List<ApplicationUser>();
