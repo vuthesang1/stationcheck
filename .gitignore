@@ -3,3 +3,4 @@ obj/
 devexpress-reference/
 TempModels/
 GenerateHash.cs
+Logs/*

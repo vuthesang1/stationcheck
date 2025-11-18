@@ -99,10 +99,10 @@
                 <h6 class="m-0 font-weight-bold text-primary">Báo cáo Cảnh báo</h6>
             </div>
             <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-3">
+                <div class="row mb-3 g-2">
+                    <div class="col-md-2">
                         <label class="form-label">Khoảng thời gian</label>
-                        <select class="form-select" @bind="alertPeriod" @bind:after="LoadAlertData">
+                        <select class="form-select form-select-sm" @bind="alertPeriod" @bind:after="LoadAlertData">
                             <option value="today">Hôm nay</option>
                             <option value="week">Tuần này</option>
                             <option value="month">Tháng này</option>
@@ -111,26 +111,18 @@
                     </div>
                     @if (alertPeriod == "custom")
                     {
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label">Từ ngày</label>
-                            <input type="date" class="form-control" @bind="alertStartDate" />
+                            <input type="date" class="form-control form-control-sm" @bind="alertStartDate" />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label">Đến ngày</label>
-                            <input type="date" class="form-control" @bind="alertEndDate" />
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary" @onclick="LoadAlertData">
-                                <i class="fas fa-search"></i> Tìm kiếm
-                            </button>
+                            <input type="date" class="form-control form-control-sm" @bind="alertEndDate" />
                         </div>
                     }
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Trạm</label>
-                        <select class="form-select" @bind="selectedStationId" @bind:after="LoadAlertData">
+                        <select class="form-select form-select-sm" @bind="selectedStationId" @bind:after="LoadAlertData">
                             <option value="0">Tất cả</option>
                             @foreach (var station in stations)
                             {
@@ -138,17 +130,25 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Trạng thái</label>
-                        <select class="form-select" @bind="alertStatus" @bind:after="LoadAlertData">
+                        <select class="form-select form-select-sm" @bind="alertStatus" @bind:after="LoadAlertData">
                             <option value="all">Tất cả</option>
                             <option value="active">Chưa xử lý</option>
                             <option value="resolved">Đã xử lý</option>
                         </select>
                     </div>
-                    <div class="col-md-6 d-flex align-items-end justify-content-end">
-                        <button class="btn btn-success" @onclick="ExportAlertsToExcel" disabled="@isExporting">
-                            <i class="fas fa-file-excel"></i> @(isExporting ? "Đang xuất..." : "Xuất Excel")
+                    @if (alertPeriod == "custom")
+                    {
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button class="btn btn-primary btn-sm w-100" @onclick="LoadAlertData">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    }
+                    <div class="col-md-@(alertPeriod == "custom" ? "1" : "4") d-flex align-items-end justify-content-end">
+                        <button class="btn btn-success btn-sm" @onclick="ExportAlertsToExcel" disabled="@isExporting">
+                            <i class="fas fa-file-excel me-1"></i>@(isExporting ? "Đang xuất..." : "Xuất Excel")
                         </button>
                     </div>
                 </div>
@@ -175,7 +175,14 @@
                             SizeMode="SizeMode.Medium"
                             >
                         <Columns>
-                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="180px">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var alert = (MotionAlert)context.DataItem;
+                                    }
+                                    @alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
                             <DxGridDataColumn FieldName="StationName" Caption="Trạm" Width="200px" />
                             <DxGridDataColumn FieldName="Message" Caption="Thông điệp" MinWidth="300" />
                             <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="100px" />
@@ -189,7 +196,14 @@
                                     </span>
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
-                            <DxGridDataColumn FieldName="ResolvedAt" Caption="Xử lý lúc" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="ResolvedAt" Caption="Xử lý lúc" Width="180px">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var alert = (MotionAlert)context.DataItem;
+                                    }
+                                    @(alert.ResolvedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") ?? "")
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
                             <DxGridDataColumn FieldName="ResolvedBy" Caption="Người xử lý" Width="150px" />
                         </Columns>
                     </DxGrid>
@@ -212,10 +226,10 @@
                 <h6 class="m-0 font-weight-bold text-primary">Báo cáo Tần suất Chuyển động</h6>
             </div>
             <div class="card-body">
-                <div class="row mb-3">
+                <div class="row mb-3 g-2">
                     <div class="col-md-3">
                         <label class="form-label">Khoảng thời gian</label>
-                        <select class="form-select" @bind="motionPeriod" @bind:after="LoadMotionData">
+                        <select class="form-select form-select-sm" @bind="motionPeriod" @bind:after="LoadMotionData">
                             <option value="today">Hôm nay</option>
                             <option value="week">7 ngày qua</option>
                             <option value="month">30 ngày qua</option>
@@ -226,15 +240,15 @@
                     {
                         <div class="col-md-3">
                             <label class="form-label">Từ ngày</label>
-                            <input type="date" class="form-control" @bind="motionStartDate" />
+                            <input type="date" class="form-control form-control-sm" @bind="motionStartDate" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Đến ngày</label>
-                            <input type="date" class="form-control" @bind="motionEndDate" />
+                            <input type="date" class="form-control form-control-sm" @bind="motionEndDate" />
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary" @onclick="LoadMotionData">
-                                <i class="fas fa-search"></i> Tìm kiếm
+                            <button class="btn btn-primary btn-sm" @onclick="LoadMotionData">
+                                <i class="fas fa-search me-1"></i>Tìm kiếm
                             </button>
                         </div>
                     }
@@ -368,7 +382,14 @@
                             
                             CustomizeElement="OnCustomizeAuditGridElement">
                         <Columns>
-                            <DxGridDataColumn FieldName="ChangedAt" Caption="Thời gian" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                            <DxGridDataColumn FieldName="ChangedAt" Caption="Thời gian" Width="180px">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var log = (ConfigurationAuditLog)context.DataItem;
+                                    }
+                                    @log.ChangedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
                             <DxGridDataColumn FieldName="EntityType" Caption="Loại" Width="150px" />
                             <DxGridDataColumn FieldName="EntityName" Caption="Tên" Width="200px" />
                             <DxGridDataColumn FieldName="ActionType" Caption="Hành động" Width="120px">
@@ -400,7 +421,7 @@
 @if (showAuditDetailModal && selectedAuditLog != null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.7);" @onclick="CloseAuditDetailModal">
-        <div class="modal-dialog modal-xl" @onclick:stopPropagation="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" @onclick:stopPropagation="true">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
@@ -941,12 +962,12 @@
             int row = 2;
             foreach (var alert in alerts)
             {
-                worksheet.Cell(row, 1).Value = alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss");
+                worksheet.Cell(row, 1).Value = alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cell(row, 2).Value = alert.StationName ?? "";
                 worksheet.Cell(row, 3).Value = alert.Message ?? "";
                 worksheet.Cell(row, 4).Value = alert.Severity.ToString();
                 worksheet.Cell(row, 5).Value = alert.IsResolved ? "Đã xử lý" : "Chưa xử lý";
-                worksheet.Cell(row, 6).Value = alert.ResolvedAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? "";
+                worksheet.Cell(row, 6).Value = alert.ResolvedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") ?? "";
                 worksheet.Cell(row, 7).Value = alert.ResolvedBy ?? "";
                 row++;
             }
@@ -1030,21 +1051,21 @@
             {
                 "CameraStations", "StationEmployees", "TimeSchedules", "TimeFrames",
                 "CreatedAt", "ModifiedAt", "CreatedBy", "ModifiedBy",
-                "Stations", "ProfileId", "Profile"
+                "Stations", "ProfileId", "Profile", "Station", "TimeFrame", "MotionAlerts"
             };
             
-            // Try to parse JSON-like value
-            var lines = jsonValue.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            // Parse JSON properly - don't split by comma as it breaks arrays
+            var lines = jsonValue.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
                 var trimmed = line.Trim().TrimEnd(',').Trim('{', '}');
                 if (trimmed.Contains(':'))
                 {
-                    var parts = trimmed.Split(':', 2);
-                    if (parts.Length == 2)
+                    var colonIndex = trimmed.IndexOf(':');
+                    if (colonIndex > 0)
                     {
-                        var key = parts[0].Trim().Trim('"');
-                        var value = parts[1].Trim().Trim('"', ' ');
+                        var key = trimmed.Substring(0, colonIndex).Trim().Trim('"');
+                        var value = trimmed.Substring(colonIndex + 1).Trim().Trim('"', ' ');
                         
                         // Skip excluded properties
                         if (excludedProperties.Contains(key))
@@ -1057,26 +1078,29 @@
                         }
                         else if (key == "DaysOfWeek" && !string.IsNullOrEmpty(value))
                         {
-                            // Convert days array to readable format
-                            value = value.Replace("[", "").Replace("]", "");
-                            var days = value.Split(',');
-                            var dayNames = new List<string>();
-                            foreach (var day in days)
+                            // Parse array format: [1,2,3,4,5,6] or "[1,2,3,4,5,6]"
+                            value = value.Trim().Trim('[', ']').Trim('"');
+                            if (!string.IsNullOrEmpty(value))
                             {
-                                var dayNum = day.Trim();
-                                dayNames.Add(dayNum switch
+                                var days = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                var dayNames = new List<string>();
+                                foreach (var day in days)
                                 {
-                                    "0" => "CN",
-                                    "1" => "T2",
-                                    "2" => "T3",
-                                    "3" => "T4",
-                                    "4" => "T5",
-                                    "5" => "T6",
-                                    "6" => "T7",
-                                    _ => dayNum
-                                });
+                                    var dayNum = day.Trim();
+                                    dayNames.Add(dayNum switch
+                                    {
+                                        "0" => "CN",
+                                        "1" => "T2",
+                                        "2" => "T3",
+                                        "3" => "T4",
+                                        "4" => "T5",
+                                        "5" => "T6",
+                                        "6" => "T7",
+                                        _ => dayNum
+                                    });
+                                }
+                                value = string.Join(", ", dayNames);
                             }
-                            value = string.Join(", ", dayNames);
                         }
                         else if ((key.Contains("Time") || key.Contains("Date")) && DateTime.TryParse(value, out var dateValue))
                         {
@@ -1099,8 +1123,8 @@
 
     private string ConvertToLocalTime(DateTime utcTime)
     {
-        // Convert UTC to local time (Vietnam is UTC+7)
-        var localTime = utcTime.AddHours(7);
+        // Convert UTC to local time based on browser timezone
+        var localTime = utcTime.ToLocalTime();
         return localTime.ToString("dd/MM/yyyy HH:mm:ss");
     }
 

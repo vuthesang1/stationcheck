@@ -11,8 +11,10 @@
          ShowCloseButton="true"
          Width="900px"
          MaxWidth="95%"
-         Height="600px"
-         CloseOnOutsideClick="false">
+         Height="auto"
+         MaxHeight="90vh"
+         CloseOnOutsideClick="false"
+         CssClass="timeframe-config-modal">
     <BodyContentTemplate Context="popupContext">
         <div class="p-3">
             @if (isLoading)
@@ -148,9 +150,12 @@
              HeaderText="📋 Copy khung thời gian"
              ShowCloseButton="true"
              Width="600px"
-             MaxWidth="95%">
+             MaxWidth="95%"
+             Height="auto"
+             MaxHeight="85vh">
         <BodyContentTemplate>
-        <div class="p-3">
+        <!-- Scrollable Content -->
+        <div class="p-3" style="max-height: calc(85vh - 120px); overflow-y: auto;">
             <div class="mb-3">
                 <label class="form-label">Chọn trạm nguồn:</label>
                 <select value="@sourceStationId" @onchange="OnSourceStationChanged" class="form-select">
@@ -204,13 +209,14 @@
                     <i class="fas fa-info-circle"></i> Trạm này chưa có khung thời gian nào.
                 </div>
             }
-            
-            <div class="d-flex justify-content-end gap-2">
-                <button class="btn btn-secondary" @onclick="CloseCopyDialog">Hủy</button>
-                <button class="btn btn-primary" @onclick="HandleCopy" disabled="@(!selectedTimeFrameIds.Any())">
-                    <i class="fas fa-copy"></i> Copy (@selectedTimeFrameIds.Count)
-                </button>
-            </div>
+        </div>
+        
+        <!-- Fixed Footer Buttons -->
+        <div class="border-top p-3 bg-light d-flex justify-content-end gap-2">
+            <button class="btn btn-secondary" @onclick="CloseCopyDialog">Hủy</button>
+            <button class="btn btn-primary" @onclick="HandleCopy" disabled="@(!selectedTimeFrameIds.Any())">
+                <i class="fas fa-copy"></i> Copy (@selectedTimeFrameIds.Count)
+            </button>
         </div>
     </BodyContentTemplate>
 </DxPopup>

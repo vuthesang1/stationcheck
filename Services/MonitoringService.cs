@@ -698,14 +698,23 @@ namespace StationCheck.Services
                 using var auditContext = await _contextFactory.CreateDbContextAsync();
                 _logger.LogInformation("[AuditLog] DB context created successfully");
                 
+                // Configure JSON serializer to ignore reference cycles
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                    WriteIndented = false,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                
                 var auditLog = new ConfigurationAuditLog
                 {
                     EntityType = entityType,
                     EntityId = int.Parse(entityId),
                     EntityName = entityName,
                     ActionType = actionType,
-                    OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue) : null,
-                    NewValue = newValue != null ? JsonSerializer.Serialize(newValue) : null,
+                    OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue, jsonOptions) : null,
+                    NewValue = newValue != null ? JsonSerializer.Serialize(newValue, jsonOptions) : null,
                     Changes = changes,
                     ChangedAt = DateTime.Now,
                     ChangedBy = userName ?? "System",
@@ -745,10 +754,13 @@ namespace StationCheck.Services
 
             foreach (var prop in oldProps)
             {
-                // Skip audit-related properties
+                // Skip audit-related properties and navigation properties
                 if (prop.Name == "CreatedAt" || prop.Name == "ModifiedAt" || 
                     prop.Name == "CreatedBy" || prop.Name == "ModifiedBy" ||
-                    prop.Name == "Id")
+                    prop.Name == "Id" ||
+                    prop.Name == "Station" || prop.Name == "TimeFrames" || 
+                    prop.Name == "StationEmployees" || prop.Name == "Profile" ||
+                    prop.Name == "TimeFrame" || prop.Name == "MotionAlerts")
                     continue;
 
                 var newProp = newProps.FirstOrDefault(p => p.Name == prop.Name);

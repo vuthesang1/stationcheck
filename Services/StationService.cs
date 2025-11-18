@@ -71,28 +71,30 @@ namespace StationCheck.Services
 
         private async Task<string> GenerateStationCodeAsync(ApplicationDbContext context)
         {
-            // Get the last station code
+            // Get the last station code that follows the ST000000 format
             var lastStation = await context.Stations
+                .Where(s => s.StationCode != null && s.StationCode.StartsWith("ST"))
                 .OrderByDescending(s => s.Id)
                 .Select(s => new { s.StationCode })
                 .FirstOrDefaultAsync();
 
             if (lastStation == null || string.IsNullOrEmpty(lastStation.StationCode))
             {
-                // First station
+                // First station or no valid ST code found
                 return "ST000001";
             }
 
-            // Extract number from last code (e.g., "ST000001" -> 1)
-            var lastCodeNumber = lastStation.StationCode.Replace("ST", "");
-            if (int.TryParse(lastCodeNumber, out int lastNumber))
+            // Extract number from last code (e.g., "ST000001" -> "000001")
+            var codeWithoutPrefix = lastStation.StationCode.Substring(2); // Skip "ST"
+            
+            if (int.TryParse(codeWithoutPrefix, out int lastNumber))
             {
                 // Increment and format with leading zeros
                 var newNumber = lastNumber + 1;
                 return $"ST{newNumber:D6}"; // D6 = 6 digits with leading zeros
             }
 
-            // Fallback if parsing fails
+            // Fallback if parsing fails - generate based on timestamp
             return $"ST{DateTime.UtcNow.Ticks % 1000000:D6}";
         }
 

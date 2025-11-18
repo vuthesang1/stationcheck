@@ -168,20 +168,25 @@
          ShowCloseButton="true"
          Width="600px"
          MaxWidth="90%"
+         Height="auto"
+         MaxHeight="90vh"
          CloseOnOutsideClick="false">
     <BodyContentTemplate Context="popupContext">
         <EditForm Model="stationForm" OnValidSubmit="SaveStation" Context="formContext">
             <DataAnnotationsValidator />
-            <DxFormLayout CssClass="w-100">
+            
+            <!-- Scrollable Form Content -->
+            <div style="max-height: calc(90vh - 150px); overflow-y: auto; padding: 1.5rem;">
+                <DxFormLayout CssClass="w-100">
                 @if (editingStation != null)
                 {
                     <DxFormLayoutItem Caption="@GetText("station.code_label", "Mã Trạm")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
                         <Template>
                             <DxTextBox @bind-Text="@editingStation.StationCode" 
                                        ReadOnly="true"
-                                       CssClass="bg-light">
+                                       CssClass="bg-light form-control-sm">
                             </DxTextBox>
-                            <small class="text-muted">@GetText("station.code_readonly_note", "Mã trạm tự động sinh ra và không thể chỉnh sửa")</small>
+                            <small class="form-text text-muted mt-1 d-block">@GetText("station.code_readonly_note", "Mã trạm tự động sinh ra và không thể chỉnh sửa")</small>
                         </Template>
                     </DxFormLayoutItem>
                 }
@@ -190,7 +195,8 @@
                     <Template>
                         <DxTextBox @bind-Text="@stationForm.Name" 
                                    NullText="@GetText("station.name_placeholder", "Nhập tên trạm")"
-                                   ShowValidationIcon="true">
+                                   ShowValidationIcon="true"
+                                   CssClass="form-control">
                         </DxTextBox>
                         <ValidationMessage For="@(() => stationForm.Name)" />
                     </Template>
@@ -199,7 +205,8 @@
                 <DxFormLayoutItem Caption="@GetText("station.address_label", "Địa chỉ")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
                     <Template>
                         <DxTextBox @bind-Text="@stationForm.Address" 
-                                   NullText="@GetText("station.address_placeholder", "Nhập địa chỉ")">
+                                   NullText="@GetText("station.address_placeholder", "Nhập địa chỉ")"
+                                   CssClass="form-control">
                         </DxTextBox>
                     </Template>
                 </DxFormLayoutItem>
@@ -208,7 +215,8 @@
                     <Template>
                         <DxMemo @bind-Text="@stationForm.Description"
                                 Rows="3"
-                                NullText="@GetText("station.description_placeholder", "Nhập mô tả")">
+                                NullText="@GetText("station.description_placeholder", "Nhập mô tả")"
+                                CssClass="form-control">
                         </DxMemo>
                     </Template>
                 </DxFormLayoutItem>
@@ -216,7 +224,8 @@
                 <DxFormLayoutItem Caption="@GetText("station.contact_label", "Người liên hệ")" ColSpanMd="6" CaptionPosition="CaptionPosition.Vertical">
                     <Template>
                         <DxTextBox @bind-Text="@stationForm.ContactPerson" 
-                                   NullText="@GetText("station.contact_placeholder", "Tên người liên hệ")">
+                                   NullText="@GetText("station.contact_placeholder", "Tên người liên hệ")"
+                                   CssClass="form-control">
                         </DxTextBox>
                     </Template>
                 </DxFormLayoutItem>
@@ -226,7 +235,8 @@
                         <DxMaskedInput @bind-Value="@stationForm.ContactPhone"
                                        Mask="0000-000-000"
                                        NullText="@GetText("station.phone_placeholder", "Nhập số điện thoại")"
-                                       ShowValidationIcon="true">
+                                       ShowValidationIcon="true"
+                                       CssClass="form-control">
                         </DxMaskedInput>
                         <ValidationMessage For="@(() => stationForm.ContactPhone)" />
                     </Template>
@@ -234,26 +244,27 @@
 
                 <DxFormLayoutItem Caption="@GetText("station.active_label", "Trạng thái hoạt động")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
                     <Template>
-                        <DxCheckBox @bind-Checked="@stationForm.IsActive" />
-                    </Template>
-                </DxFormLayoutItem>
-
-                <DxFormLayoutItem ColSpanMd="12">
-                    <Template>
-                        <div class="d-flex justify-content-end mt-3">
-                            <DxButton Text="@GetText("button.cancel", "Hủy")" 
-                                      RenderStyle="ButtonRenderStyle.Secondary"
-                                      Click="@CloseModal"
-                                      CssClass="me-2" />
-                            <DxButton Text="@GetText("button.save", "Lưu")" 
-                                      RenderStyle="ButtonRenderStyle.Primary"
-                                      RenderStyleMode="ButtonRenderStyleMode.Contained"
-                                      SubmitFormOnClick="true"
-                                      IconCssClass="fas fa-save" />
+                        <div class="form-check">
+                            <DxCheckBox @bind-Checked="@stationForm.IsActive" 
+                                        CssClass="form-check-input" />
+                            <label class="form-check-label ms-2">@GetText("station.enable_monitoring", "Kích hoạt giám sát")</label>
                         </div>
                     </Template>
                 </DxFormLayoutItem>
             </DxFormLayout>
+            </div>
+            
+            <!-- Fixed Footer Buttons -->
+            <div class="border-top p-3 bg-light d-flex justify-content-end gap-2">
+                <DxButton Text="@GetText("button.cancel", "Hủy")" 
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          Click="@CloseModal" />
+                <DxButton Text="@GetText("button.save", "Lưu")" 
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          RenderStyleMode="ButtonRenderStyleMode.Contained"
+                          SubmitFormOnClick="true"
+                          IconCssClass="fas fa-save" />
+            </div>
         </EditForm>
     </BodyContentTemplate>
 </DxPopup>

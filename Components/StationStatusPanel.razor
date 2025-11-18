@@ -746,7 +746,7 @@
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Thời gian:</td>
-                                                <td><strong>@selectedConfigLog.ChangedAt.ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
+                                                <td><strong>@ConvertToLocalTime(selectedConfigLog.ChangedAt)</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">IP Address:</td>
@@ -1232,18 +1232,23 @@
         {
             var data = new Dictionary<string, string>();
             
-            // Try to parse JSON-like value
-            var lines = jsonValue.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            // Parse JSON properly - don't split by comma as it breaks arrays
+            var lines = jsonValue.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
                 var trimmed = line.Trim().TrimEnd(',').Trim('{', '}');
                 if (trimmed.Contains(':'))
                 {
-                    var parts = trimmed.Split(':', 2);
-                    if (parts.Length == 2)
+                    var colonIndex = trimmed.IndexOf(':');
+                    if (colonIndex > 0)
                     {
-                        var key = parts[0].Trim().Trim('"');
-                        var value = parts[1].Trim().Trim('"', ' ');
+                        var key = trimmed.Substring(0, colonIndex).Trim().Trim('"');
+                        var value = trimmed.Substring(colonIndex + 1).Trim().Trim('"', ' ');
+                        
+                        // Skip navigation properties
+                        if (key == "Station" || key == "TimeFrames" || key == "StationEmployees" || 
+                            key == "Profile" || key == "TimeFrame" || key == "MotionAlerts")
+                            continue;
                         
                         // Format special keys
                         if (key == "IsActive" || key == "IsEnabled")
@@ -1252,26 +1257,29 @@
                         }
                         else if (key == "DaysOfWeek" && !string.IsNullOrEmpty(value))
                         {
-                            // Convert days array to readable format
-                            value = value.Replace("[", "").Replace("]", "");
-                            var days = value.Split(',');
-                            var dayNames = new List<string>();
-                            foreach (var day in days)
+                            // Parse array format: [1,2,3,4,5,6] or "[1,2,3,4,5,6]"
+                            value = value.Trim().Trim('[', ']').Trim('"');
+                            if (!string.IsNullOrEmpty(value))
                             {
-                                var dayNum = day.Trim();
-                                dayNames.Add(dayNum switch
+                                var days = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                var dayNames = new List<string>();
+                                foreach (var day in days)
                                 {
-                                    "0" => "CN",
-                                    "1" => "T2",
-                                    "2" => "T3",
-                                    "3" => "T4",
-                                    "4" => "T5",
-                                    "5" => "T6",
-                                    "6" => "T7",
-                                    _ => dayNum
-                                });
+                                    var dayNum = day.Trim();
+                                    dayNames.Add(dayNum switch
+                                    {
+                                        "0" => "CN",
+                                        "1" => "T2",
+                                        "2" => "T3",
+                                        "3" => "T4",
+                                        "4" => "T5",
+                                        "5" => "T6",
+                                        "6" => "T7",
+                                        _ => dayNum
+                                    });
+                                }
+                                value = string.Join(", ", dayNames);
                             }
-                            value = string.Join(", ", dayNames);
                         }
                         
                         data[key] = value;
@@ -1285,6 +1293,13 @@
         {
             return null;
         }
+    }
+
+    private string ConvertToLocalTime(DateTime utcTime)
+    {
+        // Convert UTC to local time for display
+        var localTime = utcTime.ToLocalTime();
+        return localTime.ToString("dd/MM/yyyy HH:mm:ss");
     }
 
     public void Dispose()

@@ -12,13 +12,16 @@
              ShowCloseButton="true"
              Width="600px"
              MaxWidth="95%"
+             Height="auto"
+             MaxHeight="90vh"
              CloseOnOutsideClick="false"
              CssClass="timeframe-form-popup">
         <BodyContentTemplate Context="popupContext">
         <EditForm Model="@TimeFrame" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             
-            <div class="p-3">
+            <!-- Scrollable Content -->
+            <div class="p-3" style="max-height: calc(90vh - 150px); overflow-y: auto; overflow-x: hidden;">
                 <!-- Name -->
                 <div class="mb-3">
                     <label class="form-label">Tên khung thời gian <span class="text-danger">*</span></label>
@@ -137,20 +140,20 @@
                         <label class="form-check-label" for="isEnabled">Kích hoạt ngay</label>
                     </div>
                 </div>
+            </div>
 
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-secondary" @onclick="Cancel">
-                        <i class="fas fa-times"></i> Hủy
-                    </button>
-                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                        @if (isSaving)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                        }
-                        <i class="fas fa-save"></i> @(TimeFrame.Id == 0 ? "Thêm" : "Cập nhật")
-                    </button>
-                </div>
+            <!-- Fixed Footer Buttons -->
+            <div class="border-top p-3 bg-light d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    <i class="fas fa-save"></i> @(TimeFrame.Id == 0 ? "Thêm" : "Cập nhật")
+                </button>
             </div>
         </EditForm>
     </BodyContentTemplate>

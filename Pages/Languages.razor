@@ -117,7 +117,7 @@
 @if (showModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -128,7 +128,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="languageForm" OnValidSubmit="SaveLanguage">
+                    <EditForm id="languageForm" Model="languageForm" OnValidSubmit="SaveLanguage">
                         <DataAnnotationsValidator />
                         
                         <div class="form-group">
@@ -171,20 +171,19 @@
                             </label>
                             <small class="form-text text-muted">Chỉ có thể có 1 ngôn ngữ mặc định</small>
                         </div>
-
-                        <div class="modal-footer px-0 pb-0">
-                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                @if (isSaving)
-                                {
-                                    <span class="spinner-border spinner-border-sm mr-1"></span>
-                                }
-                                <i class="fas fa-save"></i> Lưu
-                            </button>
-                            <button type="button" class="btn btn-secondary" @onclick="CloseModal" disabled="@isSaving">
-                                <i class="fas fa-times"></i> Hủy
-                            </button>
-                        </div>
                     </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" form="languageForm" class="btn btn-primary" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                        }
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal" disabled="@isSaving">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
                 </div>
             </div>
         </div>

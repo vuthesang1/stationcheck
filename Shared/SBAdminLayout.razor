@@ -80,6 +80,16 @@
                     </li>
                 </AuthorizeView>
 
+                   <!-- Nav Item - Reports (Admin & Manager) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/reports") ? "active" : "")">
+                        <NavLink class="nav-link" href="/reports">
+                            <i class="fas fa-fw fa-chart-bar"></i>
+                            <span>@GetText("menu.reports", "Báo cáo")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
                 @* <!-- Nav Item - Time Schedules (Manager & Admin) -->
                 <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/schedules") ? "active" : "")">
@@ -136,25 +146,16 @@
                     @GetText("menu.personnel", "Nhân sự")
                 </div>
 
-                <!-- Nav Item - Reports (Admin & Manager) -->
-                <AuthorizeView Roles="Admin,Manager">
-                    <li class="nav-item @(IsActive("/reports") ? "active" : "")">
-                        <NavLink class="nav-link" href="/reports">
-                            <i class="fas fa-fw fa-chart-bar"></i>
-                            <span>@GetText("menu.reports", "Báo cáo")</span>
-                        </NavLink>
-                    </li>
-                </AuthorizeView>
-
+             
                 <!-- Nav Item - Employees (Manager & Admin) -->
-                <AuthorizeView Roles="Admin,Manager">
+                @* <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/employees") ? "active" : "")">
                         <NavLink class="nav-link" href="/employees">
                             <i class="fas fa-fw fa-users"></i>
                             <span>@GetText("menu.employees", "Nhân viên")</span>
                         </NavLink>
                     </li>
-                </AuthorizeView>
+                </AuthorizeView> *@
 
                 <!-- Nav Item - Users (Manager & Admin) -->
                 <AuthorizeView Roles="Admin,Manager">
