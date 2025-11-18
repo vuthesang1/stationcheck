@@ -158,7 +158,7 @@ namespace StationCheck.Services
                 //   - "[stm] ST000001"
                 //   - "[stm] 4" 
                 //   - "[STM] ST000001"
-                int? stationId = null;
+                Guid? stationId = null;
                 string? stationCode = null;
                 
                 // Remove [stm] prefix (case insensitive) and trim
@@ -182,6 +182,8 @@ namespace StationCheck.Services
                         _logger.LogWarning("[EmailService] Station not found for code: {StationCode}", stationCode);
                     }
                 }
+                // Try to parse as direct StationId (number only) - DISABLED: Legacy int ID parsing not supported with Guid migration
+                /*
                 else
                 {
                     // Try to parse as direct StationId (number only)
@@ -201,6 +203,7 @@ namespace StationCheck.Services
                         }
                     }
                 }
+                */
 
                 if (!stationId.HasValue)
                 {
@@ -235,6 +238,7 @@ namespace StationCheck.Services
                     }
 
                     // Alarm Start Time (D/M/Y H:M:S): 12/11/2025 16:03:57
+                    // ⚠️ Time from email is UTC+7 (Vietnam timezone), need to convert to UTC for database
                     var startTimeMatch = Regex.Match(body, @"Alarm Start Time \(D/M/Y H:M:S\):\s*(.+?)(?:\r?\n|$)");
                     if (startTimeMatch.Success)
                     {
@@ -245,7 +249,9 @@ namespace StationCheck.Services
                             System.Globalization.DateTimeStyles.None,
                             out DateTime alarmStartTime))
                         {
-                            alarmDetails["AlarmStartTime"] = alarmStartTime;
+                            // Convert from UTC+7 to UTC by subtracting 7 hours
+                            var alarmStartTimeUtc = alarmStartTime.AddHours(-7);
+                            alarmDetails["AlarmStartTime"] = alarmStartTimeUtc;
                         }
                     }
 
@@ -298,8 +304,27 @@ namespace StationCheck.Services
                 
                 if (alarmDetails.ContainsKey("AlarmInputChannelName"))
                 {
-                    cameraName = alarmDetails["AlarmInputChannelName"]?.ToString();
+                    // Sanitize camera name: trim, remove newlines, limit length to avoid truncation
+                    var rawCameraName = alarmDetails["AlarmInputChannelName"]?.ToString() ?? "";
+                    cameraName = rawCameraName
+                        .Replace("\r", "")
+                        .Replace("\n", "")
+                        .Trim();
+                    
+                    // Limit camera name to reasonable length to prevent CameraId overflow
+                    // CameraId format: "STATION_{Guid}_" = ~50 chars, leave room for camera name
+                    if (cameraName.Length > 100)
+                    {
+                        cameraName = cameraName.Substring(0, 100);
+                    }
+                    
                     cameraId = $"STATION_{stationId}_{cameraName}";
+                    
+                    // Final safety check: ensure CameraId doesn't exceed 200 chars
+                    if (cameraId.Length > 200)
+                    {
+                        cameraId = cameraId.Substring(0, 200);
+                    }
                 }
                 else
                 {
@@ -320,7 +345,7 @@ namespace StationCheck.Services
                     DetectedAt = alarmDetails.ContainsKey("AlarmStartTime") 
                         ? (DateTime)alarmDetails["AlarmStartTime"]! 
                         : receivedAt,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     IsProcessed = false
                 };
 
@@ -393,7 +418,7 @@ namespace StationCheck.Services
                             if (motionEvent.DetectedAt >= windowStart && motionEvent.DetectedAt <= windowEnd)
                             {
                                 alert.IsResolved = true;
-                                alert.ResolvedAt = DateTime.Now;
+                                alert.ResolvedAt = DateTime.UtcNow;
                                 alert.ResolvedBy = "System (Auto-resolved by email motion detection)";
                                 alert.Notes = $"Auto-resolved: Motion at {motionEvent.DetectedAt:yyyy-MM-dd HH:mm:ss} within tolerance [{windowStart:HH:mm}-{windowEnd:HH:mm}]";
                                 _context.MotionAlerts.Update(alert);

@@ -8,13 +8,16 @@ namespace StationCheck.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<SystemConfigurationService> _logger;
+        private readonly ConfigurationChangeNotifier _notifier;
 
         public SystemConfigurationService(
             ApplicationDbContext context,
-            ILogger<SystemConfigurationService> logger)
+            ILogger<SystemConfigurationService> logger,
+            ConfigurationChangeNotifier notifier)
         {
             _context = context;
             _logger = logger;
+            _notifier = notifier;
         }
 
         /// <summary>
@@ -101,13 +104,16 @@ namespace StationCheck.Services
                 key, value, modifiedBy
             );
 
+            // ✅ Notify subscribers that this config changed
+            _notifier.NotifyChange(key);
+
             return true;
         }
 
         /// <summary>
         /// Update configuration by ID
         /// </summary>
-        public async Task<bool> UpdateAsync(int id, string value, string modifiedBy)
+        public async Task<bool> UpdateAsync(Guid id, string value, string modifiedBy)
         {
             var config = await _context.SystemConfigurations.FindAsync(id);
 

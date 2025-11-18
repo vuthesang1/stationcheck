@@ -10,18 +10,18 @@ namespace StationCheck.Models
     public class TimeFrameHistory
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Reference tới TimeFrame (có thể null nếu TimeFrame đã bị xóa)
         /// </summary>
-        public int? TimeFrameId { get; set; }
+        public Guid? TimeFrameId { get; set; }
 
         /// <summary>
         /// Reference tới Station
         /// </summary>
         [Required]
-        public int StationId { get; set; }
+        public Guid? StationId { get; set; }
 
         /// <summary>
         /// Version number - tăng dần cho mỗi TimeFrame
@@ -62,7 +62,7 @@ namespace StationCheck.Models
         /// Thời điểm thay đổi
         /// </summary>
         [Required]
-        public DateTime ChangedAt { get; set; } = DateTime.Now;
+        public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public virtual TimeFrame? TimeFrame { get; set; }

@@ -17,10 +17,9 @@ namespace StationCheck.Migrations
                 name: "ConfigurationAuditLogs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EntityType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    EntityId = table.Column<int>(type: "int", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EntityName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     ActionType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     OldValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -57,16 +56,18 @@ namespace StationCheck.Migrations
                 name: "MonitoringProfile",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Version = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -77,9 +78,8 @@ namespace StationCheck.Migrations
                 name: "Stations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StationCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StationCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
@@ -90,7 +90,10 @@ namespace StationCheck.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,8 +104,7 @@ namespace StationCheck.Migrations
                 name: "SystemConfigurations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
@@ -124,8 +126,7 @@ namespace StationCheck.Migrations
                 name: "Translations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LanguageCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Key = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -148,9 +149,8 @@ namespace StationCheck.Migrations
                 name: "MonitoringProfileHistory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MonitoringProfileId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MonitoringProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Version = table.Column<int>(type: "int", nullable: false),
                     ProfileSnapshot = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -172,10 +172,9 @@ namespace StationCheck.Migrations
                 name: "EmailEvents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StationCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    StationId = table.Column<int>(type: "int", nullable: true),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     AlarmEvent = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     AlarmInputChannelNo = table.Column<int>(type: "int", nullable: true),
                     AlarmInputChannelName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
@@ -207,17 +206,19 @@ namespace StationCheck.Migrations
                 name: "MonitoringConfiguration",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    StationId = table.Column<int>(type: "int", nullable: true),
-                    ProfileId = table.Column<int>(type: "int", nullable: true),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -241,7 +242,7 @@ namespace StationCheck.Migrations
                     Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CameraId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CameraName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    StationId = table.Column<int>(type: "int", nullable: true),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     EmailMessageId = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     EmailSubject = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     SnapshotPath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -265,11 +266,10 @@ namespace StationCheck.Migrations
                 name: "TimeFrames",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    StationId = table.Column<int>(type: "int", nullable: true),
-                    ProfileId = table.Column<int>(type: "int", nullable: true),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     FrequencyMinutes = table.Column<int>(type: "int", nullable: false),
@@ -279,7 +279,10 @@ namespace StationCheck.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -308,13 +311,16 @@ namespace StationCheck.Migrations
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    StationId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    StationId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    StationId1 = table.Column<int>(type: "int", nullable: true)
+                    ModifiedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -336,10 +342,9 @@ namespace StationCheck.Migrations
                 name: "TimeFrameHistories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TimeFrameId = table.Column<int>(type: "int", nullable: true),
-                    StationId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TimeFrameId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Version = table.Column<int>(type: "int", nullable: false),
                     Action = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     ConfigurationSnapshot = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -367,8 +372,7 @@ namespace StationCheck.Migrations
                 name: "RefreshTokens",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -392,12 +396,12 @@ namespace StationCheck.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    StationId = table.Column<int>(type: "int", nullable: true),
+                    StationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     StationName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    MonitoringConfigurationId = table.Column<int>(type: "int", nullable: true),
-                    TimeFrameId = table.Column<int>(type: "int", nullable: true),
-                    ProfileHistoryId = table.Column<int>(type: "int", nullable: true),
-                    TimeFrameHistoryId = table.Column<int>(type: "int", nullable: true),
+                    MonitoringConfigurationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TimeFrameId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProfileHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TimeFrameHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ConfigurationSnapshot = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
                     AlertTime = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     Severity = table.Column<int>(type: "int", nullable: false),
@@ -413,7 +417,7 @@ namespace StationCheck.Migrations
                     Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CameraId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CameraId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CameraName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
@@ -452,17 +456,17 @@ namespace StationCheck.Migrations
                 columns: new[] { "Code", "CreatedAt", "FlagIcon", "IsActive", "IsDefault", "Name", "NativeName" },
                 values: new object[,]
                 {
-                    { "en", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(816), "us", true, false, "English", "English" },
-                    { "vi", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(810), "vn", true, true, "Vietnamese", "Tiếng Việt" }
+                    { "en", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1482), "us", true, false, "English", "English" },
+                    { "vi", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1480), "vn", true, true, "Vietnamese", "Tiếng Việt" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Stations",
-                columns: new[] { "Id", "Address", "ContactPerson", "ContactPhone", "CreatedAt", "CreatedBy", "Description", "IsActive", "LastMotionDetectedAt", "ModifiedAt", "ModifiedBy", "Name", "StationCode" },
+                columns: new[] { "Id", "Address", "ContactPerson", "ContactPhone", "CreatedAt", "CreatedBy", "DeletedAt", "DeletedBy", "Description", "IsActive", "IsDeleted", "LastMotionDetectedAt", "ModifiedAt", "ModifiedBy", "Name", "StationCode" },
                 values: new object[,]
                 {
-                    { 1, "Quận Hoàn Kiếm, Hà Nội", "Nguyễn Văn A", "0123456789", new DateTime(2025, 11, 16, 14, 28, 19, 659, DateTimeKind.Utc).AddTicks(2451), null, "Trạm quan trắc chất lượng nước sông Hồng", true, null, null, null, "Trạm Quan Trắc Sông Hồng", "123123123" },
-                    { 2, "Quận Đống Đa, Hà Nội", "Trần Thị B", "0987654321", new DateTime(2025, 11, 16, 14, 28, 19, 659, DateTimeKind.Utc).AddTicks(2454), null, "Trạm quan trắc chất lượng nước sông Tô Lịch", true, null, null, null, "Trạm Quan Trắc Sông Tô Lịch", "121123123" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "Quận Hoàn Kiếm, Hà Nội", "Nguyễn Văn A", "0123456789", new DateTime(2025, 11, 18, 6, 33, 52, 21, DateTimeKind.Utc).AddTicks(2664), null, null, null, "Trạm quan trắc chất lượng nước sông Hồng", true, false, null, null, null, "Trạm Quan Trắc Sông Hồng", "123123123" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "Quận Đống Đa, Hà Nội", "Trần Thị B", "0987654321", new DateTime(2025, 11, 18, 6, 33, 52, 21, DateTimeKind.Utc).AddTicks(2668), null, null, null, "Trạm quan trắc chất lượng nước sông Tô Lịch", true, false, null, null, null, "Trạm Quan Trắc Sông Tô Lịch", "121123123" }
                 });
 
             migrationBuilder.InsertData(
@@ -470,18 +474,18 @@ namespace StationCheck.Migrations
                 columns: new[] { "Id", "Category", "CreatedAt", "CreatedBy", "Description", "DisplayName", "IsEditable", "Key", "ModifiedAt", "ModifiedBy", "Value", "ValueType" },
                 values: new object[,]
                 {
-                    { 1, "BackgroundServices", new DateTime(2025, 11, 16, 14, 28, 20, 740, DateTimeKind.Utc).AddTicks(222), "System", "Khoảng thời gian quét email mới (giây)", "Email Monitor Interval", true, "EmailMonitorInterval", null, null, "180", "int" },
-                    { 2, "BackgroundServices", new DateTime(2025, 11, 16, 14, 28, 20, 740, DateTimeKind.Utc).AddTicks(225), "System", "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)", "Alert Generation Interval", true, "AlertGenerationInterval", null, null, "3600", "int" },
-                    { 3, "BackgroundServices", new DateTime(2025, 11, 16, 14, 28, 20, 740, DateTimeKind.Utc).AddTicks(228), "System", "Khoảng thời gian kiểm tra chuyển động (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" }
+                    { new Guid("cccccccc-0001-0000-0000-000000000001"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3310), "System", "Khoảng thời gian quét email mới (giây)", "Email Monitor Interval", true, "EmailMonitorInterval", null, null, "180", "int" },
+                    { new Guid("cccccccc-0002-0000-0000-000000000002"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3316), "System", "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)", "Alert Generation Interval", true, "AlertGenerationInterval", null, null, "3600", "int" },
+                    { new Guid("cccccccc-0003-0000-0000-000000000003"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3322), "System", "Khoảng thời gian kiểm tra chuyển động (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "CreatedBy", "Email", "FullName", "IsActive", "LastLoginAt", "ModifiedAt", "ModifiedBy", "PasswordHash", "Role", "StationId", "StationId1", "Username" },
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DeletedBy", "Email", "FullName", "IsActive", "IsDeleted", "LastLoginAt", "ModifiedAt", "ModifiedBy", "PasswordHash", "Role", "StationId", "StationId1", "Username" },
                 values: new object[,]
                 {
-                    { "USR001", new DateTime(2025, 11, 16, 14, 28, 20, 735, DateTimeKind.Utc).AddTicks(3351), null, "admin@stationcheck.com", "System Administrator", true, null, null, null, "$2a$12$9bB3aM2wtwbbtVl0EWqZF.7iZTmPLLLgMVm5PcvY2HzR2S7ob5fMS", 2, null, null, "admin" },
-                    { "USR002", new DateTime(2025, 11, 16, 14, 28, 20, 735, DateTimeKind.Utc).AddTicks(3356), null, "manager@stationcheck.com", "Department Manager", true, null, null, null, "$2a$12$oohWYkn5PXh34VET5QdR7uCmbv4P5mvrwr7dk4DnpFn6lL/3ZIHQq", 1, null, null, "manager" }
+                    { "11111111-aaaa-aaaa-aaaa-111111111111", new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5388), null, null, null, "admin@stationcheck.com", "System Administrator", true, false, null, null, null, "$2a$12$FSPVbMyLtpvA./fz4KQ3ie5KW/FB5vqu1zc6jkBY93oYQ3XEuhsMS", 2, null, null, "admin" },
+                    { "22222222-bbbb-bbbb-bbbb-222222222222", new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5397), null, null, null, "manager@stationcheck.com", "Department Manager", true, false, null, null, null, "$2a$12$59vWYm2Mou4O3c29/g1ANuMoK7vcl9ETz5gqpVeiKf5PdxXKCW3FC", 1, null, null, "manager" }
                 });
 
             migrationBuilder.InsertData(
@@ -489,78 +493,78 @@ namespace StationCheck.Migrations
                 columns: new[] { "Id", "Category", "CreatedAt", "Key", "LanguageCode", "ModifiedAt", "Value" },
                 values: new object[,]
                 {
-                    { 1, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(877), "menu.dashboard", "vi", null, "Trang chủ" },
-                    { 2, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(879), "menu.stations", "vi", null, "Quản lý Trạm" },
-                    { 3, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(881), "menu.users", "vi", null, "Quản lý User" },
-                    { 4, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(883), "menu.settings", "vi", null, "Cấu hình" },
-                    { 5, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(885), "button.add", "vi", null, "Thêm mới" },
-                    { 6, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(887), "button.edit", "vi", null, "Chỉnh sửa" },
-                    { 7, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(889), "button.delete", "vi", null, "Xóa" },
-                    { 8, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(891), "button.save", "vi", null, "Lưu" },
-                    { 9, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(893), "button.cancel", "vi", null, "Hủy" },
-                    { 10, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(912), "station.name", "vi", null, "Tên trạm" },
-                    { 11, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(914), "station.address", "vi", null, "Địa chỉ" },
-                    { 12, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(916), "station.contact", "vi", null, "Người liên hệ" },
-                    { 13, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(918), "station.phone", "vi", null, "Số điện thoại" },
-                    { 14, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(921), "station.page_title", "vi", null, "Quản lý Trạm" },
-                    { 15, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(923), "station.list_title", "vi", null, "Danh sách Trạm Quan Trắc" },
-                    { 16, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(925), "station.add_button", "vi", null, "Thêm Trạm Mới" },
-                    { 17, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(927), "station.edit_title_add", "vi", null, "Thêm Trạm Mới" },
-                    { 18, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(929), "station.edit_title_edit", "vi", null, "Chỉnh sửa Trạm" },
-                    { 19, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(931), "station.search_placeholder", "vi", null, "Tìm kiếm..." },
-                    { 20, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(934), "station.name_column", "vi", null, "Tên Trạm" },
-                    { 21, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(936), "station.address_column", "vi", null, "Địa chỉ" },
-                    { 22, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(938), "station.contact_column", "vi", null, "Người liên hệ" },
-                    { 23, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(940), "station.phone_column", "vi", null, "Số điện thoại" },
-                    { 24, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(942), "station.actions_column", "vi", null, "Thao tác" },
-                    { 25, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(944), "station.name_label", "vi", null, "Tên Trạm:" },
-                    { 26, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(946), "station.address_label", "vi", null, "Địa chỉ:" },
-                    { 27, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(948), "station.description_label", "vi", null, "Mô tả:" },
-                    { 28, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(950), "station.contact_label", "vi", null, "Người liên hệ:" },
-                    { 29, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(952), "station.phone_label", "vi", null, "Số điện thoại:" },
-                    { 30, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(954), "station.active_label", "vi", null, "Kích hoạt giám sát:" },
-                    { 31, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(956), "message.confirm_delete_station", "vi", null, "Bạn có chắc muốn xóa trạm này?" },
-                    { 32, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(958), "message.delete_error", "vi", null, "Không thể xóa" },
-                    { 33, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(961), "message.error", "vi", null, "Lỗi" },
-                    { 101, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(963), "menu.dashboard", "en", null, "Dashboard" },
-                    { 102, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(965), "menu.stations", "en", null, "Station Management" },
-                    { 103, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(967), "menu.users", "en", null, "User Management" },
-                    { 104, "menu", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(969), "menu.settings", "en", null, "Settings" },
-                    { 105, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(971), "button.add", "en", null, "Add New" },
-                    { 106, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(973), "button.edit", "en", null, "Edit" },
-                    { 107, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(975), "button.delete", "en", null, "Delete" },
-                    { 108, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(978), "button.save", "en", null, "Save" },
-                    { 109, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(980), "button.cancel", "en", null, "Cancel" },
-                    { 110, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(983), "station.name", "en", null, "Station Name" },
-                    { 111, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(985), "station.address", "en", null, "Address" },
-                    { 112, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(987), "station.contact", "en", null, "Contact Person" },
-                    { 113, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(989), "station.phone", "en", null, "Phone Number" },
-                    { 114, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(991), "station.page_title", "en", null, "Station Management" },
-                    { 115, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(994), "station.list_title", "en", null, "Monitoring Station List" },
-                    { 116, "button", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(996), "station.add_button", "en", null, "Add New Station" },
-                    { 117, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1190), "station.edit_title_add", "en", null, "Add New Station" },
-                    { 118, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1193), "station.edit_title_edit", "en", null, "Edit Station" },
-                    { 119, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1195), "station.search_placeholder", "en", null, "Search..." },
-                    { 120, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1197), "station.name_column", "en", null, "Station Name" },
-                    { 121, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1199), "station.address_column", "en", null, "Address" },
-                    { 122, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1201), "station.contact_column", "en", null, "Contact Person" },
-                    { 123, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1203), "station.phone_column", "en", null, "Phone Number" },
-                    { 124, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1205), "station.actions_column", "en", null, "Actions" },
-                    { 125, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1208), "station.name_label", "en", null, "Station Name:" },
-                    { 126, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1210), "station.address_label", "en", null, "Address:" },
-                    { 127, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1212), "station.description_label", "en", null, "Description:" },
-                    { 128, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1214), "station.contact_label", "en", null, "Contact Person:" },
-                    { 129, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1215), "station.phone_label", "en", null, "Phone Number:" },
-                    { 130, "label", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1217), "station.active_label", "en", null, "Enable Monitoring:" },
-                    { 131, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1219), "message.confirm_delete_station", "en", null, "Are you sure you want to delete this station?" },
-                    { 132, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1221), "message.delete_error", "en", null, "Cannot delete" },
-                    { 133, "message", new DateTime(2025, 11, 16, 14, 28, 20, 739, DateTimeKind.Utc).AddTicks(1223), "message.error", "en", null, "Error" }
+                    { new Guid("aaaaaaaa-0001-0000-0000-000000000001"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1527), "menu.dashboard", "vi", null, "Trang chủ" },
+                    { new Guid("aaaaaaaa-0002-0000-0000-000000000002"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1529), "menu.stations", "vi", null, "Quản lý Trạm" },
+                    { new Guid("aaaaaaaa-0003-0000-0000-000000000003"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1531), "menu.users", "vi", null, "Quản lý User" },
+                    { new Guid("aaaaaaaa-0004-0000-0000-000000000004"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1533), "menu.settings", "vi", null, "Cấu hình" },
+                    { new Guid("aaaaaaaa-0005-0000-0000-000000000005"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1535), "button.add", "vi", null, "Thêm mới" },
+                    { new Guid("aaaaaaaa-0006-0000-0000-000000000006"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1537), "button.edit", "vi", null, "Chỉnh sửa" },
+                    { new Guid("aaaaaaaa-0007-0000-0000-000000000007"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1539), "button.delete", "vi", null, "Xóa" },
+                    { new Guid("aaaaaaaa-0008-0000-0000-000000000008"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1541), "button.save", "vi", null, "Lưu" },
+                    { new Guid("aaaaaaaa-0009-0000-0000-000000000009"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1543), "button.cancel", "vi", null, "Hủy" },
+                    { new Guid("aaaaaaaa-0010-0000-0000-000000000010"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1551), "station.name", "vi", null, "Tên trạm" },
+                    { new Guid("aaaaaaaa-0011-0000-0000-000000000011"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1553), "station.address", "vi", null, "Địa chỉ" },
+                    { new Guid("aaaaaaaa-0012-0000-0000-000000000012"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1555), "station.contact", "vi", null, "Người liên hệ" },
+                    { new Guid("aaaaaaaa-0013-0000-0000-000000000013"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1557), "station.phone", "vi", null, "Số điện thoại" },
+                    { new Guid("aaaaaaaa-0014-0000-0000-000000000014"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1560), "station.page_title", "vi", null, "Quản lý Trạm" },
+                    { new Guid("aaaaaaaa-0015-0000-0000-000000000015"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1562), "station.list_title", "vi", null, "Danh sách Trạm Quan Trắc" },
+                    { new Guid("aaaaaaaa-0016-0000-0000-000000000016"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1563), "station.add_button", "vi", null, "Thêm Trạm Mới" },
+                    { new Guid("aaaaaaaa-0017-0000-0000-000000000017"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1565), "station.edit_title_add", "vi", null, "Thêm Trạm Mới" },
+                    { new Guid("aaaaaaaa-0018-0000-0000-000000000018"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1567), "station.edit_title_edit", "vi", null, "Chỉnh sửa Trạm" },
+                    { new Guid("aaaaaaaa-0019-0000-0000-000000000019"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1569), "station.search_placeholder", "vi", null, "Tìm kiếm..." },
+                    { new Guid("aaaaaaaa-0020-0000-0000-000000000020"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1571), "station.name_column", "vi", null, "Tên Trạm" },
+                    { new Guid("aaaaaaaa-0021-0000-0000-000000000021"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1573), "station.address_column", "vi", null, "Địa chỉ" },
+                    { new Guid("aaaaaaaa-0022-0000-0000-000000000022"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1575), "station.contact_column", "vi", null, "Người liên hệ" },
+                    { new Guid("aaaaaaaa-0023-0000-0000-000000000023"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1577), "station.phone_column", "vi", null, "Số điện thoại" },
+                    { new Guid("aaaaaaaa-0024-0000-0000-000000000024"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1579), "station.actions_column", "vi", null, "Thao tác" },
+                    { new Guid("aaaaaaaa-0025-0000-0000-000000000025"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1581), "station.name_label", "vi", null, "Tên Trạm:" },
+                    { new Guid("aaaaaaaa-0026-0000-0000-000000000026"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1582), "station.address_label", "vi", null, "Địa chỉ:" },
+                    { new Guid("aaaaaaaa-0027-0000-0000-000000000027"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1584), "station.description_label", "vi", null, "Mô tả:" },
+                    { new Guid("aaaaaaaa-0028-0000-0000-000000000028"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1586), "station.contact_label", "vi", null, "Người liên hệ:" },
+                    { new Guid("aaaaaaaa-0029-0000-0000-000000000029"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1601), "station.phone_label", "vi", null, "Số điện thoại:" },
+                    { new Guid("aaaaaaaa-0030-0000-0000-000000000030"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1603), "station.active_label", "vi", null, "Kích hoạt giám sát:" },
+                    { new Guid("aaaaaaaa-0031-0000-0000-000000000031"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1605), "message.confirm_delete_station", "vi", null, "Bạn có chắc muốn xóa trạm này?" },
+                    { new Guid("aaaaaaaa-0032-0000-0000-000000000032"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1607), "message.delete_error", "vi", null, "Không thể xóa" },
+                    { new Guid("aaaaaaaa-0033-0000-0000-000000000033"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1609), "message.error", "vi", null, "Lỗi" },
+                    { new Guid("bbbbbbbb-0101-0000-0000-000000000101"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1611), "menu.dashboard", "en", null, "Dashboard" },
+                    { new Guid("bbbbbbbb-0102-0000-0000-000000000102"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1613), "menu.stations", "en", null, "Station Management" },
+                    { new Guid("bbbbbbbb-0103-0000-0000-000000000103"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1615), "menu.users", "en", null, "User Management" },
+                    { new Guid("bbbbbbbb-0104-0000-0000-000000000104"), "menu", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1617), "menu.settings", "en", null, "Settings" },
+                    { new Guid("bbbbbbbb-0105-0000-0000-000000000105"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1619), "button.add", "en", null, "Add New" },
+                    { new Guid("bbbbbbbb-0106-0000-0000-000000000106"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1621), "button.edit", "en", null, "Edit" },
+                    { new Guid("bbbbbbbb-0107-0000-0000-000000000107"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1622), "button.delete", "en", null, "Delete" },
+                    { new Guid("bbbbbbbb-0108-0000-0000-000000000108"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1624), "button.save", "en", null, "Save" },
+                    { new Guid("bbbbbbbb-0109-0000-0000-000000000109"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1626), "button.cancel", "en", null, "Cancel" },
+                    { new Guid("bbbbbbbb-0110-0000-0000-000000000110"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1628), "station.name", "en", null, "Station Name" },
+                    { new Guid("bbbbbbbb-0111-0000-0000-000000000111"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1630), "station.address", "en", null, "Address" },
+                    { new Guid("bbbbbbbb-0112-0000-0000-000000000112"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1632), "station.contact", "en", null, "Contact Person" },
+                    { new Guid("bbbbbbbb-0113-0000-0000-000000000113"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1634), "station.phone", "en", null, "Phone Number" },
+                    { new Guid("bbbbbbbb-0114-0000-0000-000000000114"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1636), "station.page_title", "en", null, "Station Management" },
+                    { new Guid("bbbbbbbb-0115-0000-0000-000000000115"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1637), "station.list_title", "en", null, "Monitoring Station List" },
+                    { new Guid("bbbbbbbb-0116-0000-0000-000000000116"), "button", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1639), "station.add_button", "en", null, "Add New Station" },
+                    { new Guid("bbbbbbbb-0117-0000-0000-000000000117"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1641), "station.edit_title_add", "en", null, "Add New Station" },
+                    { new Guid("bbbbbbbb-0118-0000-0000-000000000118"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1643), "station.edit_title_edit", "en", null, "Edit Station" },
+                    { new Guid("bbbbbbbb-0119-0000-0000-000000000119"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1645), "station.search_placeholder", "en", null, "Search..." },
+                    { new Guid("bbbbbbbb-0120-0000-0000-000000000120"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1647), "station.name_column", "en", null, "Station Name" },
+                    { new Guid("bbbbbbbb-0121-0000-0000-000000000121"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1649), "station.address_column", "en", null, "Address" },
+                    { new Guid("bbbbbbbb-0122-0000-0000-000000000122"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1651), "station.contact_column", "en", null, "Contact Person" },
+                    { new Guid("bbbbbbbb-0123-0000-0000-000000000123"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1653), "station.phone_column", "en", null, "Phone Number" },
+                    { new Guid("bbbbbbbb-0124-0000-0000-000000000124"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1655), "station.actions_column", "en", null, "Actions" },
+                    { new Guid("bbbbbbbb-0125-0000-0000-000000000125"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1656), "station.name_label", "en", null, "Station Name:" },
+                    { new Guid("bbbbbbbb-0126-0000-0000-000000000126"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1658), "station.address_label", "en", null, "Address:" },
+                    { new Guid("bbbbbbbb-0127-0000-0000-000000000127"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1683), "station.description_label", "en", null, "Description:" },
+                    { new Guid("bbbbbbbb-0128-0000-0000-000000000128"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1685), "station.contact_label", "en", null, "Contact Person:" },
+                    { new Guid("bbbbbbbb-0129-0000-0000-000000000129"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1687), "station.phone_label", "en", null, "Phone Number:" },
+                    { new Guid("bbbbbbbb-0130-0000-0000-000000000130"), "label", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1688), "station.active_label", "en", null, "Enable Monitoring:" },
+                    { new Guid("bbbbbbbb-0131-0000-0000-000000000131"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1690), "message.confirm_delete_station", "en", null, "Are you sure you want to delete this station?" },
+                    { new Guid("bbbbbbbb-0132-0000-0000-000000000132"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1692), "message.delete_error", "en", null, "Cannot delete" },
+                    { new Guid("bbbbbbbb-0133-0000-0000-000000000133"), "message", new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1694), "message.error", "en", null, "Error" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "CreatedBy", "Email", "FullName", "IsActive", "LastLoginAt", "ModifiedAt", "ModifiedBy", "PasswordHash", "Role", "StationId", "StationId1", "Username" },
-                values: new object[] { "USR003", new DateTime(2025, 11, 16, 14, 28, 20, 735, DateTimeKind.Utc).AddTicks(3361), null, "employee1@stationcheck.com", "Nhân viên Trạm 1", true, null, null, null, "$2a$12$cvmhS4YQ1TRjrhKTxW4ocuc3dzRlzmVaYKmPDMaekG0/Lt.nuZZWu", 0, 1, null, "employee1" });
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "DeletedAt", "DeletedBy", "Email", "FullName", "IsActive", "IsDeleted", "LastLoginAt", "ModifiedAt", "ModifiedBy", "PasswordHash", "Role", "StationId", "StationId1", "Username" },
+                values: new object[] { "33333333-cccc-cccc-cccc-333333333333", new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5413), null, null, null, "employee1@stationcheck.com", "Nhân viên Trạm 1", true, false, null, null, null, "$2a$12$z3CpZAUQUCyhhWl7HbpbPuTTr4NyFQ6ZLIXx0wjfaqjYoPx5H7lZW", 0, new Guid("11111111-1111-1111-1111-111111111111"), null, "employee1" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ConfigurationAuditLogs_ChangedAt",
@@ -593,11 +597,6 @@ namespace StationCheck.Migrations
                 column: "IsProcessed");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmailEvents_StationCode",
-                table: "EmailEvents",
-                column: "StationCode");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EmailEvents_StationId",
                 table: "EmailEvents",
                 column: "StationId");
@@ -626,6 +625,11 @@ namespace StationCheck.Migrations
                 name: "IX_MotionAlerts_AlertTime",
                 table: "MotionAlerts",
                 column: "AlertTime");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MotionAlerts_CameraId",
+                table: "MotionAlerts",
+                column: "CameraId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MotionAlerts_IsResolved",

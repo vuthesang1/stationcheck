@@ -68,7 +68,7 @@
                                         {
                                             <br />
                                             <small class="text-muted">
-                                                Sửa lần cuối: @config.ModifiedAt.Value.ToString("dd/MM/yyyy HH:mm") 
+                                                Sửa lần cuối: @config.ModifiedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") 
                                                 bởi @config.ModifiedBy
                                             </small>
                                         }
@@ -124,7 +124,7 @@
 @code {
     private List<SystemConfiguration>? configurations;
     private bool isLoading = true;
-    private int? editingId = null;
+    private Guid? editingId = null;
     private string editValue = string.Empty;
     private string? message;
     private bool isError;
@@ -166,7 +166,7 @@
         message = null;
     }
 
-    private async Task SaveEdit(int configId)
+    private async Task SaveEdit(Guid configId)
     {
         try
         {

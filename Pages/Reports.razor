@@ -101,7 +101,7 @@
 
     /* Auto-height for grids to fill available space */
     .reports-grid {
-        height: calc(100vh - 340px) !important;
+        height: calc(100vh - 429px) !important;
     }
 
     .reports-grid .dxbs-grid {
@@ -171,8 +171,8 @@
                     }
                     <div class="col-md-2">
                         <label class="form-label">Trạm</label>
-                        <select class="form-select form-select-sm" @bind="selectedStationId" @bind:after="LoadAlertData">
-                            <option value="0">Tất cả</option>
+                        <select class="form-select form-select-sm" @bind="selectedStationIdString" @bind:after="LoadAlertData">
+                            <option value="00000000-0000-0000-0000-000000000000">Tất cả</option>
                             @foreach (var station in stations)
                             {
                                 <option value="@station.Id">@station.Name</option>
@@ -197,7 +197,7 @@
                     }
                     <div class="col-md-@(alertPeriod == "custom" ? "1" : "6") d-flex align-items-end justify-content-end">
                         <button class="btn btn-success btn-sm" @onclick="ExportAlertsToExcel" disabled="@isExporting">
-                            <i class="fas fa-file-excel me-1"></i>@(isExporting ? "Đang xuất..." : "Xuất Excel")
+                            <i class="fas fa-file-excel me-1 pr-1"></i>@(isExporting ? "Đang xuất..." : "Xuất Excel")
                         </button>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
                             SizeMode="SizeMode.Medium"
                             >
                         <Columns>
-                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="180px">
+                            <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="160px">
                                 <CellDisplayTemplate>
                                     @{
                                         var alert = (MotionAlert)context.DataItem;
@@ -382,8 +382,8 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Trạm</label>
-                        <select class="form-select form-select-sm" @bind="auditStationId" @bind:after="LoadAuditData">
-                            <option value="0">Tất cả</option>
+                        <select class="form-select form-select-sm" @bind="auditStationIdString" @bind:after="LoadAuditData">
+                            <option value="00000000-0000-0000-0000-000000000000">Tất cả</option>
                             @foreach (var station in stations)
                             {
                                 <option value="@station.Id">@station.StationCode - @station.Name</option>
@@ -688,7 +688,7 @@
     private string alertPeriod = "week";
     private DateTime alertStartDate = DateTime.Today.AddDays(-7);
     private DateTime alertEndDate = DateTime.Today;
-    private int selectedStationId = 0;
+    private Guid selectedStationId = Guid.Empty;
     private string alertStatus = "all";
     private List<MotionAlert> alerts = new();
     private bool isLoadingAlerts = false;
@@ -704,14 +704,14 @@
     // Audit Log
     private string auditEntityType = "all";
     private string auditActionType = "all";
-    private int auditStationId = 0;
+    private Guid auditStationId = Guid.Empty;
     private DateTime auditStartDate = DateTime.Today.AddMonths(-1);
     private DateTime auditEndDate = DateTime.Today;
     private bool auditDateError = false;
     private string auditDateErrorMessage = string.Empty;
     private List<ConfigurationAuditLog> auditLogs = new();
     private bool isLoadingAudit = false;
-    private int? auditEntityId = null;
+    private Guid? auditEntityId = null;
     private bool showAuditDetailModal = false;
     private ConfigurationAuditLog? selectedAuditLog = null;
 
@@ -742,7 +742,10 @@
             // If entityType is Station, use it as stationId to show all related changes (Station + TimeFrames + Profile)
             if (entityType == "Station")
             {
-                auditStationId = entityId;
+                if (Guid.TryParse(entityIdStr, out var entityGuid))
+                {
+                    auditStationId = entityGuid;
+                }
                 auditEntityType = "all"; // Show all entity types for this station
                 // Don't filter by specific entityId, show all related entities
             }
@@ -750,9 +753,11 @@
             {
                 // For other entity types (TimeFrame, etc.), filter by specific entityId
                 auditEntityType = entityType ?? "all";
-                auditEntityId = entityId;
+                if (Guid.TryParse(entityIdStr, out var entityGuid))
+                {
+                    auditEntityId = entityGuid;
+                }
             }
-            
             // If we have entityId for audit, extend date range
             if (activeTab == "audit")
             {
@@ -762,9 +767,9 @@
         
         // Parse stationId from URL for filtering by station (alternative parameter)
         var stationIdStr = query["stationId"];
-        if (int.TryParse(stationIdStr, out var stationId))
+        if (Guid.TryParse(stationIdStr, out var stationGuid))
         {
-            auditStationId = stationId;
+            auditStationId = stationGuid;
             if (activeTab == "audit")
             {
                 auditStartDate = DateTime.Today.AddDays(-90);
@@ -843,7 +848,7 @@
                 .Include(a => a.TimeFrame)
                 .Where(a => a.AlertTime >= startDate && a.AlertTime <= endDate.AddDays(1));
 
-            if (selectedStationId > 0)
+            if (selectedStationId != Guid.Empty)
             {
                 query = query.Where(a => a.StationId == selectedStationId);
             }
@@ -893,7 +898,7 @@
                 .GroupBy(m => new { m.StationId, m.StationName })
                 .Select(g => new MotionStatistic
                 {
-                    StationId = g.Key.StationId ?? 0,
+                    StationId = g.Key.StationId ?? Guid.Empty,
                     StationName = g.Key.StationName ?? "Unknown",
                     TotalCount = g.Sum(x => x.Count),
                     AveragePerDay = g.Sum(x => x.Count) / (double)days,
@@ -947,7 +952,7 @@
                 query = query.Where(a => a.ActionType == auditActionType);
             }
 
-            if (auditStationId > 0)
+            if (auditStationId != Guid.Empty)
             {
                 // Get TimeFrame IDs for this station (including soft-deleted ones for audit history)
                 var timeFrameIds = await context.TimeFrames
@@ -1015,7 +1020,7 @@
             int row = 2;
             foreach (var alert in alerts)
             {
-                worksheet.Cell(row, 1).Value = alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss");
+                worksheet.Cell(row, 1).Value = alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cell(row, 2).Value = alert.StationName ?? "";
                 worksheet.Cell(row, 3).Value = alert.Message ?? "";
                 worksheet.Cell(row, 4).Value = alert.Severity.ToString();
@@ -1199,11 +1204,35 @@
 
     public class MotionStatistic
     {
-        public int StationId { get; set; }
+        public Guid StationId { get; set; }
         public string StationName { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public double AveragePerDay { get; set; }
         public DateTime? MaxDate { get; set; }
         public int MaxCount { get; set; }
+    }
+
+    private string selectedStationIdString
+    {
+        get => selectedStationId == Guid.Empty ? "00000000-0000-0000-0000-000000000000" : selectedStationId.ToString();
+        set
+        {
+            if (Guid.TryParse(value, out var guid))
+                selectedStationId = guid;
+            else
+                selectedStationId = Guid.Empty;
+        }
+    }
+
+    private string auditStationIdString
+    {
+        get => auditStationId == Guid.Empty ? "00000000-0000-0000-0000-000000000000" : auditStationId.ToString();
+        set
+        {
+            if (Guid.TryParse(value, out var guid))
+                auditStationId = guid;
+            else
+                auditStationId = Guid.Empty;
+        }
     }
 }

@@ -131,6 +131,16 @@
                     </li>
                 </AuthorizeView>
 
+                    <!-- Nav Item - System Configuration (Admin Only) -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <li class="nav-item @(IsActive("/email-simulator") ? "active" : "")">
+                        <NavLink class="nav-link" href="/email-simulator">
+                            <i class="fas fa-fw fa-cogs"></i>
+                            <span>@GetText("menu.email_simulator", "Test Email")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
 
                 <!-- Divider -->
                 <hr class="sidebar-divider">
@@ -280,7 +290,7 @@
                 <!-- End of Main Content -->
 
                 <!-- Footer -->
-                <footer class="sticky-footer bg-white p-3">
+                <footer class="sticky-footer bg-white pt-1">
                     <div class="container my-auto p-2">
                         <div class="copyright text-center my-auto">
                             <span>Copyright &copy; StationCheck @DateTime.Now.Year</span>

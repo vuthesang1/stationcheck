@@ -37,7 +37,7 @@ namespace StationCheck.Models
         public bool IsActive { get; set; } = true;
 
         // Station assignment for StationEmployee role
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         public Station? Station { get; set; }
 
         public DateTime? LastLoginAt { get; set; }
@@ -46,7 +46,7 @@ namespace StationCheck.Models
     public class RefreshToken
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -59,7 +59,7 @@ namespace StationCheck.Models
         [Required]
         public DateTime ExpiresAt { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsRevoked { get; set; } = false;
 

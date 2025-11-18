@@ -9,14 +9,14 @@ namespace StationCheck.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         // Legacy camera reference (keep for backwards compatibility)
-        [MaxLength(50)]
+        [MaxLength(200)]
         public string? CameraId { get; set; }
 
         [MaxLength(200)]
         public string? CameraName { get; set; }
 
         // ✅ NEW: Station reference (primary for monitoring)
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         
         [ForeignKey(nameof(StationId))]
         public Station? Station { get; set; }
@@ -40,10 +40,10 @@ namespace StationCheck.Models
         [MaxLength(2000)]
         public string? Payload { get; set; }
 
-        public DateTime DetectedAt { get; set; } = DateTime.Now;
+        public DateTime DetectedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsProcessed { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -17,11 +17,11 @@ namespace StationCheck.EmailSimulator
         private readonly string _toEmail;
 
         public EmailSimulator(
-            string smtpServer = "smtp.gmail.com",
-            int smtpPort = 587,
-            string fromEmail = "",
-            string fromPassword = "",
-            string toEmail = "")
+            string smtpServer,
+            int smtpPort,
+            string fromEmail,
+            string fromPassword,
+            string toEmail)
         {
             _smtpServer = smtpServer;
             _smtpPort = smtpPort;
@@ -30,18 +30,23 @@ namespace StationCheck.EmailSimulator
             _toEmail = toEmail;
         }
 
-        /// <summary>
-        /// Gửi email giả lập motion detection từ Dahua NVR
-        /// </summary>
-        /// <param name="stationId">Station ID hoặc Station Code (VD: "7" hoặc "ST000001")</param>
-        /// <param name="deviceName">Tên thiết bị NVR (VD: "NVR-6C39")</param>
-        /// <param name="channelName">Tên kênh camera (VD: "IPC", "Camera 1")</param>
-        /// <param name="ipAddress">IP của NVR (VD: "192.168.1.200")</param>
+        // 4-parameter overload (uses DateTime.Now)
         public void SendMotionDetectionEmail(
             string stationId,
             string deviceName = "NVR-TEST",
             string channelName = "IPC-TEST",
             string ipAddress = "192.168.1.100")
+        {
+            SendMotionDetectionEmail(stationId, deviceName, channelName, ipAddress, DateTime.Now);
+        }
+
+        // 5-parameter overload (custom alarmTime)
+        public void SendMotionDetectionEmail(
+            string stationId,
+            string deviceName,
+            string channelName,
+            string ipAddress,
+            DateTime alarmTime)
         {
             if (string.IsNullOrEmpty(_fromEmail) || string.IsNullOrEmpty(_fromPassword) || string.IsNullOrEmpty(_toEmail))
             {
@@ -52,7 +57,7 @@ namespace StationCheck.EmailSimulator
 
             try
             {
-                var alarmTime = DateTime.Now;
+                alarmTime = alarmTime == default ? DateTime.Now : alarmTime;
                 
                 // Subject format: [stm] {StationId}
                 var subject = $"[stm] {stationId}";
@@ -90,21 +95,7 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                         message.Subject = subject;
                         message.Body = body;
                         message.IsBodyHtml = false;
-
-                        Console.WriteLine("📧 Sending test email...");
-                        Console.WriteLine($"   From: {_fromEmail}");
-                        Console.WriteLine($"   To: {_toEmail}");
-                        Console.WriteLine($"   Subject: {subject}");
-                        Console.WriteLine($"   Time: {alarmTime:yyyy-MM-dd HH:mm:ss}");
-                        Console.WriteLine();
-
                         smtpClient.Send(message);
-
-                        Console.WriteLine("✅ Email sent successfully!");
-                        Console.WriteLine($"   Station ID: {stationId}");
-                        Console.WriteLine($"   Device: {deviceName}");
-                        Console.WriteLine($"   Channel: {channelName}");
-                        Console.WriteLine($"   IP: {ipAddress}");
                     }
                 }
             }
@@ -118,14 +109,10 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
             }
         }
 
-        /// <summary>
-        /// Gửi nhiều email test liên tiếp (để test rate limiting hoặc bulk processing)
-        /// </summary>
         public void SendBulkEmails(string stationId, int count = 5, int delaySeconds = 2)
         {
             Console.WriteLine($"📧 Sending {count} test emails with {delaySeconds}s delay...");
             Console.WriteLine();
-
             for (int i = 1; i <= count; i++)
             {
                 Console.WriteLine($"[{i}/{count}]");
@@ -133,9 +120,9 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                     stationId,
                     $"NVR-TEST-{i:D2}",
                     $"Camera-{i}",
-                    $"192.168.1.{100 + i}"
+                    $"192.168.1.{100 + i}",
+                    DateTime.Now
                 );
-                
                 if (i < count)
                 {
                     Console.WriteLine($"⏳ Waiting {delaySeconds} seconds...");
@@ -143,14 +130,10 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                     System.Threading.Thread.Sleep(delaySeconds * 1000);
                 }
             }
-
             Console.WriteLine();
             Console.WriteLine($"✅ Completed sending {count} emails!");
         }
 
-        /// <summary>
-        /// Interactive mode - nhập station ID từ console
-        /// </summary>
         public void RunInteractive()
         {
             Console.Clear();
@@ -158,7 +141,6 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
             Console.WriteLine("║   StationCheck - Email Motion Detection Simulator     ║");
             Console.WriteLine("╚════════════════════════════════════════════════════════╝");
             Console.WriteLine();
-
             while (true)
             {
                 Console.WriteLine("Options:");
@@ -167,16 +149,13 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                 Console.WriteLine("  3. Exit");
                 Console.WriteLine();
                 Console.Write("Select option (1-3): ");
-
                 var option = Console.ReadLine();
-
                 switch (option)
                 {
                     case "1":
                         Console.WriteLine();
                         Console.Write("Enter Station ID (e.g., '7' or 'ST000001'): ");
                         var stationId = Console.ReadLine();
-                        
                         if (!string.IsNullOrWhiteSpace(stationId))
                         {
                             Console.WriteLine();
@@ -187,12 +166,10 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                             Console.WriteLine("❌ Invalid Station ID!");
                         }
                         break;
-
                     case "2":
                         Console.WriteLine();
                         Console.Write("Enter Station ID for bulk test: ");
                         var bulkStationId = Console.ReadLine();
-                        
                         if (!string.IsNullOrWhiteSpace(bulkStationId))
                         {
                             Console.WriteLine();
@@ -203,31 +180,24 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                             Console.WriteLine("❌ Invalid Station ID!");
                         }
                         break;
-
                     case "3":
                         Console.WriteLine();
                         Console.WriteLine("👋 Goodbye!");
                         return;
-
                     default:
                         Console.WriteLine();
                         Console.WriteLine("❌ Invalid option! Please select 1, 2, or 3.");
                         break;
                 }
-
                 Console.WriteLine();
                 Console.WriteLine("─────────────────────────────────────────────────────────");
                 Console.WriteLine();
             }
         }
     }
-
-    /// <summary>
-    /// Program để chạy simulator standalone
-    /// </summary>
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // ⚠️ IMPORTANT: Cấu hình SMTP credentials ở đây
             // Đối với Gmail:

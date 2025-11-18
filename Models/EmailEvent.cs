@@ -5,13 +5,13 @@ namespace StationCheck.Models
     public class EmailEvent
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(10)]
-        public string StationCode { get; set; } = string.Empty; // ST000001
+        [MaxLength(200)]
+        public string Subject { get; set; } = string.Empty;
 
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         public Station? Station { get; set; }
 
         [MaxLength(200)]

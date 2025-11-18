@@ -16,7 +16,7 @@ namespace StationCheck.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         // ✅ NEW: Station-based (PRIMARY - replaces Camera)
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         
         [ForeignKey(nameof(StationId))]
         public Station? Station { get; set; }
@@ -25,24 +25,24 @@ namespace StationCheck.Models
         public string? StationName { get; set; }
 
         // ✅ NEW: Configuration references for audit trail
-        public int? MonitoringConfigurationId { get; set; }
+        public Guid? MonitoringConfigurationId { get; set; }
         
         [ForeignKey(nameof(MonitoringConfigurationId))]
         public MonitoringConfiguration? MonitoringConfiguration { get; set; }
 
-        public int? TimeFrameId { get; set; }
+        public Guid? TimeFrameId { get; set; }
         
         [ForeignKey(nameof(TimeFrameId))]
         public TimeFrame? TimeFrame { get; set; }
 
         // ✅ NEW: Link to specific profile version that generated this alert
-        public int? ProfileHistoryId { get; set; }
+        public Guid? ProfileHistoryId { get; set; }
         
         [ForeignKey(nameof(ProfileHistoryId))]
         public MonitoringProfileHistory? ProfileHistory { get; set; }
 
         // ✅ NEW: Link to specific timeframe version that generated this alert
-        public int? TimeFrameHistoryId { get; set; }
+        public Guid? TimeFrameHistoryId { get; set; }
         
         [ForeignKey(nameof(TimeFrameHistoryId))]
         public TimeFrameHistory? TimeFrameHistorySnapshot { get; set; }
@@ -52,7 +52,7 @@ namespace StationCheck.Models
         public string? ConfigurationSnapshot { get; set; }
 
         // Alert details
-        public DateTime AlertTime { get; set; } = DateTime.Now;
+        public DateTime AlertTime { get; set; } = DateTime.UtcNow;
 
         public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
 
@@ -67,7 +67,7 @@ namespace StationCheck.Models
         public int MinutesSinceLastMotion { get; set; }
 
         // ✅ NEW: Track which camera had last motion (for multi-camera stations)
-        [MaxLength(50)]
+        [MaxLength(200)]  // ✅ Updated from 50 to 200 to match CameraId length
         public string? LastMotionCameraId { get; set; }
 
         [MaxLength(200)]
@@ -85,7 +85,7 @@ namespace StationCheck.Models
         public string? Notes { get; set; }
 
         // Audit fields
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         [MaxLength(50)]
         public string? CreatedBy { get; set; }

@@ -5,7 +5,7 @@ public class CameraFrame
     public string CameraId { get; set; } = string.Empty;
     public string CameraName { get; set; } = string.Empty;
     public byte[] ImageData { get; set; } = Array.Empty<byte>();
-    public DateTime Timestamp { get; set; } = DateTime.Now;
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public int Width { get; set; }
     public int Height { get; set; }
 }

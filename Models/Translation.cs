@@ -6,7 +6,7 @@ namespace StationCheck.Models
     public class Translation
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         [Required]
         [MaxLength(10)]

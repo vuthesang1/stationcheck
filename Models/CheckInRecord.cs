@@ -5,7 +5,7 @@ public class CheckInRecord
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string EmployeeId { get; set; } = string.Empty;
     public string EmployeeName { get; set; } = string.Empty;
-    public DateTime CheckInTime { get; set; } = DateTime.Now;
+    public DateTime CheckInTime { get; set; } = DateTime.UtcNow;
     public string? CameraId { get; set; }
     public string? CameraName { get; set; }
     public double? Confidence { get; set; } // Độ tin cậy của việc nhận diện (0-1)

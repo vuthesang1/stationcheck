@@ -5,19 +5,19 @@ namespace StationCheck.Models
     public class TimeFrame : BaseAuditEntity
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
         // Link directly to Station (nullable for backward compatibility)
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         public Station? Station { get; set; }
 
         // Keep ProfileId for backward compatibility (will be deprecated)
         [Obsolete("Use StationId instead. This field is kept for backwards compatibility.")]
-        public int? ProfileId { get; set; }
+        public Guid? ProfileId { get; set; }
         
         [Obsolete("Use Station instead. This navigation is kept for backwards compatibility.")]
         public MonitoringProfile? Profile { get; set; }

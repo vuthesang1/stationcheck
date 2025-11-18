@@ -10,10 +10,10 @@ namespace StationCheck.Models
     public class MonitoringProfileHistory
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Link to the current/active profile
-        public int MonitoringProfileId { get; set; }
+        public Guid MonitoringProfileId { get; set; }
         
         [ForeignKey(nameof(MonitoringProfileId))]
         public MonitoringProfile? MonitoringProfile { get; set; }

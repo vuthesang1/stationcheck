@@ -8,7 +8,7 @@
 @if (Visible)
 {
     <DxPopup @bind-Visible="@Visible"
-             HeaderText="@(TimeFrame.Id == 0 ? "➕ Thêm khung thời gian" : "✏️ Sửa khung thời gian")"
+             HeaderText="@(TimeFrame.Id == Guid.Empty ? "➕ Thêm khung thời gian" : "✏️ Sửa khung thời gian")"
              ShowCloseButton="true"
              Width="600px"
              MaxWidth="95%"
@@ -152,7 +152,7 @@
                     {
                         <span class="spinner-border spinner-border-sm me-1"></span>
                     }
-                    <i class="fas fa-save"></i> @(TimeFrame.Id == 0 ? "Thêm" : "Cập nhật")
+                    <i class="fas fa-save"></i> @(TimeFrame.Id == Guid.Empty ? "Thêm" : "Cập nhật")
                 </button>
             </div>
         </EditForm>
@@ -163,7 +163,7 @@
 @code {
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
-    [Parameter] public int StationId { get; set; }
+    [Parameter] public Guid StationId { get; set; }
     [Parameter] public TimeFrame TimeFrame { get; set; } = new();
     [Parameter] public EventCallback OnSaved { get; set; }
 
@@ -188,11 +188,14 @@
     {
         if (Visible)
         {
-            if (TimeFrame.Id > 0)
+            if (TimeFrame.Id != Guid.Empty)
             {
                 // Edit mode - populate from existing
-                startTimeInput = TimeFrame.StartTime.ToString(@"hh\:mm");
-                endTimeInput = TimeFrame.EndTime.ToString(@"hh\:mm");
+                // ⚠️ Convert from UTC (stored in DB) to local time (UTC+7) for display
+                var startLocal = TimeFrame.StartTime.Add(TimeSpan.FromHours(7));
+                var endLocal = TimeFrame.EndTime.Add(TimeSpan.FromHours(7));
+                startTimeInput = startLocal.ToString(@"hh\:mm");
+                endTimeInput = endLocal.ToString(@"hh\:mm");
                 ParseDaysOfWeek(TimeFrame.DaysOfWeek);
                 
                 // Convert minutes to hours for display
@@ -275,7 +278,7 @@
             return;
         }
         
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var selectedDays = GetSelectedDays();
         
         // If no specific days selected, assume all days
@@ -446,8 +449,11 @@
                 return;
             }
             
-            TimeFrame.StartTime = parsedStart;
-            TimeFrame.EndTime = parsedEnd;
+            // ⚠️ Convert from local time (UTC+7) to UTC for database storage
+            // User inputs: 09:00 (Vietnam time) → Store as 02:00 (UTC)
+            // This allows AlertGenerationService to compare with DateTime.UtcNow correctly
+            TimeFrame.StartTime = parsedStart.Subtract(TimeSpan.FromHours(7));
+            TimeFrame.EndTime = parsedEnd.Subtract(TimeSpan.FromHours(7));
             TimeFrame.DaysOfWeek = GetDaysOfWeekString();
             
             // FrequencyMinutes already bound directly to input, no conversion needed
@@ -463,7 +469,7 @@
                 return;
             }
 
-            if (TimeFrame.Id == 0)
+            if (TimeFrame.Id == Guid.Empty)
             {
                 // Create new
                 await MonitoringService.CreateTimeFrameForStationAsync(StationId, TimeFrame);

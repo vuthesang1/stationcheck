@@ -122,7 +122,7 @@
                     <DxGridDataColumn FieldName="Id" Caption="@GetText("station.actions_column", "Thao tác")" Width="225px" AllowSort="false">
                         <CellDisplayTemplate>
                             @{
-                                var stationId = (int)context.Value;
+                                var stationId = (Guid)context.Value;
                             }
                             <div class="d-flex justify-content-center gap-1">
                                 <button class="btn btn-primary btn-sm" title="@GetText("station.config_monitoring_tooltip", "Cấu hình giám sát")" @onclick="@(() => ShowTimeFramesModalAsync(stationId))">
@@ -247,7 +247,6 @@
                         <div class="form-check">
                             <DxCheckBox @bind-Checked="@stationForm.IsActive" 
                                         CssClass="form-check-input" />
-                            <label class="form-check-label ms-2">@GetText("station.enable_monitoring", "Kích hoạt giám sát")</label>
                         </div>
                     </Template>
                 </DxFormLayoutItem>
@@ -284,7 +283,7 @@
     
     // TimeFrames modal fields
     private bool showTimeFramesModal = false;
-    private int selectedStationId = 0;
+    private Guid selectedStationId = Guid.Empty;
     private string selectedStationName = string.Empty;
     
     // Prevent multiple modals opening simultaneously
@@ -399,7 +398,7 @@
         }
     }
 
-    private async Task ShowEditModalAsync(int stationId)
+    private async Task ShowEditModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
         
@@ -458,7 +457,7 @@
                     ContactPhone = stationForm.ContactPhone,
                     IsActive = stationForm.IsActive,
                     CreatedBy = userName,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
                 await StationService.CreateStationAsync(newStation);
                 await JS.InvokeVoidAsync("showToast", "Tạo trạm thành công", "success", 3000);
@@ -473,7 +472,7 @@
                 editingStation.ContactPhone = stationForm.ContactPhone;
                 editingStation.IsActive = stationForm.IsActive;
                 editingStation.ModifiedBy = userName;
-                editingStation.ModifiedAt = DateTime.Now;
+                editingStation.ModifiedAt = DateTime.UtcNow;
                 await StationService.UpdateStationAsync(editingStation.Id, editingStation);
                 await JS.InvokeVoidAsync("showToast", "Cập nhật trạm thành công", "success", 3000);
             }
@@ -499,7 +498,7 @@
         }
     }
 
-    private async Task DeleteStation(int stationId)
+    private async Task DeleteStation(Guid stationId)
     {
         var confirmed = await JS.InvokeAsync<bool>("confirm", GetText("message.confirm_delete_station", "Bạn có chắc chắn muốn xóa trạm này?"));
         if (confirmed)
@@ -510,7 +509,7 @@
                 if (showTimeFramesModal && selectedStationId == stationId)
                 {
                     showTimeFramesModal = false;
-                    selectedStationId = 0;
+                    selectedStationId = Guid.Empty;
                     selectedStationName = string.Empty;
                 }
                 
@@ -533,13 +532,14 @@
         }
     }
 
-    private void ShowAuditLog(int stationId)
+
+    private void ShowAuditLog(Guid stationId)
     {
         // Navigate to reports page with station filter
         Navigation.NavigateTo($"/reports?tab=audit&entityType=Station&entityId={stationId}");
     }
 
-    private async Task ShowCamerasModalAsync(int stationId)
+    private async Task ShowCamerasModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
         
@@ -550,7 +550,7 @@
             // Close all other modals first
             showModal = false;
             showTimeFramesModal = false;
-            selectedStationId = 0;
+            selectedStationId = Guid.Empty;
             selectedStationName = string.Empty;
             
             // TODO: Navigate to camera assignment page
@@ -562,7 +562,7 @@
         }
     }
 
-    private async Task ShowTimeFramesModalAsync(int stationId)
+    private async Task ShowTimeFramesModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
         

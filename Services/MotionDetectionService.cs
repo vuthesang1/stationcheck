@@ -33,7 +33,7 @@ public class MotionDetectionService : IMotionDetectionService
         //     .Select(cs => cs.StationId)
         //     .ToListAsync();
         
-        int? stationId = null; // TODO: Implement camera-station relationship
+        Guid? stationId = null; // TODO: Implement camera-station relationship
         
         var motionEvent = new MotionEvent
         {
@@ -52,7 +52,7 @@ public class MotionDetectionService : IMotionDetectionService
         _logger.LogInformation($"[MotionEvent] Camera {cameraId} ({motionEvent.CameraName}) detected motion at {motionEvent.DetectedAt:HH:mm:ss} - Station: {stationId}");
 
         // Auto-resolve station alerts when motion detected
-        if (stationId.HasValue && stationId.Value > 0)
+        if (stationId.HasValue && stationId.Value != Guid.Empty)
         {
             await _monitoringService.ResolveStationAlertsAsync(stationId.Value, $"Camera {motionEvent.CameraName}");
         }

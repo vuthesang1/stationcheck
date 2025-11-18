@@ -336,7 +336,7 @@
         {
             var translation = new Translation
             {
-                Id = editingTranslation?.Id ?? 0,
+                Id = editingTranslation?.Id ?? Guid.Empty,
                 LanguageCode = translationForm.LanguageCode!.Trim(),
                 Key = translationForm.Key!.Trim(),
                 Value = translationForm.Value!.Trim(),
@@ -367,7 +367,7 @@
         }
     }
 
-    async Task DeleteTranslation(int id)
+    async Task DeleteTranslation(Guid id)
     {
         bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn xóa bản dịch này?");
         if (!confirmed) return;

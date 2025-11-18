@@ -57,7 +57,7 @@
                         {
                             <div class="status-detail">
                                 <i class="bi bi-check-circle text-success"></i>
-                                <span>Phát hiện chuyển động: @station.LastMotionDetectedAt?.ToString("HH:mm:ss")</span>
+                                <span>Phát hiện chuyển động: @station.LastMotionDetectedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
                             </div>
                         }
                         else if (status == StationStatus.Alert)
@@ -69,7 +69,7 @@
                             </div>
                             @if (station.LastMotionDetectedAt.HasValue)
                             {
-                                var minutesSince = (DateTime.Now - station.LastMotionDetectedAt.Value).TotalMinutes;
+                                var minutesSince = (DateTime.UtcNow - station.LastMotionDetectedAt.Value).TotalMinutes;
                                 <div class="status-detail">
                                     <i class="bi bi-clock-history"></i>
                                     <span>Không có chuyển động: @((int)minutesSince) phút</span>
@@ -117,7 +117,7 @@
             </span>
         </div>
         <small class="text-muted">
-            Last updated: @lastUpdateTime.ToString("HH:mm:ss")
+            Last updated: @lastUpdateTime.ToLocalTime().ToString("HH:mm:ss")
         </small>
     </div>
 </div>
@@ -179,7 +179,22 @@
                                             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
                                             SizeMode="SizeMode.Small">
                                         <Columns>
-                                            <DxGridDataColumn FieldName="DetectedAt" Caption="Thời gian phát hiện" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss" />
+                                            <DxGridDataColumn FieldName="DetectedAt" Caption="Thời gian phát hiện" Width="180px" DisplayFormat="dd/MM/yyyy HH:mm:ss">
+                                             <CellDisplayTemplate>
+                                                    @{
+                                                        var motion = (MotionEvent)context.DataItem;
+                                                    }
+                                                    @if (motion.DetectedAt != null)
+                                                    {
+                                                        <span>@motion.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                                    }                                       
+                                                    else
+                                                    {
+                                                        <span class="text-muted"></span>
+                                                    }
+                                                </CellDisplayTemplate>
+                                            </DxGridDataColumn>
+
                                             
                                             <DxGridDataColumn FieldName="EventType" Caption="Loại sự kiện" Width="150px">
                                                 <CellDisplayTemplate>
@@ -530,7 +545,7 @@
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Thời gian phát hiện:</td>
-                                                <td><strong>@selectedMotionEvent.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
+                                                <td><strong>@selectedMotionEvent.DetectedAt.ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Loại sự kiện:</td>
@@ -882,8 +897,8 @@
 
 @code {
     private List<Station> stations = new();
-    private Dictionary<int, int> stationAlertCounts = new();
-    private HashSet<int> stationsWithActiveMonitoring = new();
+    private Dictionary<Guid, int> stationAlertCounts = new();
+    private HashSet<Guid> stationsWithActiveMonitoring = new();
     private bool isLoading = false;
     private DateTime lastUpdateTime = DateTime.Now;
     private System.Threading.Timer? refreshTimer;
@@ -956,9 +971,9 @@
                 .Distinct()
                 .ToListAsync();
             
-            stationsWithActiveMonitoring = new HashSet<int>(activeStationIds);
+            stationsWithActiveMonitoring = new HashSet<Guid>(activeStationIds);
             
-            lastUpdateTime = DateTime.Now;
+            lastUpdateTime = DateTime.UtcNow;
         }
         finally
         {
@@ -1045,7 +1060,7 @@
             .ToListAsync();
 
         // Load alert history (last 30 days)
-        var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
         alertHistory = await context.MotionAlerts
             .Include(a => a.TimeFrame)
             .Include(a => a.TimeFrameHistorySnapshot)
@@ -1054,7 +1069,7 @@
             .ToListAsync();
 
         // Load configuration history (last 90 days) - for both Station and TimeFrame changes
-        var ninetyDaysAgo = DateTime.Now.AddDays(-90);
+        var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
         configHistory = await context.ConfigurationAuditLogs
             .Where(a => a.ChangedAt >= ninetyDaysAgo && 
                        ((a.EntityType == "Station" && a.EntityId == station.Id) ||
@@ -1265,6 +1280,23 @@
                 {
                     displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
                 }
+                else if (key == "StationId" && value.ValueKind == JsonValueKind.Number)
+                {
+                    // ✅ Display station name instead of ID (Guid)
+                    var stationId = value.GetInt32();
+                    displayValue = $"Trạm #{stationId}";
+                                {
+                                    // Handle StationId as Guid string
+                                    if (Guid.TryParse(value.GetString(), out var stationGuid))
+                                    {
+                                        displayValue = GetStationNameById(stationGuid);
+                                    }
+                                    else
+                                    {
+                                        displayValue = value.GetString() ?? string.Empty;
+                                    }
+                                }
+                }
                 else if (key == "DaysOfWeek" && value.ValueKind == JsonValueKind.Array)
                 {
                     var days = new List<string>();
@@ -1292,7 +1324,7 @@
                         // ✅ Ensure datetime is treated as UTC before converting to local time
                         if (dateValue.Kind == DateTimeKind.Unspecified)
                         {
-                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc);
+                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc).ToLocalTime();
                         }
                         displayValue = ConvertToLocalTime(dateValue);
                     }
@@ -1338,6 +1370,19 @@
         // Convert UTC to local time for display
         var localTime = utcTime.ToLocalTime();
         return localTime.ToString("dd/MM/yyyy HH:mm:ss");
+    }
+
+    private string GetStationNameById(Guid stationId)
+    {
+        // Try to find station in cached list first
+        var station = stations.FirstOrDefault(s => s.Id == stationId);
+        if (station != null)
+        {
+            return $"{station.Name} (ID: {stationId})";
+        }
+        
+        // Fallback: just show ID
+        return $"Trạm #{stationId}";
     }
 
     private string FormatDateTimeFromConfig(string dateTimeStr)

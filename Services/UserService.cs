@@ -69,7 +69,7 @@ public class UserService : IUserService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = request.Role,
             IsActive = true,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
         };
 
@@ -94,7 +94,7 @@ public class UserService : IUserService
         user.Role = request.Role;
         user.IsActive = request.IsActive;
         user.ModifiedBy = modifiedBy;
-        user.ModifiedAt = DateTime.Now;
+        user.ModifiedAt = DateTime.UtcNow;
 
         await context.SaveChangesAsync();
 
@@ -114,7 +114,7 @@ public class UserService : IUserService
         // Soft delete
         user.IsActive = false;
         user.ModifiedBy = deletedBy;
-        user.ModifiedAt = DateTime.Now;
+        user.ModifiedAt = DateTime.UtcNow;
 
         await context.SaveChangesAsync();
 

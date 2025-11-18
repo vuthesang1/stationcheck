@@ -5,7 +5,7 @@ namespace StationCheck.Models
     public class MonitoringProfile : BaseAuditEntity
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(200)]

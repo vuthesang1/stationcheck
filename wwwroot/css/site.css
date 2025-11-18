@@ -24,7 +24,7 @@ body {
 }
 
 .container-fluid {
-    padding-bottom: 2rem;
+    padding-bottom: 0.5rem;
 }
 
 .container {
@@ -91,6 +91,23 @@ button svg {
 .dxbs-pager svg {
     width: 16px !important;
     height: 16px !important;
+}
+
+/* Fix DevExpress pager input size */
+.dxbs-grid-pager .dxbs-pager-input {
+    min-width: 40px !important;
+    height: 32px !important;
+    font-size: 1rem !important;
+    padding: 2px 8px !important;
+    text-align: center;
+}
+
+/* Optional: Make pager buttons larger for better UX */
+.dxbs-grid-pager .dxbs-pager-btn {
+    min-width: 32px !important;
+    height: 32px !important;
+    font-size: 1rem !important;
+    padding: 2px 8px !important;
 }
 
 /* Make sure filter textboxes are normal size */

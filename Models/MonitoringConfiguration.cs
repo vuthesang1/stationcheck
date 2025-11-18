@@ -5,7 +5,7 @@ namespace StationCheck.Models
     public class MonitoringConfiguration : BaseAuditEntity
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -16,10 +16,10 @@ namespace StationCheck.Models
 
         public bool IsEnabled { get; set; } = true;
 
-        public int? StationId { get; set; }
+        public Guid? StationId { get; set; }
         public Station? Station { get; set; }
 
-        public int? ProfileId { get; set; }
+        public Guid? ProfileId { get; set; }
         public MonitoringProfile? Profile { get; set; }
     }
 }

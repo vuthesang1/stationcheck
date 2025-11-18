@@ -140,7 +140,7 @@ namespace StationCheck.Services
         /// <summary>
         /// Get lịch sử thay đổi của TimeFrame
         /// </summary>
-        public async Task<List<TimeFrameHistory>> GetHistoryAsync(int timeFrameId)
+        public async Task<List<TimeFrameHistory>> GetHistoryAsync(Guid timeFrameId)
         {
             return await _context.TimeFrameHistories
                 .Where(h => h.TimeFrameId == timeFrameId)
@@ -151,7 +151,7 @@ namespace StationCheck.Services
         /// <summary>
         /// Get lịch sử thay đổi của Station
         /// </summary>
-        public async Task<List<TimeFrameHistory>> GetStationHistoryAsync(int stationId)
+        public async Task<List<TimeFrameHistory>> GetStationHistoryAsync(Guid stationId)
         {
             return await _context.TimeFrameHistories
                 .Where(h => h.StationId == stationId)
@@ -162,7 +162,7 @@ namespace StationCheck.Services
         /// <summary>
         /// Get latest version của TimeFrame (để reference khi tạo alert)
         /// </summary>
-        public async Task<TimeFrameHistory?> GetLatestVersionAsync(int timeFrameId)
+        public async Task<TimeFrameHistory?> GetLatestVersionAsync(Guid timeFrameId)
         {
             return await _context.TimeFrameHistories
                 .Where(h => h.TimeFrameId == timeFrameId)
@@ -232,7 +232,7 @@ namespace StationCheck.Services
         /// <summary>
         /// Get next version number for TimeFrame
         /// </summary>
-        private async Task<int> GetNextVersionAsync(int timeFrameId)
+        private async Task<int> GetNextVersionAsync(Guid timeFrameId)
         {
             var latestVersion = await _context.TimeFrameHistories
                 .Where(h => h.TimeFrameId == timeFrameId)

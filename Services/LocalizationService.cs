@@ -96,7 +96,7 @@ namespace StationCheck.Services
                 .ToListAsync();
         }
 
-        public async Task<Translation?> GetTranslationAsync(int id)
+        public async Task<Translation?> GetTranslationAsync(Guid id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Translations
@@ -117,7 +117,7 @@ namespace StationCheck.Services
             return translation;
         }
 
-        public async Task<Translation> UpdateTranslationAsync(int id, Translation translation)
+        public async Task<Translation> UpdateTranslationAsync(Guid id, Translation translation)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
@@ -134,7 +134,7 @@ namespace StationCheck.Services
             return existing;
         }
 
-        public async Task DeleteTranslationAsync(int id)
+        public async Task DeleteTranslationAsync(Guid id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             

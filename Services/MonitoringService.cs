@@ -179,20 +179,20 @@ namespace StationCheck.Services
                 .AsQueryable();
         }
 
-        public async Task<List<TimeFrame>> GetTimeFramesByProfileIdAsync(int profileId)
-        {
-            return await _context.TimeFrames
-                .Where(tf => tf.ProfileId == profileId)
-                .OrderBy(tf => tf.StartTime)
-                .ToListAsync();
-        }
+        // public async Task<List<TimeFrame>> GetTimeFramesByProfileIdAsync(int profileId) // Legacy - use Guid version
+        // {
+        //     return await _context.TimeFrames
+        //         .Where(tf => tf.ProfileId == profileId)
+        //         .OrderBy(tf => tf.StartTime)
+        //         .ToListAsync();
+        // }
 
-        public async Task<TimeFrame?> GetTimeFrameByIdAsync(int id)
-        {
-            return await _context.TimeFrames
-                .Include(tf => tf.Profile)
-                .FirstOrDefaultAsync(tf => tf.Id == id);
-        }
+        // public async Task<TimeFrame?> GetTimeFrameByIdAsync(int id) // Legacy - use Guid version
+        // {
+        //     return await _context.TimeFrames
+        //         .Include(tf => tf.Profile)
+        //         .FirstOrDefaultAsync(tf => tf.Id == id);
+        // }
 
         public async Task<TimeFrame> CreateTimeFrameAsync(TimeFrame timeFrame)
         {
@@ -252,7 +252,7 @@ namespace StationCheck.Services
             _logger.LogInformation($"Updated time frame: {existing.Name} (ID: {id})");
         }
 
-        public async Task DeleteTimeFrameAsync(int id)
+        public async Task DeleteTimeFrameAsync(Guid id)
         {
             var timeFrame = await _context.TimeFrames
                 .IgnoreQueryFilters() // Include soft-deleted records
@@ -295,7 +295,8 @@ namespace StationCheck.Services
 
         // ==================== STATION-BASED TIMEFRAME OPERATIONS ====================
         
-        public async Task<List<TimeFrame>> GetTimeFramesByStationIdAsync(int stationId)
+
+        public async Task<List<TimeFrame>> GetTimeFramesByStationIdAsync(Guid stationId)
         {
             return await _context.TimeFrames
                 .Where(tf => tf.StationId == stationId)
@@ -303,7 +304,7 @@ namespace StationCheck.Services
                 .ToListAsync();
         }
 
-        public async Task<TimeFrame> CreateTimeFrameForStationAsync(int stationId, TimeFrame timeFrame)
+        public async Task<TimeFrame> CreateTimeFrameForStationAsync(Guid stationId, TimeFrame timeFrame)
         {
             // Validate station exists
             var station = await _context.Stations.FindAsync(stationId);
@@ -332,6 +333,9 @@ namespace StationCheck.Services
                 throw new ArgumentException($"Frequency ({timeFrame.FrequencyMinutes} min) cannot exceed timeframe range ({maxFrequencyMinutes} min)");
             }
 
+            // Get current username
+            var username = await GetCurrentUsernameAsync();
+            
             // Set StationId
             timeFrame.StationId = stationId;
             timeFrame.CreatedAt = DateTime.UtcNow;
@@ -339,10 +343,13 @@ namespace StationCheck.Services
             _context.TimeFrames.Add(timeFrame);
             await _context.SaveChangesAsync();
             
+            // ✅ Log to TimeFrameHistory
+            await _historyService.LogCreateAsync(timeFrame, username, $"Created TimeFrame '{timeFrame.Name}' for Station '{station.Name}'");
+            
             // ✅ Log to ConfigurationAuditLog AFTER SaveChanges
             await CreateAuditLogAsync("TimeFrame", timeFrame.Id.ToString(), timeFrame.Name ?? "Unknown", "Create", null, timeFrame);
             
-            _logger.LogInformation($"Created TimeFrame '{timeFrame.Name}' for Station {station.Name} (ID: {stationId})");
+            _logger.LogInformation($"Created TimeFrame '{timeFrame.Name}' for Station {station.Name} (ID: {stationId}) by {username}");
             return timeFrame;
         }
 
@@ -404,7 +411,7 @@ namespace StationCheck.Services
             return existing;
         }
 
-        public async Task BulkToggleTimeFramesAsync(int stationId, bool isEnabled)
+        public async Task BulkToggleTimeFramesAsync(Guid stationId, bool isEnabled)
         {
             var timeFrames = await _context.TimeFrames
                 .Where(tf => tf.StationId == stationId)
@@ -426,7 +433,7 @@ namespace StationCheck.Services
             _logger.LogInformation($"Bulk toggled {timeFrames.Count} timeframes for station {stationId}: {isEnabled}");
         }
 
-        public async Task CopyTimeFramesAsync(int sourceStationId, int targetStationId)
+        public async Task CopyTimeFramesAsync(Guid sourceStationId, Guid targetStationId)
         {
             // Validate both stations exist
             var sourceStation = await _context.Stations.FindAsync(sourceStationId);
@@ -650,7 +657,7 @@ namespace StationCheck.Services
             }
         }
 
-        public async Task ResolveStationAlertsAsync(int stationId, string? resolvedBy = null)
+        public async Task ResolveStationAlertsAsync(Guid stationId, string? resolvedBy = null)
         {
             try
             {
@@ -718,7 +725,7 @@ namespace StationCheck.Services
                 var auditLog = new ConfigurationAuditLog
                 {
                     EntityType = entityType,
-                    EntityId = int.Parse(entityId),
+                    EntityId = Guid.Parse(entityId),
                     EntityName = entityName,
                     ActionType = actionType,
                     OldValue = oldValue != null ? JsonSerializer.Serialize(oldValue, jsonOptions) : null,

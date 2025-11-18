@@ -60,7 +60,7 @@
                         <div class="station-summary">
                             <small class="text-muted">
                                 Lần cuối: @(latestAlert.LastMotionAt?.ToString("dd/MM HH:mm") ?? "N/A") |
-                                Cảnh báo mới nhất: @latestAlert.AlertTime.ToString("dd/MM HH:mm")
+                                Cảnh báo mới nhất: @latestAlert.AlertTime.ToLocalTime().ToString("dd/MM HH:mm")
                             </small>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
                                             <span class="badge @GetSeverityBadgeClass(alert.Severity)">
                                                 @alert.Severity
                                             </span>
-                                            <span class="alert-time">@alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss")</span>
+                                            <span class="alert-time">@alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
                                         </div>
                                         <button class="btn btn-sm btn-success" @onclick="(e) => ResolveAlertWithStop(e, alert.Id.ToString())" @onclick:stopPropagation="true">
                                             <i class="bi bi-check2"></i> Resolve
@@ -192,9 +192,9 @@
 @code {
     private List<MotionAlert> alerts = new();
     private List<StationAlertGroup> groupedAlerts = new();
-    private HashSet<int?> expandedStations = new();
+    private HashSet<Guid?> expandedStations = new();
     private bool isLoading = false;
-    private DateTime lastUpdateTime = DateTime.Now;
+    private DateTime lastUpdateTime = DateTime.UtcNow;
     private System.Threading.Timer? refreshTimer;
     private int totalAlerts = 0;
 
@@ -206,8 +206,8 @@
 
     private class StationAlertGroup
     {
-        public int? StationId { get; set; }
-        public string StationName { get; set; } = "";
+        public Guid? StationId { get; set; }
+        public string StationName { get; set; } = string.Empty;
         public List<MotionAlert> Alerts { get; set; } = new();
     }
 
@@ -232,14 +232,14 @@
         try
         {
             // 🔧 Preserve current expanded state
-            var previouslyExpanded = new HashSet<int?>(expandedStations);
+            var previouslyExpanded = new HashSet<Guid?>(expandedStations);
             
             alerts = await MotionService.GetUnresolvedAlertsAsync();
             totalAlerts = alerts.Count;
             
             // Group alerts by station
             groupedAlerts = alerts
-                .Where(a => a.StationId > 0) // Filter out invalid stations
+                .Where(a => a.StationId != null && a.StationId != Guid.Empty) // Filter out invalid stations
                 .GroupBy(a => new { a.StationId, a.StationName })
                 .Select(g => new StationAlertGroup
                 {
@@ -258,10 +258,10 @@
             else
             {
                 // First load - collapse all stations by default
-                expandedStations = new HashSet<int?>();
+                expandedStations = new HashSet<Guid?>();
             }
             
-            lastUpdateTime = DateTime.Now;
+            lastUpdateTime = DateTime.UtcNow;
         }
         finally
         {
@@ -269,7 +269,7 @@
         }
     }
 
-    private void ToggleStation(int? stationId)
+    private void ToggleStation(Guid? stationId)
     {
         if (expandedStations.Contains(stationId))
         {
@@ -290,7 +290,7 @@
         }
     }
 
-    private async Task ResolveAllStationAlerts(int? stationId)
+    private async Task ResolveAllStationAlerts(Guid? stationId)
     {
         var group = groupedAlerts.FirstOrDefault(g => g.StationId == stationId);
         if (group == null) return;

@@ -11,10 +11,10 @@ namespace StationCheck.Interfaces
         Task DeleteLanguageAsync(string code);
         
         Task<List<Translation>> GetTranslationsAsync(string languageCode, string? category = null);
-        Task<Translation?> GetTranslationAsync(int id);
+        Task<Translation?> GetTranslationAsync(Guid id);
         Task<Translation> CreateTranslationAsync(Translation translation);
-        Task<Translation> UpdateTranslationAsync(int id, Translation translation);
-        Task DeleteTranslationAsync(int id);
+        Task<Translation> UpdateTranslationAsync(Guid id, Translation translation);
+        Task DeleteTranslationAsync(Guid id);
         
         Task<string> GetTranslationValueAsync(string key, string languageCode);
         Task<Dictionary<string, string>> GetAllTranslationsForLanguageAsync(string languageCode);

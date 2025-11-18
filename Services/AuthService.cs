@@ -65,7 +65,7 @@ public class AuthService : IAuthService
         }
 
         // Update last login
-        user.LastLoginAt = DateTime.Now;
+        user.LastLoginAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
@@ -76,8 +76,8 @@ public class AuthService : IAuthService
         {
             UserId = user.Id,
             Token = refreshToken,
-            ExpiresAt = DateTime.Now.AddDays(7),
-            CreatedAt = DateTime.Now
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow
         };
         context.RefreshTokens.Add(refreshTokenEntity);
         await context.SaveChangesAsync();
@@ -137,7 +137,7 @@ public class AuthService : IAuthService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = request.Role,
             IsActive = true,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
         };
 
@@ -154,7 +154,7 @@ public class AuthService : IAuthService
         {
             UserId = user.Id,
             Token = refreshToken,
-            ExpiresAt = DateTime.Now.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         context.RefreshTokens.Add(refreshTokenEntity);
         await context.SaveChangesAsync();
@@ -187,7 +187,7 @@ public class AuthService : IAuthService
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken && !rt.IsRevoked);
 
-        if (refreshToken == null || refreshToken.ExpiresAt < DateTime.Now)
+        if (refreshToken == null || refreshToken.ExpiresAt < DateTime.UtcNow)
         {
             return new LoginResponse
             {
@@ -207,7 +207,7 @@ public class AuthService : IAuthService
 
         // Revoke old refresh token
         refreshToken.IsRevoked = true;
-        refreshToken.RevokedAt = DateTime.Now;
+        refreshToken.RevokedAt = DateTime.UtcNow;
 
         // Generate new tokens
         var newToken = GenerateJwtToken(refreshToken.User);
@@ -217,7 +217,7 @@ public class AuthService : IAuthService
         {
             UserId = refreshToken.UserId,
             Token = newRefreshToken,
-            ExpiresAt = DateTime.Now.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
         context.RefreshTokens.Add(newRefreshTokenEntity);
         await context.SaveChangesAsync();
@@ -254,7 +254,7 @@ public class AuthService : IAuthService
             return false;
 
         token.IsRevoked = true;
-        token.RevokedAt = DateTime.Now;
+        token.RevokedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
         return true;
@@ -272,7 +272,7 @@ public class AuthService : IAuthService
             return false;
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-        user.ModifiedAt = DateTime.Now;
+        user.ModifiedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
         _logger.LogInformation($"User {user.Username} changed password");
@@ -305,7 +305,7 @@ public class AuthService : IAuthService
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(expiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: credentials
         );
 

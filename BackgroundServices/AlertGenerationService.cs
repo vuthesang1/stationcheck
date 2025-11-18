@@ -14,14 +14,28 @@ namespace StationCheck.BackgroundServices
     {
         private readonly ILogger<AlertGenerationService> _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ConfigurationChangeNotifier _notifier;
         private TimeSpan _checkInterval = TimeSpan.FromHours(1); // Default: 1 hour
+        private CancellationTokenSource? _delayCts;
 
         public AlertGenerationService(
             ILogger<AlertGenerationService> logger,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ConfigurationChangeNotifier notifier)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _notifier = notifier;
+            
+            // ✅ Subscribe to configuration changes
+            _notifier.Subscribe("AlertGenerationInterval", OnConfigurationChanged);
+        }
+
+        private void OnConfigurationChanged()
+        {
+            _logger.LogInformation("[AlertGeneration] Configuration changed, reloading interval immediately...");
+            // Cancel the current delay to trigger immediate reload
+            _delayCts?.Cancel();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -48,8 +62,17 @@ namespace StationCheck.BackgroundServices
                 // Reload interval from DB every cycle (in case admin changed it)
                 await LoadIntervalAsync();
 
-                // Wait for next check interval
-                await Task.Delay(_checkInterval, stoppingToken);
+                // Wait for next check interval (can be cancelled by config change)
+                try
+                {
+                    _delayCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                    await Task.Delay(_checkInterval, _delayCts.Token);
+                }
+                catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
+                {
+                    // Config changed, reload immediately
+                    _logger.LogInformation("[AlertGeneration] Delay cancelled due to configuration change");
+                }
             }
 
             _logger.LogInformation("[AlertGeneration] Service stopped");
@@ -88,7 +111,7 @@ namespace StationCheck.BackgroundServices
 
         private async Task GenerateAlertsAsync(CancellationToken cancellationToken)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             _logger.LogInformation("[AlertGeneration] Running check at {Time}", now);
 
             using var scope = _serviceProvider.CreateScope();
@@ -121,9 +144,12 @@ namespace StationCheck.BackgroundServices
 
                         if (!matchingTimeFrames.Any())
                         {
-                            _logger.LogDebug(
-                                "[AlertGeneration] Station {StationId} has no matching timeframes for current time",
-                                station.Id
+                            _logger.LogInformation(
+                                "[AlertGeneration] Station {StationId} ({StationName}) has no matching timeframes for current time {Time} (UTC+7: {LocalTime})",
+                                station.Id,
+                                station.Name,
+                                now.ToString("HH:mm:ss"),
+                                now.AddHours(7).ToString("HH:mm:ss")
                             );
                             continue;
                         }
@@ -177,7 +203,7 @@ namespace StationCheck.BackgroundServices
         /// </summary>
         private async Task<List<TimeFrame>> GetMatchingTimeFramesAsync(
             ApplicationDbContext context,
-            int stationId,
+            Guid stationId,
             DateTime now,
             CancellationToken cancellationToken)
         {
@@ -187,6 +213,30 @@ namespace StationCheck.BackgroundServices
             var timeFrames = await context.TimeFrames
                 .Where(tf => tf.StationId == stationId && tf.IsEnabled)
                 .ToListAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "[AlertGeneration] Station {StationId}: Found {Count} enabled TimeFrames. Current time: {Time} (UTC), Day: {Day}",
+                stationId,
+                timeFrames.Count,
+                currentTime.ToString(@"hh\:mm\:ss"),
+                currentDayOfWeek
+            );
+
+            foreach (var tf in timeFrames)
+            {
+                var timeMatch = currentTime >= tf.StartTime && currentTime <= tf.EndTime;
+                var dayMatch = string.IsNullOrEmpty(tf.DaysOfWeek) || tf.DaysOfWeek.Contains(currentDayOfWeek);
+                
+                _logger.LogInformation(
+                    "[AlertGeneration]   TimeFrame '{Name}': Start={Start}, End={End}, Days={Days}, TimeMatch={TimeMatch}, DayMatch={DayMatch}",
+                    tf.Name,
+                    tf.StartTime.ToString(@"hh\:mm\:ss"),
+                    tf.EndTime.ToString(@"hh\:mm\:ss"),
+                    tf.DaysOfWeek ?? "All",
+                    timeMatch,
+                    dayMatch
+                );
+            }
 
             return timeFrames
                 .Where(tf => 
@@ -209,9 +259,42 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            // ✅ Calculate the tolerance window
-            // If frequency is 60 min and buffer is 15 min:
-            // - Check if there's any motion in the last 75 minutes
+            // ✅ STEP 1: Check if current time is a scheduled check point
+            // Example: StartTime=09:00, Frequency=3min → Check at 09:00, 09:03, 09:06, 09:09...
+            // If now=09:02, skip this check (not a scheduled time)
+            var currentTime = now.TimeOfDay;
+            var startTime = timeFrame.StartTime;
+            var frequencySpan = TimeSpan.FromMinutes(timeFrame.FrequencyMinutes);
+            
+            // Calculate elapsed time since start of timeframe
+            var elapsed = currentTime - startTime;
+            
+            // Check if we're NOT at a scheduled checkpoint (allow ±1 minute tolerance for timing)
+            if (elapsed.TotalMinutes < 0 || elapsed.TotalMinutes % timeFrame.FrequencyMinutes > 1)
+            {
+                _logger.LogDebug(
+                    "[AlertGeneration] Station {StationId} - Current time {CurrentTime} is NOT a scheduled checkpoint (Start={Start}, Frequency={Freq}min, Elapsed={Elapsed:F1}min)",
+                    station.Id,
+                    currentTime.ToString(@"hh\:mm\:ss"),
+                    startTime.ToString(@"hh\:mm\:ss"),
+                    timeFrame.FrequencyMinutes,
+                    elapsed.TotalMinutes
+                );
+                return false;
+            }
+            
+            _logger.LogInformation(
+                "[AlertGeneration] Station {StationId} - Current time {CurrentTime} IS a scheduled checkpoint (Start={Start}, Frequency={Freq}min, Elapsed={Elapsed:F1}min)",
+                station.Id,
+                currentTime.ToString(@"hh\:mm\:ss"),
+                startTime.ToString(@"hh\:mm\:ss"),
+                timeFrame.FrequencyMinutes,
+                elapsed.TotalMinutes
+            );
+
+            // ✅ STEP 2: Calculate the tolerance window
+            // If frequency is 3 min and buffer is 2 min:
+            // - Check if there's any motion in the last 5 minutes (3+2)
             // - If yes, no alert needed
             var toleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
             var windowStart = now.AddMinutes(-toleranceMinutes);
@@ -223,7 +306,7 @@ namespace StationCheck.BackgroundServices
 
             if (hasRecentMotion)
             {
-                _logger.LogDebug(
+                _logger.LogInformation(
                     "[AlertGeneration] Station {StationId} has motion within tolerance window. Window: {WindowStart} to {Now}, Frequency: {Frequency}, Buffer: {Buffer}",
                     station.Id,
                     windowStart.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -240,8 +323,8 @@ namespace StationCheck.BackgroundServices
                 ? (now - station.LastMotionDetectedAt.Value).TotalMinutes
                 : double.MaxValue;
 
-            _logger.LogInformation(
-                "[AlertGeneration] Station {StationId} exceeds tolerance window. Last motion: {LastMotion}, Minutes: {Minutes:F0}, Tolerance: {Tolerance} min (Frequency: {Frequency} + Buffer: {Buffer})",
+            _logger.LogWarning(
+                "[AlertGeneration] ⚠️ Station {StationId} exceeds tolerance window. Last motion: {LastMotion}, Minutes: {Minutes:F0}, Tolerance: {Tolerance} min (Frequency: {Frequency} + Buffer: {Buffer})",
                 station.Id,
                 lastMotion,
                 minutesSinceLastMotion,
@@ -292,13 +375,13 @@ namespace StationCheck.BackgroundServices
                 timeFrameHistory = new TimeFrameHistory
                 {
                     TimeFrameId = timeFrame.Id,
-                    StationId = timeFrame.StationId.Value,
+                    StationId = timeFrame.StationId,
                     Version = 1,
                     Action = "Create",
                     ConfigurationSnapshot = JsonSerializer.Serialize(tfSnapshot),
                     ChangeDescription = $"Auto-created history for TimeFrame '{timeFrame.Name}'",
                     ChangedBy = "System (AlertGeneration)",
-                    ChangedAt = DateTime.Now
+                    ChangedAt = DateTime.UtcNow
                 };
 
                 context.TimeFrameHistories.Add(timeFrameHistory);
@@ -388,7 +471,9 @@ namespace StationCheck.BackgroundServices
                 .FirstOrDefaultAsync(cancellationToken);
 
             // ✅ LEGACY: Ensure CameraId is never NULL for database compatibility
-            string cameraId = $"STATION_{station.Id}_MAIN";
+            // Use shorter format: STN_{last8chars}_{cameraName} to avoid truncation
+            string stationIdShort = station.Id.ToString().Substring(station.Id.ToString().Length - 8);
+            string cameraId = $"STN_{stationIdShort}_MAIN";
             string cameraName = station.Name;
             
             if (lastMotionEvent != null)

@@ -26,33 +26,33 @@ namespace StationCheck.Interfaces
         
         // TimeFrame operations
         IQueryable<TimeFrame> GetTimeFramesQueryable();
-        Task<List<TimeFrame>> GetTimeFramesByProfileIdAsync(int profileId);
-        Task<TimeFrame?> GetTimeFrameByIdAsync(int id);
+        // Task<List<TimeFrame>> GetTimeFramesByProfileIdAsync(int profileId); // Legacy - use Guid version
+        // Task<TimeFrame?> GetTimeFrameByIdAsync(int id); // Legacy - use Guid version
         Task<TimeFrame> CreateTimeFrameAsync(TimeFrame timeFrame);
         Task UpdateTimeFrameAsync(int id, TimeFrame timeFrame);
-        Task DeleteTimeFrameAsync(int id);
+        Task DeleteTimeFrameAsync(Guid id);
         Task ToggleTimeFrameAsync(int timeFrameId, bool isEnabled);
         
         // Station-based TimeFrame operations (NEW)
         /// <summary>
         /// Get all TimeFrames for a specific station
         /// </summary>
-        Task<List<TimeFrame>> GetTimeFramesByStationIdAsync(int stationId);
+        Task<List<TimeFrame>> GetTimeFramesByStationIdAsync(Guid stationId);
         
         /// <summary>
         /// Create TimeFrame directly for a station with validation
         /// </summary>
-        Task<TimeFrame> CreateTimeFrameForStationAsync(int stationId, TimeFrame timeFrame);
+        Task<TimeFrame> CreateTimeFrameForStationAsync(Guid stationId, TimeFrame timeFrame);
         
         /// <summary>
         /// Bulk enable/disable all TimeFrames for a station
         /// </summary>
-        Task BulkToggleTimeFramesAsync(int stationId, bool isEnabled);
+        Task BulkToggleTimeFramesAsync(Guid stationId, bool isEnabled);
         
         /// <summary>
         /// Copy all TimeFrames from one station to another
         /// </summary>
-        Task CopyTimeFramesAsync(int sourceStationId, int targetStationId);
+        Task CopyTimeFramesAsync(Guid sourceStationId, Guid targetStationId);
         
         /// <summary>
         /// Update an existing TimeFrame with validation
@@ -78,6 +78,6 @@ namespace StationCheck.Interfaces
         /// <summary>
         /// Resolve all open alerts for a station when motion is detected
         /// </summary>
-        Task ResolveStationAlertsAsync(int stationId, string? resolvedBy = null);
+        Task ResolveStationAlertsAsync(Guid stationId, string? resolvedBy = null);
     }
 }

@@ -1,0 +1,105 @@
+@page "/email-simulator"
+@using StationCheck.EmailSimulator
+@inject NavigationManager Navigation
+@inject IStationService StationService
+@using StationCheck.Models
+@using DevExpress.Blazor
+
+<div class="container mt-4">
+    <div class="card shadow mb-4" style="max-width: 500px; margin: 0 auto;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="m-0">Email Motion Detection Simulator</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="@formModel" OnValidSubmit="SendTestEmail">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="mb-3">
+                    <label class="form-label">Mã trạm (Station ID/Code)</label>
+                    <DxComboBox Data="@stations"
+                                @bind-Value="@formModel.Station"
+                                ClearButtonVisible="true"
+                                TextFieldName="@nameof(Station.StationCode)"
+                                ShowDropDownButton="true"
+                                NullText="Chọn mã trạm..."
+                                class="w-100">
+                        <ItemTemplate Context="station">
+                            @station.StationCode - @station.Name
+                        </ItemTemplate>
+                </DxComboBox>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Alarm Time</label>
+                    <DxDateEdit @bind-Date="formModel.AlarmTime"
+                                TimeSectionVisible="true"
+                                DisplayFormat="dd/MM/yyyy HH:mm:ss"
+                                class="w-100" />
+                </div>
+                <div class="mb-3 text-end">
+                    <button class="btn btn-primary" type="submit" disabled="@isSending">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display:@(isSending ? "inline-block" : "none")"></span>
+                        Gửi Email
+                    </button>
+                </div>
+            </EditForm>
+            @if (!string.IsNullOrEmpty(resultMessage))
+            {
+                <div class="alert @(isSuccess ? "alert-success" : "alert-danger") mt-3">@resultMessage</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private SimulatorFormModel formModel = new();
+    private bool isSending = false;
+    private string? resultMessage;
+    private bool isSuccess;
+    private List<Station> stations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        stations = await StationService.GetAllStationsAsync();
+    }
+
+    private async Task SendTestEmail()
+    {
+        isSending = true;
+        resultMessage = null;
+        isSuccess = false;
+        try
+        {
+            var simulator = new StationCheck.EmailSimulator.EmailSimulator(
+                "smtp.gmail.com",
+                587,
+                "huythucson01@gmail.com",
+                "dtfn erbe wcjg mkrg",
+                "vuthesang4@gmail.com"
+            );
+            simulator.SendMotionDetectionEmail(
+                formModel.Station.StationCode,
+                "NVR-TEST",
+                "IPC-TEST",
+                "192.168.1.100",
+                formModel.AlarmTime
+            );
+            resultMessage = "✅ Đã gửi email test thành công!";
+            isSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            resultMessage = $"❌ Lỗi gửi email: {ex.Message}";
+            isSuccess = false;
+        }
+        isSending = false;
+    }
+
+    public class SimulatorFormModel
+    {
+        [Required(ErrorMessage = "Mã trạm là bắt buộc")]
+        public Station Station { get; set; } = new Station();
+
+        [Required(ErrorMessage = "Alarm Time là bắt buộc")]
+        public DateTime AlarmTime { get; set; } = DateTime.Now;
+    }
+}

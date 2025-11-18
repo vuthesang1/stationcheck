@@ -40,7 +40,7 @@ namespace StationCheck.Services
                 .OrderBy(s => s.Name);
         }
 
-        public async Task<Station?> GetStationByIdAsync(int id)
+        public async Task<Station?> GetStationByIdAsync(Guid id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Stations
@@ -102,7 +102,7 @@ namespace StationCheck.Services
             return $"ST{DateTime.UtcNow.Ticks % 1000000:D6}";
         }
 
-        public async Task<Station> UpdateStationAsync(int id, Station station)
+        public async Task<Station> UpdateStationAsync(Guid id, Station station)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
@@ -145,7 +145,7 @@ namespace StationCheck.Services
             return existingStation;
         }
 
-        public async Task DeleteStationAsync(int id)
+        public async Task DeleteStationAsync(Guid id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             
@@ -218,7 +218,7 @@ namespace StationCheck.Services
         private async Task CreateAuditLog(
             ApplicationDbContext context,
             string entityType,
-            int entityId,
+            Guid entityId,
             string entityName,
             string actionType,
             object? oldValue,

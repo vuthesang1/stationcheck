@@ -203,7 +203,7 @@
                     </small>
                 </div>
             }
-            else if (sourceStationId > 0)
+            else if (sourceStationId != Guid.Empty)
             {
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> Trạm này chưa có khung thời gian nào.
@@ -225,7 +225,7 @@
 @code {
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
-    [Parameter] public int StationId { get; set; }
+    [Parameter] public Guid StationId { get; set; }
     [Parameter] public string Title { get; set; } = "Cấu hình khung thời gian";
 
     private bool isLoading = true;
@@ -234,14 +234,14 @@
     private bool showFormModal = false;
     private bool showCopyModal = false;
     private TimeFrame currentTimeFrame = new();
-    private int sourceStationId = 0;
+    private Guid sourceStationId = Guid.Empty;
     private List<Station> availableStations = new();
     private List<TimeFrame> sourceTimeFrames = new();
-    private HashSet<int> selectedTimeFrameIds = new();
+    private HashSet<Guid> selectedTimeFrameIds = new();
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Visible && StationId > 0)
+        if (Visible && StationId != Guid.Empty)
         {
             isLoading = true;
             await LoadTimeFrames();
@@ -254,7 +254,7 @@
             showFormModal = false;
             showCopyModal = false;
             currentTimeFrame = new();
-            sourceStationId = 0;
+            sourceStationId = Guid.Empty;
             sourceTimeFrames = new();
             selectedTimeFrameIds = new();
             timeFrames = new();
@@ -362,7 +362,7 @@
         // Close other modals first
         showFormModal = false;
         
-        sourceStationId = 0;
+        sourceStationId = Guid.Empty;
         sourceTimeFrames = new();
         selectedTimeFrameIds = new();
         showCopyModal = true;
@@ -370,10 +370,17 @@
 
     private async Task OnSourceStationChanged(ChangeEventArgs e)
     {
-        sourceStationId = int.Parse(e.Value?.ToString() ?? "0");
+        if (Guid.TryParse(e.Value?.ToString(), out var guid))
+        {
+            sourceStationId = guid;
+        }
+        else
+        {
+            sourceStationId = Guid.Empty;
+        }
         selectedTimeFrameIds.Clear();
         
-        if (sourceStationId > 0)
+        if (sourceStationId != Guid.Empty)
         {
             await LoadSourceTimeFrames();
         }
@@ -385,13 +392,13 @@
 
     private async Task LoadSourceTimeFrames()
     {
-        if (sourceStationId > 0)
+        if (sourceStationId != Guid.Empty)
         {
             sourceTimeFrames = await MonitoringService.GetTimeFramesByStationIdAsync(sourceStationId);
         }
     }
 
-    private void ToggleTimeFrameSelection(int timeFrameId, bool isChecked)
+    private void ToggleTimeFrameSelection(Guid timeFrameId, bool isChecked)
     {
         if (isChecked)
         {
@@ -431,7 +438,7 @@
     private void CloseCopyDialog()
     {
         showCopyModal = false;
-        sourceStationId = 0;
+        sourceStationId = Guid.Empty;
         sourceTimeFrames = new();
         selectedTimeFrameIds.Clear();
     }
@@ -462,6 +469,7 @@
                     StartTime = tf.StartTime,
                     EndTime = tf.EndTime,
                     FrequencyMinutes = tf.FrequencyMinutes,
+                    BufferMinutes = tf.BufferMinutes,  // ✅ Copy buffer time
                     DaysOfWeek = tf.DaysOfWeek,
                     IsEnabled = tf.IsEnabled
                 };

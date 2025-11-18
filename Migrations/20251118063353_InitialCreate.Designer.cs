@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StationCheck.Data;
 
@@ -11,9 +12,11 @@ using StationCheck.Data;
 namespace StationCheck.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251118063353_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,38 +109,39 @@ namespace StationCheck.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "USR001",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 918, DateTimeKind.Utc).AddTicks(5821),
+                            Id = "11111111-aaaa-aaaa-aaaa-111111111111",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5388),
                             Email = "admin@stationcheck.com",
                             FullName = "System Administrator",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$Lye4Rp3wiZac3e2zMQkwIeT6FMH2iOgGZ7B526s8I7aYK8BPouWPK",
+                            PasswordHash = "$2a$12$FSPVbMyLtpvA./fz4KQ3ie5KW/FB5vqu1zc6jkBY93oYQ3XEuhsMS",
                             Role = 2,
                             Username = "admin"
                         },
                         new
                         {
-                            Id = "USR002",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 918, DateTimeKind.Utc).AddTicks(5827),
+                            Id = "22222222-bbbb-bbbb-bbbb-222222222222",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5397),
                             Email = "manager@stationcheck.com",
                             FullName = "Department Manager",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$8P2eOBhstCiFFRlVmm7Td.LTRqVGAR55FsTRSmhiNkYB9oauY15Ie",
+                            PasswordHash = "$2a$12$59vWYm2Mou4O3c29/g1ANuMoK7vcl9ETz5gqpVeiKf5PdxXKCW3FC",
                             Role = 1,
                             Username = "manager"
                         },
                         new
                         {
-                            Id = "USR003",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 918, DateTimeKind.Utc).AddTicks(5831),
+                            Id = "33333333-cccc-cccc-cccc-333333333333",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 852, DateTimeKind.Utc).AddTicks(5413),
                             Email = "employee1@stationcheck.com",
                             FullName = "Nhân viên Trạm 1",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$qaW7nc4Q.1AdUawwfHdL0OqW3mDk4yJC1dLiMqQYwV0XFLVssgaHK",
+                            PasswordHash = "$2a$12$z3CpZAUQUCyhhWl7HbpbPuTTr4NyFQ6ZLIXx0wjfaqjYoPx5H7lZW",
                             Role = 0,
+                            StationId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Username = "employee1"
                         });
                 });
@@ -323,7 +327,7 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "vi",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 921, DateTimeKind.Utc).AddTicks(7787),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1480),
                             FlagIcon = "vn",
                             IsActive = true,
                             IsDefault = true,
@@ -333,7 +337,7 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "en",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 921, DateTimeKind.Utc).AddTicks(7790),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1482),
                             FlagIcon = "us",
                             IsActive = true,
                             IsDefault = false,
@@ -497,8 +501,8 @@ namespace StationCheck.Migrations
 
                     b.Property<string>("CameraId")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CameraName")
                         .HasMaxLength(200)
@@ -525,8 +529,8 @@ namespace StationCheck.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LastMotionCameraId")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("LastMotionCameraName")
                         .HasMaxLength(200)
@@ -604,8 +608,8 @@ namespace StationCheck.Migrations
 
                     b.Property<string>("CameraId")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CameraName")
                         .HasMaxLength(200)
@@ -776,7 +780,7 @@ namespace StationCheck.Migrations
                             Address = "Quận Hoàn Kiếm, Hà Nội",
                             ContactPerson = "Nguyễn Văn A",
                             ContactPhone = "0123456789",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 5, 998, DateTimeKind.Utc).AddTicks(2235),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 21, DateTimeKind.Utc).AddTicks(2664),
                             Description = "Trạm quan trắc chất lượng nước sông Hồng",
                             IsActive = true,
                             IsDeleted = false,
@@ -789,7 +793,7 @@ namespace StationCheck.Migrations
                             Address = "Quận Đống Đa, Hà Nội",
                             ContactPerson = "Trần Thị B",
                             ContactPhone = "0987654321",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 5, 998, DateTimeKind.Utc).AddTicks(2246),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 21, DateTimeKind.Utc).AddTicks(2668),
                             Description = "Trạm quan trắc chất lượng nước sông Tô Lịch",
                             IsActive = true,
                             IsDeleted = false,
@@ -859,9 +863,9 @@ namespace StationCheck.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            Id = new Guid("cccccccc-0001-0000-0000-000000000001"),
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 922, DateTimeKind.Utc).AddTicks(4317),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3310),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian quét email mới (giây)",
                             DisplayName = "Email Monitor Interval",
@@ -872,9 +876,9 @@ namespace StationCheck.Migrations
                         },
                         new
                         {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            Id = new Guid("cccccccc-0002-0000-0000-000000000002"),
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 922, DateTimeKind.Utc).AddTicks(4321),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3316),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)",
                             DisplayName = "Alert Generation Interval",
@@ -885,9 +889,9 @@ namespace StationCheck.Migrations
                         },
                         new
                         {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            Id = new Guid("cccccccc-0003-0000-0000-000000000003"),
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 18, 13, 49, 6, 922, DateTimeKind.Utc).AddTicks(4324),
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3322),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian kiểm tra chuyển động (giây)",
                             DisplayName = "Motion Monitor Interval",
@@ -996,8 +1000,7 @@ namespace StationCheck.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("StationId")
-                        .IsRequired()
+                    b.Property<Guid>("StationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("TimeFrameId")
@@ -1059,6 +1062,602 @@ namespace StationCheck.Migrations
                         .IsUnique();
 
                     b.ToTable("Translations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0001-0000-0000-000000000001"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1527),
+                            Key = "menu.dashboard",
+                            LanguageCode = "vi",
+                            Value = "Trang chủ"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0002-0000-0000-000000000002"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1529),
+                            Key = "menu.stations",
+                            LanguageCode = "vi",
+                            Value = "Quản lý Trạm"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0003-0000-0000-000000000003"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1531),
+                            Key = "menu.users",
+                            LanguageCode = "vi",
+                            Value = "Quản lý User"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0004-0000-0000-000000000004"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1533),
+                            Key = "menu.settings",
+                            LanguageCode = "vi",
+                            Value = "Cấu hình"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0005-0000-0000-000000000005"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1535),
+                            Key = "button.add",
+                            LanguageCode = "vi",
+                            Value = "Thêm mới"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0006-0000-0000-000000000006"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1537),
+                            Key = "button.edit",
+                            LanguageCode = "vi",
+                            Value = "Chỉnh sửa"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0007-0000-0000-000000000007"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1539),
+                            Key = "button.delete",
+                            LanguageCode = "vi",
+                            Value = "Xóa"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0008-0000-0000-000000000008"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1541),
+                            Key = "button.save",
+                            LanguageCode = "vi",
+                            Value = "Lưu"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0009-0000-0000-000000000009"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1543),
+                            Key = "button.cancel",
+                            LanguageCode = "vi",
+                            Value = "Hủy"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0010-0000-0000-000000000010"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1551),
+                            Key = "station.name",
+                            LanguageCode = "vi",
+                            Value = "Tên trạm"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0011-0000-0000-000000000011"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1553),
+                            Key = "station.address",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0012-0000-0000-000000000012"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1555),
+                            Key = "station.contact",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0013-0000-0000-000000000013"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1557),
+                            Key = "station.phone",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0014-0000-0000-000000000014"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1560),
+                            Key = "station.page_title",
+                            LanguageCode = "vi",
+                            Value = "Quản lý Trạm"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0015-0000-0000-000000000015"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1562),
+                            Key = "station.list_title",
+                            LanguageCode = "vi",
+                            Value = "Danh sách Trạm Quan Trắc"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0016-0000-0000-000000000016"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1563),
+                            Key = "station.add_button",
+                            LanguageCode = "vi",
+                            Value = "Thêm Trạm Mới"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0017-0000-0000-000000000017"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1565),
+                            Key = "station.edit_title_add",
+                            LanguageCode = "vi",
+                            Value = "Thêm Trạm Mới"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0018-0000-0000-000000000018"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1567),
+                            Key = "station.edit_title_edit",
+                            LanguageCode = "vi",
+                            Value = "Chỉnh sửa Trạm"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0019-0000-0000-000000000019"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1569),
+                            Key = "station.search_placeholder",
+                            LanguageCode = "vi",
+                            Value = "Tìm kiếm..."
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0020-0000-0000-000000000020"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1571),
+                            Key = "station.name_column",
+                            LanguageCode = "vi",
+                            Value = "Tên Trạm"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0021-0000-0000-000000000021"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1573),
+                            Key = "station.address_column",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0022-0000-0000-000000000022"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1575),
+                            Key = "station.contact_column",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0023-0000-0000-000000000023"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1577),
+                            Key = "station.phone_column",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0024-0000-0000-000000000024"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1579),
+                            Key = "station.actions_column",
+                            LanguageCode = "vi",
+                            Value = "Thao tác"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0025-0000-0000-000000000025"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1581),
+                            Key = "station.name_label",
+                            LanguageCode = "vi",
+                            Value = "Tên Trạm:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0026-0000-0000-000000000026"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1582),
+                            Key = "station.address_label",
+                            LanguageCode = "vi",
+                            Value = "Địa chỉ:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0027-0000-0000-000000000027"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1584),
+                            Key = "station.description_label",
+                            LanguageCode = "vi",
+                            Value = "Mô tả:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0028-0000-0000-000000000028"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1586),
+                            Key = "station.contact_label",
+                            LanguageCode = "vi",
+                            Value = "Người liên hệ:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0029-0000-0000-000000000029"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1601),
+                            Key = "station.phone_label",
+                            LanguageCode = "vi",
+                            Value = "Số điện thoại:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0030-0000-0000-000000000030"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1603),
+                            Key = "station.active_label",
+                            LanguageCode = "vi",
+                            Value = "Kích hoạt giám sát:"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0031-0000-0000-000000000031"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1605),
+                            Key = "message.confirm_delete_station",
+                            LanguageCode = "vi",
+                            Value = "Bạn có chắc muốn xóa trạm này?"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0032-0000-0000-000000000032"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1607),
+                            Key = "message.delete_error",
+                            LanguageCode = "vi",
+                            Value = "Không thể xóa"
+                        },
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-0033-0000-0000-000000000033"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1609),
+                            Key = "message.error",
+                            LanguageCode = "vi",
+                            Value = "Lỗi"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0101-0000-0000-000000000101"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1611),
+                            Key = "menu.dashboard",
+                            LanguageCode = "en",
+                            Value = "Dashboard"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0102-0000-0000-000000000102"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1613),
+                            Key = "menu.stations",
+                            LanguageCode = "en",
+                            Value = "Station Management"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0103-0000-0000-000000000103"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1615),
+                            Key = "menu.users",
+                            LanguageCode = "en",
+                            Value = "User Management"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0104-0000-0000-000000000104"),
+                            Category = "menu",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1617),
+                            Key = "menu.settings",
+                            LanguageCode = "en",
+                            Value = "Settings"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0105-0000-0000-000000000105"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1619),
+                            Key = "button.add",
+                            LanguageCode = "en",
+                            Value = "Add New"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0106-0000-0000-000000000106"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1621),
+                            Key = "button.edit",
+                            LanguageCode = "en",
+                            Value = "Edit"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0107-0000-0000-000000000107"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1622),
+                            Key = "button.delete",
+                            LanguageCode = "en",
+                            Value = "Delete"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0108-0000-0000-000000000108"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1624),
+                            Key = "button.save",
+                            LanguageCode = "en",
+                            Value = "Save"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0109-0000-0000-000000000109"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1626),
+                            Key = "button.cancel",
+                            LanguageCode = "en",
+                            Value = "Cancel"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0110-0000-0000-000000000110"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1628),
+                            Key = "station.name",
+                            LanguageCode = "en",
+                            Value = "Station Name"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0111-0000-0000-000000000111"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1630),
+                            Key = "station.address",
+                            LanguageCode = "en",
+                            Value = "Address"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0112-0000-0000-000000000112"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1632),
+                            Key = "station.contact",
+                            LanguageCode = "en",
+                            Value = "Contact Person"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0113-0000-0000-000000000113"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1634),
+                            Key = "station.phone",
+                            LanguageCode = "en",
+                            Value = "Phone Number"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0114-0000-0000-000000000114"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1636),
+                            Key = "station.page_title",
+                            LanguageCode = "en",
+                            Value = "Station Management"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0115-0000-0000-000000000115"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1637),
+                            Key = "station.list_title",
+                            LanguageCode = "en",
+                            Value = "Monitoring Station List"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0116-0000-0000-000000000116"),
+                            Category = "button",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1639),
+                            Key = "station.add_button",
+                            LanguageCode = "en",
+                            Value = "Add New Station"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0117-0000-0000-000000000117"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1641),
+                            Key = "station.edit_title_add",
+                            LanguageCode = "en",
+                            Value = "Add New Station"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0118-0000-0000-000000000118"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1643),
+                            Key = "station.edit_title_edit",
+                            LanguageCode = "en",
+                            Value = "Edit Station"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0119-0000-0000-000000000119"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1645),
+                            Key = "station.search_placeholder",
+                            LanguageCode = "en",
+                            Value = "Search..."
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0120-0000-0000-000000000120"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1647),
+                            Key = "station.name_column",
+                            LanguageCode = "en",
+                            Value = "Station Name"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0121-0000-0000-000000000121"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1649),
+                            Key = "station.address_column",
+                            LanguageCode = "en",
+                            Value = "Address"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0122-0000-0000-000000000122"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1651),
+                            Key = "station.contact_column",
+                            LanguageCode = "en",
+                            Value = "Contact Person"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0123-0000-0000-000000000123"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1653),
+                            Key = "station.phone_column",
+                            LanguageCode = "en",
+                            Value = "Phone Number"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0124-0000-0000-000000000124"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1655),
+                            Key = "station.actions_column",
+                            LanguageCode = "en",
+                            Value = "Actions"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0125-0000-0000-000000000125"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1656),
+                            Key = "station.name_label",
+                            LanguageCode = "en",
+                            Value = "Station Name:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0126-0000-0000-000000000126"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1658),
+                            Key = "station.address_label",
+                            LanguageCode = "en",
+                            Value = "Address:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0127-0000-0000-000000000127"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1683),
+                            Key = "station.description_label",
+                            LanguageCode = "en",
+                            Value = "Description:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0128-0000-0000-000000000128"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1685),
+                            Key = "station.contact_label",
+                            LanguageCode = "en",
+                            Value = "Contact Person:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0129-0000-0000-000000000129"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1687),
+                            Key = "station.phone_label",
+                            LanguageCode = "en",
+                            Value = "Phone Number:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0130-0000-0000-000000000130"),
+                            Category = "label",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1688),
+                            Key = "station.active_label",
+                            LanguageCode = "en",
+                            Value = "Enable Monitoring:"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0131-0000-0000-000000000131"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1690),
+                            Key = "message.confirm_delete_station",
+                            LanguageCode = "en",
+                            Value = "Are you sure you want to delete this station?"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0132-0000-0000-000000000132"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1692),
+                            Key = "message.delete_error",
+                            LanguageCode = "en",
+                            Value = "Cannot delete"
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-0133-0000-0000-000000000133"),
+                            Category = "message",
+                            CreatedAt = new DateTime(2025, 11, 18, 6, 33, 52, 856, DateTimeKind.Utc).AddTicks(1694),
+                            Key = "message.error",
+                            LanguageCode = "en",
+                            Value = "Error"
+                        });
                 });
 
             modelBuilder.Entity("StationCheck.Models.ApplicationUser", b =>
