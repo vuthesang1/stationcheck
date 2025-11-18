@@ -307,12 +307,13 @@ namespace StationCheck.BackgroundServices
             if (hasRecentMotion)
             {
                 _logger.LogInformation(
-                    "[AlertGeneration] Station {StationId} has motion within tolerance window. Window: {WindowStart} to {Now}, Frequency: {Frequency}, Buffer: {Buffer}",
+                    "[AlertGeneration] Station {StationId} has motion within tolerance window. Window: {WindowStart} to {Now} (UTC), Frequency: {Frequency}min, Buffer: {Buffer}min. Last motion: {LastMotion}",
                     station.Id,
                     windowStart.ToString("yyyy-MM-dd HH:mm:ss"),
                     now.ToString("yyyy-MM-dd HH:mm:ss"),
                     timeFrame.FrequencyMinutes,
-                    timeFrame.BufferMinutes
+                    timeFrame.BufferMinutes,
+                    station.LastMotionDetectedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Unknown"
                 );
                 return false;
             }
@@ -493,6 +494,12 @@ namespace StationCheck.BackgroundServices
                 );
             }
 
+            // Calculate tolerance window for display in message
+            var toleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
+            var windowStart = now.AddMinutes(-toleranceMinutes);
+            var windowStartLocal = windowStart.AddHours(7).ToString("HH:mm");
+            var nowLocal = now.AddHours(7).ToString("HH:mm");
+
             var alert = new MotionAlert
             {
                 StationId = station.Id,
@@ -505,7 +512,7 @@ namespace StationCheck.BackgroundServices
                 Severity = minutesSinceLastMotion > timeFrame.FrequencyMinutes * 2 
                     ? AlertSeverity.Critical 
                     : AlertSeverity.Warning,
-                Message = $"Không phát hiện chuyển động tại {station.Name} trong {minutesSinceLastMotion} phút (mong đợi: {timeFrame.FrequencyMinutes} phút)",
+                Message = $"Không phát hiện chuyển động tại {station.Name} vào lúc {windowStartLocal} - {nowLocal}",
                 ExpectedFrequencyMinutes = timeFrame.FrequencyMinutes,
                 LastMotionAt = station.LastMotionDetectedAt,
                 LastMotionCameraId = lastMotionEvent?.CameraId,
