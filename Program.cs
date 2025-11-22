@@ -99,6 +99,9 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+// Add HttpContextAccessor for accessing current user in DbContext
+builder.Services.AddHttpContextAccessor();
+
 // Add DevExpress Blazor
 builder.Services.AddDevExpressBlazor(options => {
     options.SizeMode = DevExpress.Blazor.SizeMode.Medium;

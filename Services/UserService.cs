@@ -61,6 +61,40 @@ public class UserService : IUserService
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
+        // Check if email already exists (including soft-deleted users)
+        var existingUser = await context.Users
+            .IgnoreQueryFilters() // Include soft-deleted users
+            .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+        if (existingUser != null)
+        {
+            if (existingUser.IsDeleted)
+            {
+                throw new InvalidOperationException($"Email '{request.Email}' đã tồn tại trong hệ thống (user đã bị xóa trước đó). Vui lòng sử dụng email khác hoặc liên hệ quản trị viên để khôi phục tài khoản.");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Email '{request.Email}' đã được sử dụng bởi user khác.");
+            }
+        }
+
+        // Check if username already exists
+        var existingUsername = await context.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
+
+        if (existingUsername != null)
+        {
+            if (existingUsername.IsDeleted)
+            {
+                throw new InvalidOperationException($"Username '{request.Username}' đã tồn tại trong hệ thống (user đã bị xóa trước đó). Vui lòng sử dụng username khác hoặc liên hệ quản trị viên để khôi phục tài khoản.");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Username '{request.Username}' đã được sử dụng.");
+            }
+        }
+
         var user = new ApplicationUser
         {
             Username = request.Username,
@@ -88,6 +122,26 @@ public class UserService : IUserService
         var user = await context.Users.FindAsync(id);
         if (user == null)
             throw new InvalidOperationException($"User {id} not found");
+
+        // Check if email is being changed and if new email already exists
+        if (user.Email != request.Email)
+        {
+            var existingUser = await context.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Email == request.Email && u.Id != id);
+
+            if (existingUser != null)
+            {
+                if (existingUser.IsDeleted)
+                {
+                    throw new InvalidOperationException($"Email '{request.Email}' đã tồn tại trong hệ thống (user đã bị xóa trước đó). Vui lòng sử dụng email khác.");
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Email '{request.Email}' đã được sử dụng bởi user khác.");
+                }
+            }
+        }
 
         user.Email = request.Email;
         user.FullName = request.FullName;

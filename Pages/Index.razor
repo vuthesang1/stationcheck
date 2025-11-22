@@ -1,8 +1,8 @@
-@page "/"
+@page "/dashboard"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using StationCheck.Services
-@attribute [Authorize]
+@attribute [Authorize(Policy = "ManagerOrAbove")]
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
 

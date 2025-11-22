@@ -1,13 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using StationCheck.Models;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace StationCheck.Data;
 
 public class ApplicationDbContext : DbContext
 {
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
+    }
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor)
+        : base(options)
+    {
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public DbSet<MotionEvent> MotionEvents => Set<MotionEvent>();
@@ -67,8 +77,10 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasMaxLength(50);
-            entity.Property(e => e.CameraId).HasMaxLength(200).IsRequired();  // ✅ Updated from 50 to 200
+#pragma warning disable CS0618 // Type or member is obsolete
+            entity.Property(e => e.CameraId).HasMaxLength(200);  // ✅ Made nullable - legacy field
             entity.Property(e => e.CameraName).HasMaxLength(200);
+#pragma warning restore CS0618
             entity.Property(e => e.StationName).HasMaxLength(200);
             entity.Property(e => e.LastMotionCameraId).HasMaxLength(200);  // ✅ Ensure LastMotionCameraId is 200
             entity.Property(e => e.LastMotionCameraName).HasMaxLength(200);
@@ -95,7 +107,9 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.TimeFrameHistoryId)
                 .OnDelete(DeleteBehavior.NoAction);
             
+#pragma warning disable CS0618 // Type or member is obsolete
             entity.HasIndex(e => e.CameraId);
+#pragma warning restore CS0618
             entity.HasIndex(e => e.StationId);
             entity.HasIndex(e => e.AlertTime);
             entity.HasIndex(e => e.IsResolved);
@@ -105,6 +119,75 @@ public class ApplicationDbContext : DbContext
 
         // Seed data
         SeedData(modelBuilder);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var currentUser = GetCurrentUsername();
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            // Set audit fields for entities with BaseAuditEntity properties
+            if (entry.State == EntityState.Added)
+            {
+                // Set CreatedAt and CreatedBy for new entities
+                if (entry.Entity.GetType().GetProperty("CreatedAt") != null)
+                {
+                    entry.Property("CreatedAt").CurrentValue = now;
+                }
+                if (entry.Entity.GetType().GetProperty("CreatedBy") != null && !string.IsNullOrEmpty(currentUser))
+                {
+                    entry.Property("CreatedBy").CurrentValue = currentUser;
+                }
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                // Set ModifiedAt and ModifiedBy for updated entities
+                if (entry.Entity.GetType().GetProperty("ModifiedAt") != null)
+                {
+                    entry.Property("ModifiedAt").CurrentValue = now;
+                }
+                if (entry.Entity.GetType().GetProperty("ModifiedBy") != null && !string.IsNullOrEmpty(currentUser))
+                {
+                    entry.Property("ModifiedBy").CurrentValue = currentUser;
+                }
+
+                // For soft delete: set DeletedAt and DeletedBy
+                if (entry.Entity.GetType().GetProperty("IsDeleted") != null)
+                {
+                    var isDeleted = (bool)entry.Property("IsDeleted").CurrentValue!;
+                    if (isDeleted)
+                    {
+                        if (entry.Entity.GetType().GetProperty("DeletedAt") != null)
+                        {
+                            entry.Property("DeletedAt").CurrentValue = now;
+                        }
+                        if (entry.Entity.GetType().GetProperty("DeletedBy") != null && !string.IsNullOrEmpty(currentUser))
+                        {
+                            entry.Property("DeletedBy").CurrentValue = currentUser;
+                        }
+                    }
+                }
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private string? GetCurrentUsername()
+    {
+        if (_httpContextAccessor?.HttpContext == null)
+            return null;
+
+        var user = _httpContextAccessor.HttpContext.User;
+        if (user?.Identity?.IsAuthenticated != true)
+            return null;
+
+        // Try to get username from claims
+        return user.FindFirst(ClaimTypes.Name)?.Value 
+            ?? user.FindFirst("username")?.Value 
+            ?? user.Identity.Name;
     }
 
     private void SeedData(ModelBuilder modelBuilder)
@@ -422,19 +505,6 @@ public class ApplicationDbContext : DbContext
                 Value = "3600", // 1 hour in seconds
                 DisplayName = "Alert Generation Interval",
                 Description = "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)",
-                ValueType = "int",
-                Category = "BackgroundServices",
-                IsEditable = true,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "System"
-            },
-            new SystemConfiguration
-            {
-                Id = new Guid("CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC"),
-                Key = "MotionMonitorInterval",
-                Value = "60", // 1 minute in seconds
-                DisplayName = "Motion Monitor Interval",
-                Description = "Khoảng thời gian kiểm tra chuyển động (giây)",
                 ValueType = "int",
                 Category = "BackgroundServices",
                 IsEditable = true,

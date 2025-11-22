@@ -1,112 +1,147 @@
 @page "/users"
 @using StationCheck.Interfaces
 @using StationCheck.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 @attribute [Authorize(Policy = "ManagerOrAbove")]
 @inject IUserService UserService
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject LocalizationStateService LocalizationState
+@inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@GetText("user.title", "User Management")</PageTitle>
+<PageTitle>@GetText("user.title", "Quản Lý User")</PageTitle>
 
-<div class="user-management">
-    <div class="header-section">
-        <h3>@GetText("user.title", "User Management")</h3>
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-users"></i> @GetText("user.title", "Quản Lý User")
+        </h1>
         @if (currentUser?.Role >= UserRole.Manager)
         {
-            <button class="btn btn-success" @onclick="ShowAddUserModal">
-                <i class="bi bi-plus-circle"></i> @GetText("user.add_new", "Add User")
+            <button class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" @onclick="ShowAddUserModal">
+                <i class="fas fa-user-plus fa-sm text-white-50"></i> @GetText("user.add_new", "Thêm User")
             </button>
         }
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="alert alert-danger alert-dismissible">
-            @errorMessage
-            <button type="button" class="btn-close" @onclick="@(() => errorMessage = "")"></button>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @errorMessage
+            <button type="button" class="close" @onclick="@(() => errorMessage = "")">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     }
 
     @if (!string.IsNullOrEmpty(successMessage))
     {
-        <div class="alert alert-success alert-dismissible">
-            @successMessage
-            <button type="button" class="btn-close" @onclick="@(() => successMessage = "")"></button>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @successMessage
+            <button type="button" class="close" @onclick="@(() => successMessage = "")">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     }
 
-    @if (users == null)
-    {
-        <div class="text-center p-5">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+    <!-- DevExpress DataGrid -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@GetText("user.list_title", "Danh Sách User")</h6>
         </div>
-    }
-    else if (!users.Any())
-    {
-        <div class="alert alert-info">@GetText("user.no_users_found", "No users found.")</div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>@GetText("user.username_column", "Username")</th>
-                        <th>@GetText("user.fullname_column", "Full Name")</th>
-                        <th>@GetText("user.email_column", "Email")</th>
-                        <th>@GetText("user.role_column", "Role")</th>
-                        <th>@GetText("user.status_column", "Status")</th>
-                        <th>@GetText("user.created_column", "Created At")</th>
-                        <th>@GetText("user.last_login_column", "Last Login")</th>
-                        <th>@GetText("user.actions_column", "Actions")</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in users)
-                    {
-                        <tr>
-                            <td>@user.Username</td>
-                            <td>@user.FullName</td>
-                            <td>@user.Email</td>
-                            <td>
-                                <span class="badge @GetRoleBadgeClass(user.Role)">
-                                    @user.Role.ToString()
+        <div class="card-body">
+            @if (users == null)
+            {
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">@GetText("common.loading", "Đang tải...")</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <DxGrid Data="@users"
+                        PageSize="20"
+                        ShowPager="true"
+                        PagerNavigationMode="PagerNavigationMode.InputBox"
+                        PageSizeSelectorVisible="true"
+                        AllowSelectRowByClick="false"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                        SizeMode="SizeMode.Medium">
+                    <Columns>
+                        <DxGridDataColumn FieldName="Id" Caption="ID" Visible="false" />
+                        <DxGridDataColumn FieldName="Username" Caption="@UsernameColumnCaption" Width="150px">
+                            <CellDisplayTemplate>
+                                <strong>@context.Value</strong>
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="FullName" Caption="@FullNameColumnCaption" MinWidth="150" />
+                        <DxGridDataColumn FieldName="Email" Caption="@EmailColumnCaption" MinWidth="200" />
+                        <DxGridDataColumn FieldName="Role" Caption="@RoleColumnCaption" Width="180px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var role = (UserRole)context.Value;
+                                }
+                                <span class="badge @GetRoleBadgeClass(role)">
+                                    @GetRoleDisplayName(role)
                                 </span>
-                            </td>
-                            <td>
-                                <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">
-                                    @(user.IsActive ? GetText("user.active", "Active") : GetText("user.inactive", "Inactive"))
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="IsActive" Caption="@StatusColumnCaption" Width="110px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var isActive = (bool)context.Value;
+                                }
+                                <span class="badge @(isActive ? "badge-success" : "badge-secondary")">
+                                    @(isActive ? GetText("user.active", "Kích hoạt") : GetText("user.inactive", "Vô hiệu"))
                                 </span>
-                            </td>
-                            <td>@user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@(user.LastLoginAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? GetText("user.never_login", "Never"))</td>
-                            <td>
-                                @if (CanModifyUser(user))
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="CreatedAt" Caption="@CreatedColumnCaption" Width="130px" DisplayFormat="dd/MM/yyyy HH:mm" />
+                        <DxGridDataColumn FieldName="LastLoginAt" Caption="@LastLoginColumnCaption" Width="130px">
+                            <CellDisplayTemplate>
+                                @{
+                                    var lastLogin = (DateTime?)context.Value;
+                                }
+                                @(lastLogin?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? GetText("user.never_login", "Chưa đăng nhập"))
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="Id" Caption="@ActionsColumnCaption" Width="150px" AllowSort="false">
+                            <CellDisplayTemplate>
+                                @{
+                                    var userId = (string)context.Value;
+                                    var user = users?.FirstOrDefault(u => u.Id == userId);
+                                }
+                                @if (user != null && CanModifyUser(user))
                                 {
-                                    <button class="btn btn-sm btn-primary me-1" @onclick="@(() => ShowEditUserModal(user))">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    @if (user.Id != currentUser?.Id)
-                                    {
-                                        <button class="btn btn-sm btn-danger" @onclick="@(() => DeleteUser(user))">
-                                            <i class="bi bi-trash"></i>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <button class="btn btn-warning btn-sm" title="Chỉnh sửa" @onclick="@(() => ShowEditUserModal(user))">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                    }
+                                        @if (user.Id != currentUser?.Id)
+                                        {
+                                            <button class="btn btn-danger btn-sm" title="Xóa" @onclick="@(() => DeleteUser(user))">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">@GetText("user.no_permission", "No permission")</span>
+                                    <span class="text-muted small">@GetText("user.no_permission", "Không có quyền")</span>
                                 }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </CellDisplayTemplate>
+                        </DxGridDataColumn>
+                    </Columns>
+                </DxGrid>
+            }
         </div>
-    }
+    </div>
 </div>
 
 <!-- Add/Edit User Modal -->
@@ -116,49 +151,101 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(editingUser == null ? "Add User" : "Edit User")</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    <h5 class="modal-title">
+                        @if (editingUser == null)
+                        {
+                            <i class="fas fa-user-plus"></i> @GetText("user.add_title", "Thêm User Mới")
+                        }
+                        else
+                        {
+                            <i class="fas fa-user-edit"></i> @GetText("user.edit_title", "Chỉnh Sửa User")
+                        }
+                    </h5>
+                    <button type="button" class="close" @onclick="CloseModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(modalErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @modalErrorMessage
+                            <button type="button" class="close" @onclick="@(() => modalErrorMessage = "")">
+                <span aria-hidden="true">&times;</span>
+            </button>
+                        </div>
+                    }
+                    
                     <EditForm id="userForm" Model="@userFormModel" OnValidSubmit="@SaveUser">
                         <DataAnnotationsValidator />
                         
                         @if (editingUser == null)
                         {
                             <div class="mb-3">
-                                <label class="form-label">Username</label>
-                                <InputText @bind-Value="userFormModel.Username" class="form-control" />
-                                <ValidationMessage For="@(() => userFormModel.Username)" />
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> @GetText("user.username_label", "Username") <span class="text-danger">*</span>
+                                </label>
+                                <InputText @bind-Value="userFormModel.Username" class="form-control" placeholder="Nhập username..." />
+                                <ValidationMessage For="@(() => userFormModel.Username)" class="text-danger" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Username
+                                </label>
+                                <input type="text" class="form-control" value="@editingUser.Username" disabled />
+                                <small class="text-muted">Username không thể thay đổi</small>
                             </div>
                         }
                         
                         <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <InputText @bind-Value="userFormModel.FullName" class="form-control" />
-                            <ValidationMessage For="@(() => userFormModel.FullName)" />
+                            <label class="form-label">
+                                <i class="fas fa-id-card"></i> @GetText("user.fullname_label", "Họ và Tên") <span class="text-danger">*</span>
+                            </label>
+                            <InputText @bind-Value="userFormModel.FullName" class="form-control" placeholder="Nhập họ và tên..." />
+                            <ValidationMessage For="@(() => userFormModel.FullName)" class="text-danger" />
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <InputText @bind-Value="userFormModel.Email" class="form-control" type="email" />
-                            <ValidationMessage For="@(() => userFormModel.Email)" />
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> @GetText("user.email_label", "Email") <span class="text-danger">*</span>
+                            </label>
+                            <InputText @bind-Value="userFormModel.Email" class="form-control" type="email" placeholder="example@example.com" />
+                            <ValidationMessage For="@(() => userFormModel.Email)" class="text-danger" />
                         </div>
                         
                         @if (editingUser == null)
                         {
                             <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <InputText @bind-Value="userFormModel.Password" class="form-control" type="password" />
-                                <ValidationMessage For="@(() => userFormModel.Password)" />
+                                <label class="form-label">
+                                    <i class="fas fa-key"></i> @GetText("user.password_label", "Mật khẩu") <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <InputText @bind-Value="userFormModel.Password" class="form-control" type="@(showPassword ? "text" : "password")" placeholder="Tối thiểu 6 ký tự..." />
+                                    <button class="btn btn-outline-secondary" type="button" @onclick="TogglePasswordVisibility" title="@(showPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu")">
+                                        <i class="fas @(showPassword ? "fa-eye-slash" : "fa-eye")"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" @onclick="CopyPasswordToClipboard" title="Copy mật khẩu">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary" type="button" @onclick="GenerateRandomPassword" title="Tạo mật khẩu ngẫu nhiên">
+                                        <i class="fas fa-random"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="@(() => userFormModel.Password)" class="text-danger" />
                             </div>
                         }
                         
                         <div class="mb-3">
-                            <label class="form-label">Role</label>
+                            <label class="form-label">
+                                <i class="fas fa-user-tag"></i> @GetText("user.role_label", "Vai trò") <span class="text-danger">*</span>
+                            </label>
                             <InputSelect @bind-Value="userFormModel.Role" class="form-select">
                                 @if (currentUser?.Role == UserRole.Admin)
                                 {
-                                    <option value="@UserRole.Admin">Admin (Quản trị)</option>
+                                    <option value="@UserRole.Admin">Admin (Quản trị viên)</option>
                                     <option value="@UserRole.Manager">Manager (Quản lý)</option>
                                 }
                                 <option value="@UserRole.StationEmployee">Station Employee (Nhân viên trạm)</option>
@@ -169,14 +256,20 @@
                         {
                             <div class="mb-3 form-check">
                                 <InputCheckbox @bind-Value="userFormModel.IsActive" class="form-check-input" id="isActiveCheck" />
-                                <label class="form-check-label" for="isActiveCheck">Active</label>
+                                <label class="form-check-label" for="isActiveCheck">
+                                    <i class="fas fa-check-circle"></i> @GetText("user.active_label", "Kích hoạt")
+                                </label>
                             </div>
                         }
                     </EditForm>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
-                    <button type="submit" form="userForm" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+                        <i class="fas fa-times"></i> @GetText("common.cancel", "Hủy")
+                    </button>
+                    <button type="submit" form="userForm" class="btn btn-primary">
+                        <i class="fas fa-save"></i> @GetText("common.save", "Lưu")
+                    </button>
                 </div>
             </div>
         </div>
@@ -185,17 +278,6 @@
 }
 
 <style>
-    .user-management {
-        padding: 20px;
-    }
-    
-    .header-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
     .modal.show {
         display: block;
     }
@@ -209,6 +291,38 @@
         height: 100vh;
         background-color: rgba(0,0,0,0.5);
     }
+    
+    .modal-dialog {
+        z-index: 1050;
+    }
+    
+    .password-input-group {
+        display: flex;
+    }
+    
+    .password-input-group input {
+        flex: 1;
+        border-right: none;
+        border-radius: 0.25rem 0 0 0.25rem;
+    }
+    
+    .password-input-group .btn {
+        border-left: none;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .password-input-group .btn:last-child {
+        border-radius: 0 0.25rem 0.25rem 0;
+    }
+    
+    .password-input-group .btn:not(:last-child) {
+        border-radius: 0;
+    }
+    
+    .password-input-group .btn i {
+        font-size: 0.875rem;
+    }
 </style>
 
 @code {
@@ -219,19 +333,44 @@
     private UserFormModel userFormModel = new();
     private string errorMessage = "";
     private string successMessage = "";
+    private string modalErrorMessage = "";
+    private bool showPassword = false;
+    private string generatedPassword = "";
+
+    // Column captions for DevExpress Grid
+    private string UsernameColumnCaption => GetText("user.username_column", "Username");
+    private string FullNameColumnCaption => GetText("user.fullname_column", "Họ và Tên");
+    private string EmailColumnCaption => GetText("user.email_column", "Email");
+    private string RoleColumnCaption => GetText("user.role_column", "Vai trò");
+    private string StatusColumnCaption => GetText("user.status_column", "Trạng thái");
+    private string CreatedColumnCaption => GetText("user.created_column", "Ngày tạo");
+    private string LastLoginColumnCaption => GetText("user.last_login_column", "Đăng nhập");
+    private string ActionsColumnCaption => GetText("user.actions_column", "Thao tác");
 
     public class UserFormModel
     {
         public string Username { get; set; } = "";
+        
+        [Required(ErrorMessage = "Họ tên là bắt buộc")]
+        [StringLength(100, ErrorMessage = "Họ tên không được quá 100 ký tự")]
         public string FullName { get; set; } = "";
+        
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; } = "";
+        
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
         public string? Password { get; set; }
+        
         public UserRole Role { get; set; } = UserRole.StationEmployee;
         public bool IsActive { get; set; } = true;
     }
 
     protected override async Task OnInitializedAsync()
     {
+        // Load current user from authentication state
+        await LoadCurrentUserFromAuth();
+        
         // Initialize LocalizationState
         if (LocalizationState != null && !LocalizationState.IsLoaded)
         {
@@ -241,25 +380,27 @@
             await LocalizationState.InitializeAsync(preferredLanguage);
         }
         
-        await LoadCurrentUser();
         await LoadUsers();
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && LocalizationState != null)
+        if (firstRender)
         {
-            // Wait for translations to load
-            int attempts = 0;
-            while (!LocalizationState.IsLoaded && attempts < 20)
+            if (LocalizationState != null)
             {
-                await Task.Delay(100);
-                attempts++;
-            }
-            
-            if (LocalizationState.IsLoaded)
-            {
-                StateHasChanged();
+                // Wait for translations to load
+                int attempts = 0;
+                while (!LocalizationState.IsLoaded && attempts < 20)
+                {
+                    await Task.Delay(100);
+                    attempts++;
+                }
+                
+                if (LocalizationState.IsLoaded)
+                {
+                    StateHasChanged();
+                }
             }
         }
     }
@@ -269,6 +410,35 @@
         return LocalizationState?.GetText(key, defaultText) ?? defaultText;
     }
 
+    private async Task LoadCurrentUserFromAuth()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var username = user.FindFirst(ClaimTypes.Name)?.Value;
+                var email = user.FindFirst(ClaimTypes.Email)?.Value;
+                var roleStr = user.FindFirst(ClaimTypes.Role)?.Value;
+                
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    currentUser = new UserInfo
+                    {
+                        Id = userId,
+                        Username = username ?? "",
+                        Email = email ?? "",
+                        Role = Enum.TryParse<UserRole>(roleStr, out var role) ? role : UserRole.StationEmployee
+                    };
+                }
+            }
+        }
+        catch { }
+    }
+    
     private async Task LoadCurrentUser()
     {
         try
@@ -276,7 +446,11 @@
             var userJson = await JS.InvokeAsync<string>("localStorage.getItem", "user_info");
             if (!string.IsNullOrEmpty(userJson))
             {
-                currentUser = System.Text.Json.JsonSerializer.Deserialize<UserInfo>(userJson);
+                var options = new System.Text.Json.JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+                currentUser = System.Text.Json.JsonSerializer.Deserialize<UserInfo>(userJson, options);
             }
         }
         catch { }
@@ -311,6 +485,8 @@
     {
         editingUser = null;
         userFormModel = new UserFormModel();
+        modalErrorMessage = "";
+        showPassword = false;
         showModal = true;
     }
 
@@ -319,11 +495,14 @@
         editingUser = user;
         userFormModel = new UserFormModel
         {
+            Username = user.Username,
             FullName = user.FullName,
             Email = user.Email,
             Role = user.Role,
             IsActive = user.IsActive
         };
+        modalErrorMessage = "";
+        showPassword = false;
         showModal = true;
     }
 
@@ -331,6 +510,7 @@
     {
         showModal = false;
         editingUser = null;
+        modalErrorMessage = "";
     }
 
     private async Task SaveUser()
@@ -339,21 +519,48 @@
         {
             errorMessage = "";
             successMessage = "";
+            modalErrorMessage = "";
 
             if (editingUser == null)
             {
+                // Validate username for new user
+                if (string.IsNullOrWhiteSpace(userFormModel.Username))
+                {
+                    modalErrorMessage = "Username là bắt buộc";
+                    return;
+                }
+                
+                if (userFormModel.Username.Length < 3 || userFormModel.Username.Length > 50)
+                {
+                    modalErrorMessage = "Username phải từ 3-50 ký tự";
+                    return;
+                }
+                
+                // Validate password for new user
+                if (string.IsNullOrWhiteSpace(userFormModel.Password))
+                {
+                    modalErrorMessage = "Mật khẩu là bắt buộc khi tạo user mới";
+                    return;
+                }
+                
+                if (userFormModel.Password.Length < 6)
+                {
+                    modalErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự";
+                    return;
+                }
+                
                 // Add new user
                 var registerRequest = new RegisterRequest
                 {
                     Username = userFormModel.Username,
-                    Password = userFormModel.Password ?? "",
+                    Password = userFormModel.Password,
                     Email = userFormModel.Email,
                     FullName = userFormModel.FullName,
                     Role = userFormModel.Role
                 };
                 
                 await UserService.CreateUserAsync(registerRequest, currentUser?.Id ?? "");
-                successMessage = "User created successfully";
+                successMessage = "Tạo user thành công";
             }
             else
             {
@@ -367,32 +574,39 @@
                 };
                 
                 await UserService.UpdateUserAsync(editingUser.Id, updateRequest, currentUser?.Id ?? "");
-                successMessage = "User updated successfully";
+                successMessage = "Cập nhật user thành công";
             }
 
             CloseModal();
             await LoadUsers();
         }
+        catch (InvalidOperationException ex)
+        {
+            // Business logic errors with user-friendly messages
+            modalErrorMessage = ex.Message;
+        }
         catch (Exception ex)
         {
-            errorMessage = $"Failed to save user: {ex.Message}";
+            // Unexpected errors
+            modalErrorMessage = $"Lỗi không xác định: {ex.Message}";
+            Console.WriteLine($"[UserManagement.SaveUser] Error: {ex}");
         }
     }
 
     private async Task DeleteUser(UserInfo user)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user '{user.Username}'?"))
+        if (!await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn xóa user '{user.Username}'?"))
             return;
 
         try
         {
             await UserService.DeleteUserAsync(user.Id, currentUser?.Id ?? "");
-            successMessage = "User deleted successfully";
+            successMessage = "Xóa user thành công";
             await LoadUsers();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Failed to delete user: {ex.Message}";
+            errorMessage = $"Lỗi khi xóa user: {ex.Message}";
         }
     }
 
@@ -405,5 +619,45 @@
             UserRole.StationEmployee => "bg-info",
             _ => "bg-secondary"
         };
+    }
+    
+    private string GetRoleDisplayName(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => "Admin (Quản trị viên)",
+            UserRole.Manager => "Manager (Quản lý)",
+            UserRole.StationEmployee => "Nhân viên trạm",
+            _ => role.ToString()
+        };
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task CopyPasswordToClipboard()
+    {
+        if (!string.IsNullOrEmpty(userFormModel.Password))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", userFormModel.Password);
+            await JS.InvokeVoidAsync("alert", "Đã copy mật khẩu vào clipboard!");
+        }
+    }
+
+    private void GenerateRandomPassword()
+    {
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#$%";
+        var random = new Random();
+        var password = new char[10];
+        
+        for (int i = 0; i < password.Length; i++)
+        {
+            password[i] = chars[random.Next(chars.Length)];
+        }
+        
+        userFormModel.Password = new string(password);
+        showPassword = true; // Automatically show password when generated
     }
 }

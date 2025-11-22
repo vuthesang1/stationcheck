@@ -49,3 +49,32 @@ window.showToast = function (message, type = 'success', duration = 3000) {
 
     bsToast.show();
 };
+
+// Fullscreen toggle helper for StationMonitor
+window.toggleFullscreen = function (isFullscreen) {
+    if (isFullscreen) {
+        // Hide layout elements
+        const sidebar = document.getElementById('accordionSidebar');
+        const topbar = document.querySelector('.topbar');
+        const pageHeading = document.querySelector('.d-sm-flex.align-items-center');
+        
+        if (sidebar) sidebar.style.display = 'none';
+        if (topbar) topbar.style.display = 'none';
+        if (pageHeading) pageHeading.style.display = 'none';
+        
+        // Make body overflow hidden
+        document.body.style.overflow = 'hidden';
+    } else {
+        // Show layout elements
+        const sidebar = document.getElementById('accordionSidebar');
+        const topbar = document.querySelector('.topbar');
+        const pageHeading = document.querySelector('.d-sm-flex.align-items-center');
+        
+        if (sidebar) sidebar.style.display = '';
+        if (topbar) topbar.style.display = '';
+        if (pageHeading) pageHeading.style.display = '';
+        
+        // Reset body overflow
+        document.body.style.overflow = '';
+    }
+};

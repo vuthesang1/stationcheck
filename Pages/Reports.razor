@@ -129,7 +129,7 @@
         <li class="nav-item">
             <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
                     @onclick='() => SwitchTab("motion")'>
-                <i class="fas fa-chart-line"></i> Báo cáo Chuyển động
+                <i class="fas fa-chart-line"></i> Báo cáo
             </button>
         </li>
         <li class="nav-item">
@@ -195,11 +195,11 @@
                             </button>
                         </div>
                     }
-                    <div class="col-md-@(alertPeriod == "custom" ? "1" : "6") d-flex align-items-end justify-content-end">
+                    @* <div class="col-md-@(alertPeriod == "custom" ? "1" : "6") d-flex align-items-end justify-content-end">
                         <button class="btn btn-success btn-sm" @onclick="ExportAlertsToExcel" disabled="@isExporting">
                             <i class="fas fa-file-excel me-1 pr-1"></i>@(isExporting ? "Đang xuất..." : "Xuất Excel")
                         </button>
-                    </div>
+                    </div> *@
                 </div>
 
                 @if (isLoadingAlerts)
@@ -217,7 +217,8 @@
                             ShowPager="true"
                             PagerNavigationMode="PagerNavigationMode.InputBox"
                             PageSizeSelectorVisible="true"
-                            AllowSelectRowByClick="false"
+                            AllowSelectRowByClick="true"
+                            SelectedDataItemChanged="@OnAlertRowSelected"
                             HighlightRowOnHover="true"
                             TextWrapEnabled="false"
                             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
@@ -228,18 +229,18 @@
                             <DxGridDataColumn FieldName="AlertTime" Caption="Thời gian" Width="160px">
                                 <CellDisplayTemplate>
                                     @{
-                                        var alert = (MotionAlert)context.DataItem;
+                                        var alert = (MotionAlert)context.Grid.GetDataItem(context.VisibleIndex);
                                     }
                                     @alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
                             <DxGridDataColumn FieldName="StationName" Caption="Trạm" Width="200px" />
                             <DxGridDataColumn FieldName="Message" Caption="Thông điệp" MinWidth="300" />
-                            <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="100px" />
+                            @* <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="100px" />
                             <DxGridDataColumn FieldName="IsResolved" Caption="Trạng thái" Width="120px">
                                 <CellDisplayTemplate>
                                     @{
-                                        var alert = (MotionAlert)context.DataItem;
+                                        var alert = (MotionAlert)context.Grid.GetDataItem(context.VisibleIndex);
                                     }
                                     <span class="badge @(alert.IsResolved ? "bg-success" : "bg-danger")">
                                         @(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
@@ -249,12 +250,29 @@
                             <DxGridDataColumn FieldName="ResolvedAt" Caption="Xử lý lúc" Width="180px">
                                 <CellDisplayTemplate>
                                     @{
-                                        var alert = (MotionAlert)context.DataItem;
+                                        var alert = (MotionAlert)context.Grid.GetDataItem(context.VisibleIndex);
                                     }
                                     @(alert.ResolvedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") ?? "")
                                 </CellDisplayTemplate>
                             </DxGridDataColumn>
                             <DxGridDataColumn FieldName="ResolvedBy" Caption="Người xử lý" Width="150px" />
+                            <DxGridDataColumn FieldName="Notes" Caption="Ghi chú" MinWidth="200">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var alert = (MotionAlert)context.Grid.GetDataItem(context.VisibleIndex);
+                                        var notes = alert.Notes ?? "";
+                                        var displayNotes = notes.Length > 50 ? notes.Substring(0, 50) + "..." : notes;
+                                    }
+                                    @if (!string.IsNullOrEmpty(notes))
+                                    {
+                                        <span title="@notes">@displayNotes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn> *@
                         </Columns>
                     </DxGrid>
 
@@ -273,7 +291,7 @@
     {
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Báo cáo Tần suất Chuyển động</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Báo cáo</h6>
             </div>
             <div class="card-body">
                 <div class="row mb-3 g-2">
@@ -438,7 +456,7 @@
                             <DxGridDataColumn FieldName="ChangedAt" Caption="Thời gian" Width="180px">
                                 <CellDisplayTemplate>
                                     @{
-                                        var log = (ConfigurationAuditLog)context.DataItem;
+                                        var log = (ConfigurationAuditLog)context.Grid.GetDataItem(context.VisibleIndex);
                                     }
                                     @log.ChangedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
                                 </CellDisplayTemplate>
@@ -448,7 +466,7 @@
                             <DxGridDataColumn FieldName="ActionType" Caption="Hành động" Width="120px">
                                 <CellDisplayTemplate>
                                     @{
-                                        var log = (ConfigurationAuditLog)context.DataItem;
+                                        var log = (ConfigurationAuditLog)context.Grid.GetDataItem(context.VisibleIndex);
                                         var badgeClass = log.ActionType switch
                                         {
                                             "Create" => "bg-success",
@@ -501,10 +519,10 @@
                                                 <td class="text-muted">Tên:</td>
                                                 <td><strong>@selectedAuditLog.EntityName</strong></td>
                                             </tr>
-                                            <tr>
+                                            @* <tr>
                                                 <td class="text-muted">Entity ID:</td>
                                                 <td><code>@selectedAuditLog.EntityId</code></td>
-                                            </tr>
+                                            </tr> *@
                                             <tr>
                                                 <td class="text-muted">Hành động:</td>
                                                 <td>
@@ -680,6 +698,100 @@
     </div>
 }
 
+@* Alert Detail Modal *@
+@if (showAlertDetailModal && selectedAlert != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.7);">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-bell"></i> Chi tiết Cảnh báo
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseAlertDetailModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Alert Information -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <strong><i class="fas fa-info-circle"></i> Thông tin cảnh báo</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted" style="width: 180px;"><strong>Thời gian:</strong></td>
+                                                <td>@selectedAlert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted"><strong>Trạm:</strong></td>
+                                                <td>@selectedAlert.StationName</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted"><strong>Thông điệp:</strong></td>
+                                                <td>@selectedAlert.Message</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted"><strong>Mức độ:</strong></td>
+                                                <td>
+                                                    <span class="badge @(selectedAlert.Severity.ToString() == "Critical" ? "bg-danger" : "bg-warning")">
+                                                        @selectedAlert.Severity.ToString()
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted"><strong>Trạng thái:</strong></td>
+                                                <td>
+                                                    <span class="badge @(selectedAlert.IsResolved ? "bg-success" : "bg-danger")">
+                                                        @(selectedAlert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            @if (selectedAlert.IsResolved)
+                                            {
+                                                <tr>
+                                                    <td class="text-muted"><strong>Thời gian xử lý:</strong></td>
+                                                    <td>@selectedAlert.ResolvedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted"><strong>Người xử lý:</strong></td>
+                                                    <td>@selectedAlert.ResolvedBy</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        @if (!string.IsNullOrEmpty(selectedAlert.Notes))
+                        {
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-warning">
+                                        <strong><i class="fas fa-sticky-note"></i> Ghi chú xử lý</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-light mb-0">
+                                            @selectedAlert.Notes
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseAlertDetailModal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private string activeTab = "alerts";
     private bool isFirstRender = true;
@@ -714,6 +826,10 @@
     private Guid? auditEntityId = null;
     private bool showAuditDetailModal = false;
     private ConfigurationAuditLog? selectedAuditLog = null;
+    
+    // Alert Detail Modal
+    private bool showAlertDetailModal = false;
+    private MotionAlert? selectedAlert = null;
 
     // Common
     private List<Station> stations = new();
@@ -1020,7 +1136,7 @@
             int row = 2;
             foreach (var alert in alerts)
             {
-                worksheet.Cell(row, 1).Value = alert.AlertTime.ToString("dd/MM/yyyy HH:mm:ss");
+                worksheet.Cell(row, 1).Value = alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss");
                 worksheet.Cell(row, 2).Value = alert.StationName ?? "";
                 worksheet.Cell(row, 3).Value = alert.Message ?? "";
                 worksheet.Cell(row, 4).Value = alert.Severity.ToString();
@@ -1084,6 +1200,26 @@
         showAuditDetailModal = false;
         selectedAuditLog = null;
     }
+    
+    private void ShowAlertDetail(MotionAlert alert)
+    {
+        selectedAlert = alert;
+        showAlertDetailModal = true;
+    }
+    
+    private void OnAlertRowSelected(object dataItem)
+    {
+        if (dataItem is MotionAlert alert)
+        {
+            ShowAlertDetail(alert);
+        }
+    }
+    
+    private void CloseAlertDetailModal()
+    {
+        showAlertDetailModal = false;
+        selectedAlert = null;
+    }
 
     private string GetRowHighlightClass(string key, string oldVal, string newVal)
     {
@@ -1113,7 +1249,8 @@
             {
                 "CameraStations", "StationEmployees", "TimeSchedules", "TimeFrames",
                 "CreatedAt", "ModifiedAt", "CreatedBy", "ModifiedBy",
-                "Stations", "ProfileId", "Profile", "Station", "TimeFrame", "MotionAlerts"
+                "Stations", "ProfileId", "Profile", "Station", "TimeFrame", "MotionAlerts",
+                "Id", "StationId"  // Hide all ID fields
             };
             
             foreach (var property in root.EnumerateObject())
@@ -1152,10 +1289,32 @@
                     }
                     displayValue = string.Join(", ", days);
                 }
+                else if ((key == "StartTime" || key == "EndTime") && value.ValueKind == JsonValueKind.String)
+                {
+                    // Handle StartTime and EndTime as TimeSpan (show only HH:mm:ss)
+                    var timeStr = value.GetString() ?? "";
+                    if (TimeSpan.TryParse(timeStr, out var timeSpan))
+                    {
+                        displayValue = timeSpan.ToString(@"hh\:mm\:ss");
+                    }
+                    else if (DateTime.TryParse(timeStr, out var dateValue))
+                    {
+                        displayValue = dateValue.TimeOfDay.ToString(@"hh\:mm\:ss");
+                    }
+                    else
+                    {
+                        displayValue = timeStr;
+                    }
+                }
                 else if ((key.Contains("Time") || key.Contains("Date")) && value.ValueKind == JsonValueKind.String)
                 {
                     if (DateTime.TryParse(value.GetString(), out var dateValue))
                     {
+                        // Ensure datetime is treated as UTC before converting to local time
+                        if (dateValue.Kind == DateTimeKind.Unspecified)
+                        {
+                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc);
+                        }
                         displayValue = ConvertToLocalTime(dateValue);
                     }
                     else

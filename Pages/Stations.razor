@@ -8,7 +8,7 @@
 @using DevExpress.Data.Linq
 @inherits OwningComponentBase
 @implements IDisposable
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,Manager")]
 @inject IStationService StationService
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
@@ -65,9 +65,11 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">@GetText("station.page_title", "Quản lý Trạm")</h1>
-    <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" @onclick="ShowAddModal">
-        <i class="fas fa-plus fa-sm text-white-50"></i> @GetText("station.add_button", "Thêm Trạm Mới")
-    </button>
+    <AuthorizeView Roles="Admin">
+        <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" @onclick="ShowAddModal">
+            <i class="fas fa-plus fa-sm text-white-50"></i> @GetText("station.add_button", "Thêm Trạm Mới")
+        </button>
+    </AuthorizeView>
 </div>
 
 <!-- DevExpress DataGrid -->
@@ -131,12 +133,14 @@
                                 <button class="btn btn-info btn-sm" title="Xem lịch sử thay đổi" @onclick="@(() => ShowAuditLog(stationId))">
                                     <i class="fas fa-history"></i>
                                 </button>
-                                <button class="btn btn-warning btn-sm" title="@GetText("station.edit_tooltip", "Chỉnh sửa")" @onclick="@(() => ShowEditModalAsync(stationId))">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm" title="@GetText("station.delete_tooltip", "Xóa")" @onclick="@(() => DeleteStation(stationId))">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <AuthorizeView Roles="Admin" Context="authContext">
+                                    <button class="btn btn-warning btn-sm" title="@GetText("station.edit_tooltip", "Chỉnh sửa")" @onclick="@(() => ShowEditModalAsync(stationId))">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" title="@GetText("station.delete_tooltip", "Xóa")" @onclick="@(() => DeleteStation(stationId))">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </AuthorizeView>
                             </div>
                         </CellDisplayTemplate>
                     </DxGridDataColumn>

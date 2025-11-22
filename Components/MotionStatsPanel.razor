@@ -51,7 +51,7 @@
                         <div class="event-item">
                             <i class="bi bi-dot"></i>
                             <span><strong>@evt.CameraName</strong></span>
-                            <span class="text-muted">@evt.DetectedAt.ToString("HH:mm:ss")</span>
+                            <span class="text-muted">@evt.DetectedAt.ToLocalTime().ToString("HH:mm:ss")</span>
                         </div>
                     }
                 </div>

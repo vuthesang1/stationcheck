@@ -207,15 +207,17 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            var currentTime = now.TimeOfDay;
-            var currentDayOfWeek = ((int)now.DayOfWeek == 0 ? 7 : (int)now.DayOfWeek).ToString(); // 1=Monday, 7=Sunday
+            // Convert UTC to local time (UTC+7) for TimeFrame comparison
+            var localNow = now.AddHours(7);
+            var currentTime = localNow.TimeOfDay;
+            var currentDayOfWeek = ((int)localNow.DayOfWeek == 0 ? 7 : (int)localNow.DayOfWeek).ToString(); // 1=Monday, 7=Sunday
 
             var timeFrames = await context.TimeFrames
                 .Where(tf => tf.StationId == stationId && tf.IsEnabled)
                 .ToListAsync(cancellationToken);
 
             _logger.LogInformation(
-                "[AlertGeneration] Station {StationId}: Found {Count} enabled TimeFrames. Current time: {Time} (UTC), Day: {Day}",
+                "[AlertGeneration] Station {StationId}: Found {Count} enabled TimeFrames. Current time: {Time} (Local UTC+7), Day: {Day}",
                 stationId,
                 timeFrames.Count,
                 currentTime.ToString(@"hh\:mm\:ss"),
@@ -262,7 +264,10 @@ namespace StationCheck.BackgroundServices
             // ✅ STEP 1: Check if current time is a scheduled check point
             // Example: StartTime=09:00, Frequency=3min → Check at 09:00, 09:03, 09:06, 09:09...
             // If now=09:02, skip this check (not a scheduled time)
-            var currentTime = now.TimeOfDay;
+            
+            // Convert to local time for TimeFrame comparison (TimeSpan is stored as local time)
+            var localNow = now.AddHours(7);
+            var currentTime = localNow.TimeOfDay;
             var startTime = timeFrame.StartTime;
             var frequencySpan = TimeSpan.FromMinutes(timeFrame.FrequencyMinutes);
             
@@ -499,6 +504,19 @@ namespace StationCheck.BackgroundServices
             var windowStart = now.AddMinutes(-toleranceMinutes);
             var windowStartLocal = windowStart.AddHours(7).ToString("HH:mm");
             var nowLocal = now.AddHours(7).ToString("HH:mm");
+            var bufferFrom =now.AddHours(7).AddMinutes(-timeFrame.BufferMinutes).ToString("HH:mm");
+            var bufferTo =now.AddHours(7).AddMinutes(timeFrame.BufferMinutes).ToString("HH:mm");
+
+            // ✅ Remove seconds from AlertTime - only keep hour:minute
+            var alertTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, DateTimeKind.Utc);
+
+            // Calculate severity based on how long since last motion
+            // - Warning: If just missed (within FrequencyMinutes to FrequencyMinutes * 1.5)
+            // - Critical: If significantly overdue (> FrequencyMinutes * 1.5)
+            var severityThreshold = timeFrame.FrequencyMinutes * 1.5;
+            var severity = minutesSinceLastMotion > severityThreshold
+                ? AlertSeverity.Critical
+                : AlertSeverity.Warning;
 
             var alert = new MotionAlert
             {
@@ -508,20 +526,15 @@ namespace StationCheck.BackgroundServices
                 ProfileHistoryId = profileHistory?.Id,  // ✅ Link to profile version
                 TimeFrameHistoryId = timeFrameHistory?.Id,  // ✅ Link to timeframe version
                 ConfigurationSnapshot = JsonSerializer.Serialize(configSnapshot),
-                AlertTime = now,
-                Severity = minutesSinceLastMotion > timeFrame.FrequencyMinutes * 2 
-                    ? AlertSeverity.Critical 
-                    : AlertSeverity.Warning,
-                Message = $"Không phát hiện chuyển động tại {station.Name} vào lúc {windowStartLocal} - {nowLocal}",
+                AlertTime = alertTime,
+                Severity = severity,
+                Message = $"Không phát hiện chuyển động tại {station.Name} vào lúc {bufferFrom} - {bufferTo}",
                 ExpectedFrequencyMinutes = timeFrame.FrequencyMinutes,
                 LastMotionAt = station.LastMotionDetectedAt,
                 LastMotionCameraId = lastMotionEvent?.CameraId,
                 LastMotionCameraName = lastMotionEvent?.CameraName,
                 MinutesSinceLastMotion = minutesSinceLastMotion,
-                IsResolved = false,
-                // ✅ LEGACY: Populate obsolete CameraId field for database compatibility
-                CameraId = cameraId,
-                CameraName = cameraName
+                IsResolved = false
             };
 
             context.MotionAlerts.Add(alert);
@@ -537,6 +550,37 @@ namespace StationCheck.BackgroundServices
                 station.LastMotionDetectedAt?.ToString() ?? "Never",
                 minutesSinceLastMotion
             );
+
+            // ✅ CRITICAL FIX: Auto-resolve immediately if motion detected within tolerance window
+            // This handles cases where motion event arrived BEFORE alert was created
+            // Example: Motion at 20:38:15, Alert created at 20:39:00 for window 20:38-20:40
+            var alertWindowStart = alertTime.AddMinutes(-timeFrame.BufferMinutes);
+            var alertWindowEnd = alertTime.AddMinutes(timeFrame.BufferMinutes);
+
+            var recentMotion = await context.MotionEvents
+                .Where(me => me.StationId == station.Id 
+                          && me.DetectedAt >= alertWindowStart 
+                          && me.DetectedAt <= alertWindowEnd)
+                .OrderByDescending(me => me.DetectedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (recentMotion != null)
+            {
+                alert.IsResolved = true;
+                alert.ResolvedAt = now;
+                alert.ResolvedBy = "System (Auto-resolved - motion detected in tolerance window)";
+                alert.Notes = $"Motion detected at {recentMotion.DetectedAt:yyyy-MM-dd HH:mm:ss} within tolerance [{alertWindowStart:HH:mm}-{alertWindowEnd:HH:mm}]";
+                
+                await context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation(
+                    "[AlertGeneration] Auto-resolved alert {AlertId} immediately after creation. Motion at {MotionTime:HH:mm:ss} within tolerance [{WindowStart:HH:mm}-{WindowEnd:HH:mm}]",
+                    alert.Id,
+                    recentMotion.DetectedAt,
+                    alertWindowStart,
+                    alertWindowEnd
+                );
+            }
         }
 
         /// <summary>

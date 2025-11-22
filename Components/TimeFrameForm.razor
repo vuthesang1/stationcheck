@@ -191,11 +191,9 @@
             if (TimeFrame.Id != Guid.Empty)
             {
                 // Edit mode - populate from existing
-                // ⚠️ Convert from UTC (stored in DB) to local time (UTC+7) for display
-                var startLocal = TimeFrame.StartTime.Add(TimeSpan.FromHours(7));
-                var endLocal = TimeFrame.EndTime.Add(TimeSpan.FromHours(7));
-                startTimeInput = startLocal.ToString(@"hh\:mm");
-                endTimeInput = endLocal.ToString(@"hh\:mm");
+                // TimeSpan is stored as local time (no timezone conversion needed)
+                startTimeInput = TimeFrame.StartTime.ToString(@"hh\:mm");
+                endTimeInput = TimeFrame.EndTime.ToString(@"hh\:mm");
                 ParseDaysOfWeek(TimeFrame.DaysOfWeek);
                 
                 // Convert minutes to hours for display
@@ -449,11 +447,11 @@
                 return;
             }
             
-            // ⚠️ Convert from local time (UTC+7) to UTC for database storage
-            // User inputs: 09:00 (Vietnam time) → Store as 02:00 (UTC)
-            // This allows AlertGenerationService to compare with DateTime.UtcNow correctly
-            TimeFrame.StartTime = parsedStart.Subtract(TimeSpan.FromHours(7));
-            TimeFrame.EndTime = parsedEnd.Subtract(TimeSpan.FromHours(7));
+            // Store TimeSpan as local time (UTC+7) - no conversion needed
+            // User inputs: 09:00 → Store as TimeSpan(9, 0, 0)
+            // AlertGenerationService will compare with local TimeOfDay
+            TimeFrame.StartTime = parsedStart;
+            TimeFrame.EndTime = parsedEnd;
             TimeFrame.DaysOfWeek = GetDaysOfWeekString();
             
             // FrequencyMinutes already bound directly to input, no conversion needed

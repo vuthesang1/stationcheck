@@ -4,16 +4,24 @@
 @using Microsoft.EntityFrameworkCore
 @using System.Text.Json
 @using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthStateProvider
 @implements IDisposable
 
-<div class="station-status-panel">
+<div class="station-status-panel @(isFullscreen ? "fullscreen-mode" : "")">
     <div class="panel-header">
         <h4><i class="bi bi-broadcast"></i> Trạng thái trạm theo thời gian thực</h4>
-        <button class="btn btn-sm btn-primary" @onclick="LoadStations">
-            <i class="bi bi-arrow-clockwise"></i> Refresh
-        </button>
+        <div>
+            <button class="btn btn-sm btn-secondary me-2" @onclick="ToggleFullscreen">
+                <i class="bi bi-@(isFullscreen ? "fullscreen-exit" : "arrows-fullscreen")"></i>
+                @(isFullscreen ? "Exit Fullscreen" : "Fullscreen")
+            </button>
+            <button class="btn btn-sm btn-primary" @onclick="LoadStations">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
     </div>
 
     @if (isLoading)
@@ -39,11 +47,10 @@
                 <div class="station-card @GetStatusClass(status)" @onclick="() => ShowStationDetails(station)">
                     <div class="station-header">
                         <div class="station-info">
-                            <h5 class="station-name">
+                            <div class="station-name-large">
                                 <span class="status-indicator @GetStatusIndicatorClass(status)"></span>
                                 @station.Name
-                            </h5>
-                            <small class="text-muted">@station.StationCode</small>
+                            </div>
                         </div>
                         <div class="station-status">
                             <span class="badge @GetStatusBadgeClass(status)">
@@ -136,12 +143,15 @@
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
-                                    @onclick='() => activeTab = "motion"'>
-                                <i class="bi bi-activity"></i> Lịch sử chuyển động
-                            </button>
-                        </li>
+                        @if (!isManagerRole)
+                        {
+                            <li class="nav-item">
+                                <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
+                                        @onclick='() => activeTab = "motion"'>
+                                    <i class="bi bi-activity"></i> Lịch sử chuyển động
+                                </button>
+                            </li>
+                        }
                         <li class="nav-item">
                             <button class="nav-link @(activeTab == "alerts" ? "active" : "")" 
                                     @onclick='() => activeTab = "alerts"'>
@@ -157,7 +167,7 @@
                     </ul>
 
                     <div class="tab-content">
-                        @if (activeTab == "motion")
+                        @if (activeTab == "motion" && !isManagerRole)
                         {
                             <div class="motion-history">
                                 <h6>Lịch sử chuyển động gần nhất</h6>
@@ -184,14 +194,7 @@
                                                     @{
                                                         var motion = (MotionEvent)context.DataItem;
                                                     }
-                                                    @if (motion.DetectedAt != null)
-                                                    {
-                                                        <span>@motion.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
-                                                    }                                       
-                                                    else
-                                                    {
-                                                        <span class="text-muted"></span>
-                                                    }
+                                                    <span>@motion.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
                                                 </CellDisplayTemplate>
                                             </DxGridDataColumn>
 
@@ -290,6 +293,12 @@
                                                             {
                                                                 <text> - @alert.ResolvedBy</text>
                                                             }
+                                                            @if (!string.IsNullOrEmpty(alert.Notes))
+                                                            {
+                                                                <div class="mt-1 fst-italic">
+                                                                    <i class="bi bi-chat-left-text"></i> @alert.Notes
+                                                                </div>
+                                                            }
                                                         </div>
                                                     }
                                                 </div>
@@ -305,7 +314,7 @@
                                                     @if (!alert.IsResolved)
                                                     {
                                                         <button class="btn btn-sm btn-success" 
-                                                                @onclick="() => ShowResolveConfirm(alert.Id)"
+                                                                @onclick="() => ShowResolveModal(alert.Id)"
                                                                 title="Đánh dấu đã xử lý">
                                                             <i class="bi bi-check-circle"></i> Resolve
                                                         </button>
@@ -334,16 +343,8 @@
                                                                         <table class="table table-sm table-borderless mb-0">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td class="text-muted">ID:</td>
-                                                                                    <td><strong>@config.GetValueOrDefault("Id", "N/A")</strong></td>
-                                                                                </tr>
-                                                                                <tr>
                                                                                     <td class="text-muted">Tên:</td>
                                                                                     <td><strong>@config.GetValueOrDefault("Name", "N/A")</strong></td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td class="text-muted">Trạm:</td>
-                                                                                    <td>@config.GetValueOrDefault("StationId", "N/A")</td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted">Trạng thái:</td>
@@ -371,7 +372,7 @@
                                                                             <tbody>
                                                                                 <tr>
                                                                                     <td class="text-muted">Khung giờ:</td>
-                                                                                    <td><strong>@config.GetValueOrDefault("StartTime", "N/A") - @config.GetValueOrDefault("EndTime", "N/A")</strong></td>
+                                                                                    <td><strong>@FormatTimeSpan(config.GetValueOrDefault("StartTime", "N/A")) - @FormatTimeSpan(config.GetValueOrDefault("EndTime", "N/A"))</strong></td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted">Tần suất:</td>
@@ -527,7 +528,9 @@
                     <h5 class="modal-title">
                         <i class="bi bi-activity"></i> Chi tiết sự kiện chuyển động
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" @onclick="CloseMotionDetailModal" @onclick:stopPropagation="true"></button>
+                    <button type="button" class="close text-white" @onclick="CloseMotionDetailModal" @onclick:stopPropagation="true">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
@@ -545,7 +548,7 @@
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Thời gian phát hiện:</td>
-                                                <td><strong>@selectedMotionEvent.DetectedAt.ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
+                                                <td><strong>@selectedMotionEvent.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Loại sự kiện:</td>
@@ -701,7 +704,9 @@
                     <h5 class="modal-title">
                         <i class="bi bi-file-earmark-text"></i> Chi tiết thay đổi cấu hình
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" @onclick="CloseConfigDetailModal" @onclick:stopPropagation="true"></button>
+                    <button type="button" class="close text-white" @onclick="CloseConfigDetailModal" @onclick:stopPropagation="true">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
@@ -721,10 +726,6 @@
                                             <tr>
                                                 <td class="text-muted">Tên:</td>
                                                 <td><strong>@selectedConfigLog.EntityName</strong></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-muted">Entity ID:</td>
-                                                <td><code>@selectedConfigLog.EntityId</code></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Hành động:</td>
@@ -895,6 +896,44 @@
     </div>
 }
 
+@* Resolve Alert Modal with Reason Input *@
+@if (showResolveModal && !string.IsNullOrEmpty(resolveAlertId))
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle"></i> Xác nhận xử lý cảnh báo
+                    </h5>
+                    <button type="button" class="close" @onclick="CloseResolveModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Lý do xử lý <span class="text-danger">*</span></label>
+                        <textarea class="form-control" rows="3" @bind="resolveReason" 
+                                  placeholder="Nhập lý do tại sao bạn đánh dấu cảnh báo này đã xử lý..."></textarea>
+                        @if (string.IsNullOrWhiteSpace(resolveReason))
+                        {
+                            <small class="text-muted">Vui lòng nhập lý do xử lý</small>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseResolveModal">Hủy</button>
+                    <button type="button" class="btn btn-success" 
+                            @onclick="ConfirmResolveAlert" 
+                            disabled="@string.IsNullOrWhiteSpace(resolveReason)">
+                        <i class="bi bi-check-circle"></i> Xác nhận xử lý
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Station> stations = new();
     private Dictionary<Guid, int> stationAlertCounts = new();
@@ -902,6 +941,8 @@
     private bool isLoading = false;
     private DateTime lastUpdateTime = DateTime.Now;
     private System.Threading.Timer? refreshTimer;
+    private bool isFullscreen = false;
+    private bool isManagerRole = false;
 
     // Modal state
     private bool showStationModal = false;
@@ -920,6 +961,11 @@
     private bool showConfigDetailModal = false;
     private ConfigurationAuditLog? selectedConfigLog = null;
 
+    // Resolve modal
+    private bool showResolveModal = false;
+    private string? resolveAlertId = null;
+    private string resolveReason = string.Empty;
+
     public enum StationStatus
     {
         Normal,   // 🟢 Có chuyển động trong khoảng cho phép
@@ -929,6 +975,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Check user role
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isManagerRole = user.IsInRole("Manager");
+        
         await LoadStations();
         
         // Auto-refresh every 30 seconds
@@ -1047,7 +1098,7 @@
     private async Task ShowStationDetails(Station station)
     {
         selectedStation = station;
-        activeTab = "motion";
+        activeTab = isManagerRole ? "alerts" : "motion";
         expandedSnapshots.Clear();
 
         using var context = await DbContextFactory.CreateDbContextAsync();
@@ -1070,11 +1121,17 @@
 
         // Load configuration history (last 90 days) - for both Station and TimeFrame changes
         var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
+        
+        // Get all TimeFrame IDs for this station
+        var timeFrameIds = await context.TimeFrames
+            .Where(tf => tf.StationId == station.Id)
+            .Select(tf => tf.Id)
+            .ToListAsync();
+        
         configHistory = await context.ConfigurationAuditLogs
             .Where(a => a.ChangedAt >= ninetyDaysAgo && 
                        ((a.EntityType == "Station" && a.EntityId == station.Id) ||
-                        (a.EntityType == "TimeFrame" && a.OldValue != null && a.OldValue.Contains($"\"StationId\":{station.Id}")) ||
-                        (a.EntityType == "TimeFrame" && a.NewValue != null && a.NewValue.Contains($"\"StationId\":{station.Id}"))))
+                        (a.EntityType == "TimeFrame" && timeFrameIds.Contains(a.EntityId))))
             .OrderByDescending(a => a.ChangedAt)
             .ToListAsync();
 
@@ -1149,16 +1206,30 @@
         }
     }
 
-    private async Task ShowResolveConfirm(string alertId)
+    private void ShowResolveModal(string alertId)
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn đánh dấu cảnh báo này đã xử lý?");
-        if (confirmed)
-        {
-            await ResolveAlert(alertId);
-        }
+        resolveAlertId = alertId;
+        resolveReason = string.Empty;
+        showResolveModal = true;
     }
 
-    private async Task ResolveAlert(string alertId)
+    private void CloseResolveModal()
+    {
+        showResolveModal = false;
+        resolveAlertId = null;
+        resolveReason = string.Empty;
+    }
+
+    private async Task ConfirmResolveAlert()
+    {
+        if (string.IsNullOrWhiteSpace(resolveReason) || string.IsNullOrWhiteSpace(resolveAlertId))
+            return;
+
+        await ResolveAlert(resolveAlertId, resolveReason);
+        CloseResolveModal();
+    }
+
+    private async Task ResolveAlert(string alertId, string reason)
     {
         try
         {
@@ -1169,7 +1240,8 @@
             {
                 alert.IsResolved = true;
                 alert.ResolvedAt = DateTime.UtcNow;
-                alert.ResolvedBy = "System"; // TODO: Get current user name
+                alert.ResolvedBy = "Manual Resolve"; // TODO: Get current user name
+                alert.Notes = reason; // ✅ Save the reason
                 
                 await context.SaveChangesAsync();
                 
@@ -1261,15 +1333,17 @@
             // Properties to exclude from display
             var excludedProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                "Station", "TimeFrames", "StationEmployees", "Profile", "TimeFrame", "MotionAlerts"
+                "Station", "TimeFrames", "StationEmployees", "Profile", "TimeFrame", "MotionAlerts",
+                "Id", "StationId", "ProfileId", "TimeFrameId", "EntityId", // Hide all ID columns
+                "CreatedBy", "ModifiedBy", "DeletedBy" // Hide technical fields
             };
             
             foreach (var property in root.EnumerateObject())
             {
                 var key = property.Name;
                 
-                // Skip excluded properties
-                if (excludedProperties.Contains(key))
+                // Skip excluded properties and properties ending with "Id"
+                if (excludedProperties.Contains(key) || key.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
                     continue;
                 
                 var value = property.Value;
@@ -1279,23 +1353,6 @@
                 if (key == "IsActive" || key == "IsEnabled")
                 {
                     displayValue = value.GetBoolean() ? "✓ Có" : "✗ Không";
-                }
-                else if (key == "StationId" && value.ValueKind == JsonValueKind.Number)
-                {
-                    // ✅ Display station name instead of ID (Guid)
-                    var stationId = value.GetInt32();
-                    displayValue = $"Trạm #{stationId}";
-                                {
-                                    // Handle StationId as Guid string
-                                    if (Guid.TryParse(value.GetString(), out var stationGuid))
-                                    {
-                                        displayValue = GetStationNameById(stationGuid);
-                                    }
-                                    else
-                                    {
-                                        displayValue = value.GetString() ?? string.Empty;
-                                    }
-                                }
                 }
                 else if (key == "DaysOfWeek" && value.ValueKind == JsonValueKind.Array)
                 {
@@ -1317,14 +1374,31 @@
                     }
                     displayValue = string.Join(", ", days);
                 }
+                else if ((key == "StartTime" || key == "EndTime") && value.ValueKind == JsonValueKind.String)
+                {
+                    // Handle StartTime and EndTime as TimeSpan (show only HH:mm:ss)
+                    var timeStr = value.GetString() ?? "";
+                    if (TimeSpan.TryParse(timeStr, out var timeSpan))
+                    {
+                        displayValue = timeSpan.ToString(@"hh\:mm\:ss");
+                    }
+                    else if (DateTime.TryParse(timeStr, out var dateValue))
+                    {
+                        displayValue = dateValue.TimeOfDay.ToString(@"hh\:mm\:ss");
+                    }
+                    else
+                    {
+                        displayValue = timeStr;
+                    }
+                }
                 else if ((key.Contains("Time") || key.Contains("Date")) && value.ValueKind == JsonValueKind.String)
                 {
                     if (DateTime.TryParse(value.GetString(), out var dateValue))
                     {
-                        // ✅ Ensure datetime is treated as UTC before converting to local time
+                        // Ensure datetime is treated as UTC before converting to local time
                         if (dateValue.Kind == DateTimeKind.Unspecified)
                         {
-                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc).ToLocalTime();
+                            dateValue = DateTime.SpecifyKind(dateValue, DateTimeKind.Utc);
                         }
                         displayValue = ConvertToLocalTime(dateValue);
                     }
@@ -1404,6 +1478,35 @@
         }
     }
 
+    private string FormatTimeSpan(string timeStr)
+    {
+        if (string.IsNullOrWhiteSpace(timeStr) || timeStr == "N/A")
+            return "N/A";
+            
+        try
+        {
+            if (TimeSpan.TryParse(timeStr, out var timeSpan))
+            {
+                return timeSpan.ToString(@"hh\:mm\:ss");
+            }
+            else if (DateTime.TryParse(timeStr, out var dateValue))
+            {
+                return dateValue.TimeOfDay.ToString(@"hh\:mm\:ss");
+            }
+            return timeStr;
+        }
+        catch
+        {
+            return timeStr;
+        }
+    }
+
+    private async Task ToggleFullscreen()
+    {
+        isFullscreen = !isFullscreen;
+        await JSRuntime.InvokeVoidAsync("toggleFullscreen", isFullscreen);
+    }
+
     public void Dispose()
     {
         refreshTimer?.Dispose();
@@ -1416,6 +1519,21 @@
         border: 1px solid #ddd;
         border-radius: 8px;
         background: white;
+        position: relative;
+    }
+
+    /* Fullscreen mode */
+    .station-status-panel.fullscreen-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        border: none;
+        border-radius: 0;
+        padding: 30px;
+        overflow-y: auto;
     }
 
     .panel-header {
@@ -1434,18 +1552,46 @@
 
     .stations-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
         margin-bottom: 20px;
+    }
+
+    /* Responsive: điều chỉnh số cột dựa trên kích thước màn hình */
+    @@media (max-width: 1920px) {
+        .stations-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @@media (max-width: 1400px) {
+        .stations-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .stations-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .stations-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .station-card {
         border: 2px solid #ddd;
         border-radius: 8px;
-        padding: 15px;
+        padding: 20px;
         background: white;
         cursor: pointer;
         transition: all 0.3s ease;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
     }
 
     .station-card:hover {
@@ -1474,21 +1620,25 @@
         margin-bottom: 12px;
     }
 
-    .station-name {
-        margin: 0;
-        font-size: 18px;
-        font-weight: bold;
+    /* Tên trạm nổi bật */
+    .station-name-large {
+        font-size: 22px;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        color: #1a1a1a;
+        line-height: 1.3;
+        margin: 0;
     }
 
     .status-indicator {
         display: inline-block;
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         animation: pulse 2s infinite;
+        flex-shrink: 0;
     }
 
     .status-indicator.status-normal {
@@ -1515,6 +1665,7 @@
 
     .station-body {
         margin: 12px 0;
+        flex-grow: 1;
     }
 
     .status-detail {
@@ -1639,21 +1790,29 @@
     }
 
     /* Modal close button fixes */
-    .modal-header .btn-close {
-        padding: 0.5rem;
-        margin: -0.5rem -0.5rem -0.5rem auto;
+    .modal-header .close {
+        padding: 0;
         background-color: transparent;
         border: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
         opacity: 0.5;
     }
 
-    .modal-header .btn-close:hover {
-        opacity: 1;
+    .modal-header .close:hover {
+        opacity: 0.75;
     }
 
-    .modal-header .btn-close:focus {
+    .modal-header .close:focus {
         outline: 0;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .modal-header .close.text-white {
+        color: #fff;
+        text-shadow: 0 1px 0 rgba(0,0,0,0.5);
     }
 
     /* Bootstrap gap utility fallback */

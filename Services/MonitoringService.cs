@@ -175,7 +175,7 @@ namespace StationCheck.Services
         public IQueryable<TimeFrame> GetTimeFramesQueryable()
         {
             return _context.TimeFrames
-                .Include(tf => tf.Profile)
+                .Include(tf => tf.Station)
                 .AsQueryable();
         }
 
@@ -319,6 +319,31 @@ namespace StationCheck.Services
                 throw new ArgumentException("End time must be greater than start time");
             }
 
+            // ✅ Validate no overlap with existing TimeFrames for this station
+            var existingTimeFrames = await _context.TimeFrames
+                .Where(tf => tf.StationId == stationId && tf.IsEnabled)
+                .ToListAsync();
+            
+            foreach (var existing in existingTimeFrames)
+            {
+                // Check if days overlap
+                var newDays = timeFrame.DaysOfWeek?.Split(',').Select(int.Parse).ToHashSet() ?? new HashSet<int> { 1, 2, 3, 4, 5, 6, 7 };
+                var existingDays = existing.DaysOfWeek?.Split(',').Select(int.Parse).ToHashSet() ?? new HashSet<int> { 1, 2, 3, 4, 5, 6, 7 };
+                var hasCommonDay = newDays.Intersect(existingDays).Any();
+                
+                if (hasCommonDay)
+                {
+                    // Check if time ranges overlap
+                    bool overlaps = !(timeFrame.EndTime <= existing.StartTime || timeFrame.StartTime >= existing.EndTime);
+                    
+                    if (overlaps)
+                    {
+                        // TimeSpan is already in local time (UTC+7)
+                        throw new ArgumentException($"Khung thời gian bị trùng với '{existing.Name}' ({existing.StartTime:hh\\:mm} - {existing.EndTime:hh\\:mm})");
+                    }
+                }
+            }
+
             // Validate frequency range
             var timeSpan = timeFrame.EndTime - timeFrame.StartTime;
             var maxFrequencyMinutes = (int)timeSpan.TotalMinutes;
@@ -365,6 +390,31 @@ namespace StationCheck.Services
             if (timeFrame.EndTime <= timeFrame.StartTime)
             {
                 throw new ArgumentException("End time must be greater than start time");
+            }
+
+            // ✅ Validate no overlap with other TimeFrames for this station
+            var otherTimeFrames = await _context.TimeFrames
+                .Where(tf => tf.StationId == existing.StationId && tf.IsEnabled && tf.Id != timeFrame.Id)
+                .ToListAsync();
+            
+            foreach (var other in otherTimeFrames)
+            {
+                // Check if days overlap
+                var newDays = timeFrame.DaysOfWeek?.Split(',').Select(int.Parse).ToHashSet() ?? new HashSet<int> { 1, 2, 3, 4, 5, 6, 7 };
+                var otherDays = other.DaysOfWeek?.Split(',').Select(int.Parse).ToHashSet() ?? new HashSet<int> { 1, 2, 3, 4, 5, 6, 7 };
+                var hasCommonDay = newDays.Intersect(otherDays).Any();
+                
+                if (hasCommonDay)
+                {
+                    // Check if time ranges overlap
+                    bool overlaps = !(timeFrame.EndTime <= other.StartTime || timeFrame.StartTime >= other.EndTime);
+                    
+                    if (overlaps)
+                    {
+                        // TimeSpan is already in local time (UTC+7)
+                        throw new ArgumentException($"Khung thời gian bị trùng với '{other.Name}' ({other.StartTime:hh\\:mm} - {other.EndTime:hh\\:mm})");
+                    }
+                }
             }
 
             // Validate frequency range
@@ -638,10 +688,7 @@ namespace StationCheck.Services
                     LastMotionCameraId = latestMotion.CameraId,
                     LastMotionCameraName = latestMotion.CameraName,
                     MinutesSinceLastMotion = minutesSinceLastMotion,
-                    IsResolved = false,
-                    // ✅ Set legacy CameraId field (required by database NOT NULL constraint)
-                    CameraId = latestMotion.CameraId ?? $"STATION_{station.Id}",
-                    CameraName = station.Name
+                    IsResolved = false
                 };
 
                 _context.MotionAlerts.Add(alert);

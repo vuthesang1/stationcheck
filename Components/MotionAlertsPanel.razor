@@ -382,7 +382,7 @@
         var windowStart = alert.AlertTime.AddMinutes(-bufferMinutes);
         var windowEnd = alert.AlertTime.AddMinutes(bufferMinutes);
 
-        return $"Không phát hiện chuyển động vào lúc [{windowStart:HH:mm} - {windowEnd:HH:mm}]";
+        return $"Không phát hiện chuyển động vào lúc [{windowStart.ToLocalTime():HH:mm} - {windowEnd.ToLocalTime():HH:mm}]";
     }
 
     private string GetDaysOfWeekText(string? daysOfWeek)

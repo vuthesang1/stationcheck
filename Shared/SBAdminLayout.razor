@@ -24,24 +24,29 @@
                 <!-- Divider -->
                 <hr class="sidebar-divider my-0">
 
+                @* Tạm thời ẩn Dashboard *@
                 <!-- Nav Item - Dashboard -->
-                <li class="nav-item @(IsActive("/") ? "active" : "")">
-                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                        <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>@GetText("menu.dashboard", "Dashboard")</span>
-                    </NavLink>
-                </li>
+                <AuthorizeView Roles="hidden">
+                    <li class="nav-item @(IsActive("/") ? "active" : "")">
+                        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                            <i class="fas fa-fw fa-tachometer-alt"></i>
+                            <span>@GetText("menu.dashboard", "Dashboard")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
 
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
-                <!-- Heading -->
-                <div class="sidebar-heading">
-                    @GetText("menu.management", "Quản lý")
-                </div>
+                <!-- Heading - Only show if user has access to at least one item below -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <div class="sidebar-heading">
+                        @GetText("menu.management", "Quản lý")
+                    </div>
+                </AuthorizeView>
 
-                <!-- Nav Item - Stations (Admin Only) -->
-                <AuthorizeView Roles="Admin">
+                <!-- Nav Item - Stations (Admin & Manager) -->
+                <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/stations") ? "active" : "")">
                         <NavLink class="nav-link" href="/stations">
                             <i class="fas fa-fw fa-building"></i>
@@ -51,7 +56,7 @@
                 </AuthorizeView>
 
                 <!-- Nav Item - My Station (StationEmployee Only) -->
-                <AuthorizeView Roles="StationEmployee">
+                <AuthorizeView Roles="hidden">
                     <li class="nav-item @(IsActive("/my-station") ? "active" : "")">
                         <NavLink class="nav-link" href="/my-station">
                             <i class="fas fa-fw fa-building"></i>
@@ -84,11 +89,13 @@
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
-                <!-- Heading -->
-                <div class="sidebar-heading">
-                    @GetText("menu.monitoring", defaultText: "Giám sát")
-                </div>
-@* 
+                <!-- Heading - Only show for Admin & Manager -->
+                <AuthorizeView Roles="Admin,Manager">
+                    <div class="sidebar-heading">
+                        @GetText("menu.monitoring", defaultText: "Giám sát")
+                    </div>
+                </AuthorizeView>
+                @* 
                 <!-- Nav Item - Monitoring Settings (Admin Only) -->
                 <AuthorizeView Roles="Admin">
                     <li class="nav-item @(IsActive("/monitoring/settings") ? "active" : "")">
@@ -98,7 +105,7 @@
                         </NavLink>
                     </li>
                 </AuthorizeView> *@
-@* 
+                @* 
                 <!-- Nav Item - Monitoring Profiles (Admin Only) -->
                 <AuthorizeView Roles="Admin">
                     <li class="nav-item @(IsActive("/monitoring/profiles") ? "active" : "")">
@@ -110,7 +117,7 @@
                 </AuthorizeView> *@
 
 
-                
+
                 <!-- Nav Item - Station Monitor (Real-time Status) -->
                 <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/station-monitor") ? "active" : "")">
@@ -121,7 +128,7 @@
                     </li>
                 </AuthorizeView>
 
-                   <!-- Nav Item - Reports (Admin & Manager) -->
+                <!-- Nav Item - Reports (Admin & Manager) -->
                 <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/reports") ? "active" : "")">
                         <NavLink class="nav-link" href="/reports">
@@ -131,7 +138,7 @@
                     </li>
                 </AuthorizeView>
 
-                    <!-- Nav Item - System Configuration (Admin Only) -->
+                <!-- Nav Item - System Configuration (Admin Only) -->
                 <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/email-simulator") ? "active" : "")">
                         <NavLink class="nav-link" href="/email-simulator">
@@ -142,15 +149,18 @@
                 </AuthorizeView>
 
 
-                <!-- Divider -->
-                <hr class="sidebar-divider">
+                <!-- Divider & Heading for Personnel (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <!-- Divider -->
+                    <hr class="sidebar-divider">
 
-                <!-- Heading -->
-                <div class="sidebar-heading">
-                    @GetText("menu.personnel", "Nhân sự")
-                </div>
+                    <!-- Heading -->
+                    <div class="sidebar-heading">
+                        @GetText("menu.personnel", "Nhân sự")
+                    </div>
+                </AuthorizeView>
 
-             
+
                 <!-- Nav Item - Employees (Manager & Admin) -->
                 @* <AuthorizeView Roles="Admin,Manager">
                     <li class="nav-item @(IsActive("/employees") ? "active" : "")">
@@ -162,7 +172,7 @@
                 </AuthorizeView> *@
 
                 <!-- Nav Item - Users (Manager & Admin) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="Admin">
                     <li class="nav-item @(IsActive("/users") ? "active" : "")">
                         <NavLink class="nav-link" href="/users">
                             <i class="fas fa-fw fa-user-cog"></i>
@@ -171,13 +181,17 @@
                     </li>
                 </AuthorizeView>
 
-                <!-- Divider -->
-                <hr class="sidebar-divider">
 
-                <!-- Heading -->
-                <div class="sidebar-heading">
-                    @GetText("menu.system", "Hệ thống")
-                </div>
+                <!-- Divider & Heading for System (Admin Only) -->
+                <AuthorizeView Roles="Admin">
+                    <!-- Divider -->
+                    <hr class="sidebar-divider">
+
+                    <!-- Heading -->
+                    <div class="sidebar-heading">
+                        @GetText("menu.system", "Hệ thống")
+                    </div>
+                </AuthorizeView>
 
                 <!-- Nav Item - Languages (Admin Only) -->
                 <AuthorizeView Roles="Admin">
@@ -199,7 +213,7 @@
                     </li>
                 </AuthorizeView>
 
-                
+
                 <!-- Nav Item - System Configuration (Admin Only) -->
                 <AuthorizeView Roles="Admin">
                     <li class="nav-item @(IsActive("/system-config") ? "active" : "")">
@@ -236,20 +250,20 @@
                             <!-- Nav Item - Language Switcher -->
                             <li class="nav-item dropdown no-arrow mx-1">
                                 <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
-                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-globe fa-fw"></i>
                                     <span class="d-none d-lg-inline ml-1">@GetCurrentLanguageName()</span>
                                 </a>
                                 <!-- Dropdown - Language Selection -->
                                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                     aria-labelledby="languageDropdown">
-                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "vi" ? "active" : "")" 
-                                       href="#" @onclick="@(() => ChangeLanguage("vi"))" @onclick:preventDefault>
+                                    aria-labelledby="languageDropdown">
+                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "vi" ? "active" : "")"
+                                        href="#" @onclick="@(() => ChangeLanguage("vi"))" @onclick:preventDefault>
                                         <i class="fas fa-flag fa-sm fa-fw mr-2"></i>
                                         Tiếng Việt
                                     </a>
-                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "en" ? "active" : "")" 
-                                       href="#" @onclick="@(() => ChangeLanguage("en"))" @onclick:preventDefault>
+                                    <a class="dropdown-item @(LocalizationState?.CurrentLanguage == "en" ? "active" : "")"
+                                        href="#" @onclick="@(() => ChangeLanguage("en"))" @onclick:preventDefault>
                                         <i class="fas fa-flag fa-sm fa-fw mr-2"></i>
                                         English
                                     </a>
@@ -259,13 +273,14 @@
                             <!-- Nav Item - User Information -->
                             <li class="nav-item dropdown no-arrow">
                                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">@authContext.User.Identity?.Name</span>
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span
+                                        class="mr-2 d-none d-lg-inline text-gray-600 small">@authContext.User.Identity?.Name</span>
                                     <i class="fas fa-user-circle fa-2x text-gray-600"></i>
                                 </a>
                                 <!-- Dropdown - User Information -->
                                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                     aria-labelledby="userDropdown">
+                                    aria-labelledby="userDropdown">
                                     <a class="dropdown-item" href="/profile">
                                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                         @GetText("menu.profile", "Profile")
@@ -324,7 +339,7 @@
             var storedLanguage = await JS.InvokeAsync<string?>("localStorage.getItem", "preferredLanguage");
             var browserLanguage = await JS.InvokeAsync<string?>("eval", "navigator.language || navigator.userLanguage");
             var preferredLanguage = storedLanguage ?? (browserLanguage?.StartsWith("vi") == true ? "vi" : "en");
-            
+
             await LocalizationState.InitializeAsync(preferredLanguage);
             currentLanguage = preferredLanguage;
         }
@@ -351,7 +366,7 @@
             {
                 LocalizationState.OnLanguageChanged += HandleLanguageChanged;
             }
-            
+
             // Wait for translations to load
             if (LocalizationState != null)
             {
@@ -361,7 +376,7 @@
                     await Task.Delay(100);
                     attempts++;
                 }
-                
+
                 if (LocalizationState.IsLoaded)
                 {
                     StateHasChanged();
@@ -427,7 +442,7 @@
 
             // Update state
             await LocalizationState.SetLanguageAsync(languageCode);
-            
+
             // Reload page to apply translations
             Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
         }

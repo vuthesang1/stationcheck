@@ -210,7 +210,7 @@ Motion detection triggered at {alarmTime:HH:mm:ss}";
                 smtpPort: 587,
                 fromEmail: "huythucson01@gmail.com",
                 fromPassword: "dtfn erbe wcjg mkrg",
-                toEmail: "vuthesang4@gmail.com"
+                toEmail: "vienthongvt0408@gmail.com"
             );
 
             // Quick test mode nếu có args
