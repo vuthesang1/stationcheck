@@ -30,9 +30,26 @@
                 <!-- Toolbar with actions -->
                 <div class="mb-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <button class="btn btn-success btn-sm me-2" @onclick="ShowAddForm">
-                            <i class="fas fa-plus"></i> Thêm khung thời gian
-                        </button>
+                        @* Temporarily hidden - 1 timeframe limit warning
+                        @if (timeFrames.Count >= 1)
+                        {
+                            <div class="alert alert-warning mb-0 py-2 px-3 d-inline-block">
+                                <i class="fas fa-info-circle"></i>
+                                Mỗi trạm chỉ được phép 1 khung thời gian (24/7). Vui lòng xóa khung hiện tại để tạo mới.
+                            </div>
+                        }
+                        else
+                        *@
+                        @if (timeFrames.Count < 1)
+                        {
+                            <button class="btn btn-success btn-sm me-2" @onclick="ShowAddForm">
+                                <i class="fas fa-plus"></i> Thêm khung thời gian
+                            </button>
+                            <button class="btn btn-info btn-sm me-2" @onclick="ShowCopyDialog">
+                                <i class="fas fa-copy"></i> Copy từ trạm khác
+                            </button>
+                        }
+                        @* Temporarily hidden - Bulk toggle buttons
                         @if (timeFrames.Any())
                         {
                             <button class="btn btn-primary btn-sm me-2" @onclick="() => BulkToggle(true)">
@@ -42,11 +59,9 @@
                                 <i class="fas fa-times-circle"></i> Tắt tất cả
                             </button>
                         }
-                        <button class="btn btn-info btn-sm" @onclick="ShowCopyDialog">
-                            <i class="fas fa-copy"></i> Copy từ trạm khác
-                        </button>
+                        *@
                     </div>
-                    <span class="badge bg-info">@timeFrames.Count khung thời gian</span>
+                    <span class="badge bg-info">@timeFrames.Count / 1 khung thời gian</span>
                 </div>
 
                 <!-- TimeFrames List -->
@@ -63,13 +78,12 @@
                         <table class="table table-hover table-bordered">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 20%;">Tên khung</th>
-                                    <th style="width: 18%;">Thời gian</th>
-                                    <th style="width: 12%;">Tần suất</th>
-                                    <th style="width: 10%;">Buffer</th>
-                                    <th style="width: 25%;">Ngày trong tuần</th>
-                                    <th style="width: 10%;">Trạng thái</th>
-                                    <th style="width: 5%;"></th>
+                                    <th style="width: 30%;">Tên khung</th>
+                                    <th style="width: 20%;">Thời gian</th>
+                                    <th style="width: 15%;">Tần suất</th>
+                                    <th style="width: 12%;">Buffer</th>
+                                    <th style="width: 15%;">Trạng thái</th>
+                                    <th style="width: 8%;"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,10 +95,10 @@
                                         </td>
                                         <td>
                                             <i class="fas fa-clock text-primary"></i>
-                                            @tf.StartTime.ToString(@"hh\:mm") - @tf.EndTime.ToString(@"hh\:mm")
+                                            00:00 - 24:00
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">@tf.FrequencyMinutes phút</span>
+                                            <span class="badge bg-info">@(tf.FrequencyMinutes / 60) giờ</span>
                                         </td>
                                         <td>
                                             @if (tf.BufferMinutes > 0)
@@ -95,9 +109,6 @@
                                             {
                                                 <span class="text-muted">-</span>
                                             }
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">@GetDaysOfWeekText(tf.DaysOfWeek ?? "127")</small>
                                         </td>
                                         <td>
                                             @if (tf.IsEnabled)
@@ -118,9 +129,11 @@
                                                 <button class="btn btn-outline-primary" title="Sửa" @onclick="() => ShowEditForm(tf)">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+                                                @* Temporarily hidden - Delete button (only 1 timeframe allowed)
                                                 <button class="btn btn-outline-danger" title="Xóa" @onclick="() => DeleteTimeFrame(tf)">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                                *@
                                             </div>
                                         </td>
                                     </tr>
@@ -191,9 +204,9 @@
                                        @onchange="e => ToggleTimeFrameSelection(tf.Id, (bool)e.Value!)" />
                                 <label class="form-check-label" for="tf_@tf.Id">
                                     <strong>@tf.Name</strong> - 
-                                    @tf.StartTime.ToString(@"hh\:mm") → @tf.EndTime.ToString(@"hh\:mm") 
-                                    (@tf.FrequencyMinutes phút) - 
-                                    <small class="text-muted">@GetDaysOfWeekText(tf.DaysOfWeek ?? "127")</small>
+                                    00:00 → 24:00 
+                                    (@(tf.FrequencyMinutes / 60) giờ, Buffer: @tf.BufferMinutes phút) - 
+                                    <small class="text-muted">24/7</small>
                                 </label>
                             </div>
                         }

@@ -25,7 +25,7 @@
     else if (groupedAlerts.Count == 0)
     {
         <div class="alert alert-success">
-            <i class="bi bi-check-circle"></i> Không có cảnh báo nào. Tất cả camera hoạt động bình thường.
+            <i class="bi bi-check-circle"></i> Chưa có cảnh báo nào được ghi nhận.
         </div>
     }
     else
@@ -35,8 +35,8 @@
             {
                 var isExpanded = expandedStations.Contains(group.StationId);
                 var latestAlert = group.Alerts.OrderByDescending(a => a.AlertTime).First();
-                var criticalCount = group.Alerts.Count(a => a.Severity == AlertSeverity.Critical);
-                var warningCount = group.Alerts.Count(a => a.Severity == AlertSeverity.Warning);
+                var onlineCount = group.Alerts.Count(a => a.IsResolved);
+                var offlineCount = group.Alerts.Count(a => !a.IsResolved);
                 
                 <div class="station-group @GetStationGroupClass(group.Alerts)">
                     <div class="station-header" @onclick="() => ToggleStation(group.StationId)">
@@ -46,13 +46,13 @@
                                 <strong>@group.StationName</strong>
                             </div>
                             <div class="station-badges">
-                                @if (criticalCount > 0)
+                                @if (offlineCount > 0)
                                 {
-                                    <span class="badge bg-danger">@criticalCount Critical</span>
+                                    <span class="badge bg-danger">@offlineCount Offline</span>
                                 }
-                                @if (warningCount > 0)
+                                @if (onlineCount > 0)
                                 {
-                                    <span class="badge bg-warning text-dark">@warningCount Warning</span>
+                                    <span class="badge bg-success">@onlineCount Online</span>
                                 }
                                 <span class="badge bg-secondary">@group.Alerts.Count total</span>
                             </div>
@@ -73,17 +73,29 @@
                                 <div class="alert-card @GetSeverityClass(alert.Severity)" @onclick="() => ShowTimeFrameDetails(alert)" style="cursor: pointer;">
                                     <div class="alert-header">
                                         <div>
-                                            <span class="badge @GetSeverityBadgeClass(alert.Severity)">
-                                                @alert.Severity
-                                            </span>
+                                            @if (alert.IsResolved)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle"></i> Online
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i> Offline
+                                                </span>
+                                            }
                                             <span class="alert-time">@alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
                                         </div>
-                                        <button class="btn btn-sm btn-success" @onclick="(e) => ResolveAlertWithStop(e, alert.Id.ToString())" @onclick:stopPropagation="true">
-                                            <i class="bi bi-check2"></i> Resolve
-                                        </button>
+                                        @if (!alert.IsResolved)
+                                        {
+                                            <button class="btn btn-sm btn-success" @onclick="(e) => ResolveAlertWithStop(e, alert.Id.ToString())" @onclick:stopPropagation="true">
+                                                <i class="bi bi-check2"></i> Resolve
+                                            </button>
+                                        }
                                     </div>
                                     <div class="alert-body">
-                                        <p class="alert-message">@GetAlertMessage(alert)</p>
+                                        <p class="alert-message">@alert.Message</p>
                                         <div class="alert-details">
                                             <div><i class="bi bi-clock-history"></i> Lần cuối phát hiện: @(alert.LastMotionAt?.ToString("HH:mm:ss") ?? "N/A")</div>
                                             <div><i class="bi bi-hourglass-split"></i> Thời gian không có chuyển động: @alert.MinutesSinceLastMotion phút</div>
@@ -122,7 +134,7 @@
                     <h5 class="modal-title">
                         <i class="bi bi-clock"></i> Cấu hình khung giám sát
                     </h5>
-                    <button type="button" class="btn-close" @onclick="CloseTimeFrameModal" @onclick:stopPropagation="true"></button>
+                    <button type="button" class="close" @onclick="CloseTimeFrameModal" @onclick:stopPropagation="true"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
@@ -234,10 +246,16 @@
             // 🔧 Preserve current expanded state
             var previouslyExpanded = new HashSet<Guid?>(expandedStations);
             
-            alerts = await MotionService.GetUnresolvedAlertsAsync();
+            // Load all alerts (both Online and Offline) - only exclude deleted ones
+            using var context = await DbContext.Database.CanConnectAsync() ? DbContext : DbContext;
+            alerts = await DbContext.MotionAlerts
+                .Include(a => a.TimeFrame)
+                .Where(a => !a.IsDeleted) // Only exclude explicitly deleted alerts
+                .OrderByDescending(a => a.AlertTime)
+                .ToListAsync();
             totalAlerts = alerts.Count;
             
-            // Group alerts by station
+            // Group alerts by station - show both Online and Offline
             groupedAlerts = alerts
                 .Where(a => a.StationId != null && a.StationId != Guid.Empty) // Filter out invalid stations
                 .GroupBy(a => new { a.StationId, a.StationName })
@@ -382,7 +400,7 @@
         var windowStart = alert.AlertTime.AddMinutes(-bufferMinutes);
         var windowEnd = alert.AlertTime.AddMinutes(bufferMinutes);
 
-        return $"Không phát hiện chuyển động vào lúc [{windowStart.ToLocalTime():HH:mm} - {windowEnd.ToLocalTime():HH:mm}]";
+        return $"Trạm {alert.StationName} Offline lúc [{windowStart.ToLocalTime():HH:mm} - {windowEnd.ToLocalTime():HH:mm}]";
     }
 
     private string GetDaysOfWeekText(string? daysOfWeek)

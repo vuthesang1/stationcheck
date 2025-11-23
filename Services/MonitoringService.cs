@@ -683,7 +683,7 @@ namespace StationCheck.Services
                     Severity = minutesSinceLastMotion > timeFrame.FrequencyMinutes * 2
                         ? AlertSeverity.Critical
                         : AlertSeverity.Warning,
-                    Message = $"Trạm '{station.Name}' không phát hiện chuyển động trong {minutesSinceLastMotion} phút (ngưỡng: {timeFrame.FrequencyMinutes} phút)",
+                    Message = $"Trạm '{station.Name}' Offline lúc {DateTime.Now.ToString("HH:mm")}",
                     LastMotionAt = latestMotion.DetectedAt,
                     LastMotionCameraId = latestMotion.CameraId,
                     LastMotionCameraName = latestMotion.CameraName,
@@ -723,6 +723,7 @@ namespace StationCheck.Services
                     alert.IsResolved = true;
                     alert.ResolvedAt = now;
                     alert.ResolvedBy = resolvedBy ?? "System (Motion Detected)";
+                    alert.IsDeleted = true; // Hide resolved alert from display
                 }
 
                 await _context.SaveChangesAsync();

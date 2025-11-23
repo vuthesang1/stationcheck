@@ -95,9 +95,9 @@
                             </CellDisplayTemplate>
                         </DxGridDataColumn>
                         <DxGridDataColumn FieldName="@nameof(Translation.Key)" Caption="@KeyColumnCaption" MinWidth="200">
-                            <CellDisplayTemplate>
+                            @* <CellDisplayTemplate>
                                 <code>@((Translation)context.DataItem).Key</code>
-                            </CellDisplayTemplate>
+                            </CellDisplayTemplate> *@
                         </DxGridDataColumn>
                         <DxGridDataColumn FieldName="@nameof(Translation.Value)" Caption="@ValueColumnCaption" MinWidth="250" />
                         <DxGridCommandColumn Width="150px" MinWidth="150" Caption="@ActionsColumnCaption">

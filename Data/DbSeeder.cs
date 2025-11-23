@@ -550,4 +550,240 @@ public static class DbSeeder
             await context.SaveChangesAsync();
         }
     }
+
+    /// <summary>
+    /// Seed real stations - removes test stations and creates 21 production stations
+    /// </summary>
+    public static async Task SeedStationsAsync(ApplicationDbContext context)
+    {
+        // Remove all test stations (stations with names starting with "trạm" or "Trạm")
+        // Delete ALL existing stations (clean slate)
+        var allStations = await context.Stations.ToListAsync();
+
+        if (allStations.Any())
+        {
+            // Delete related data in correct order (respecting foreign key constraints)
+            var stationIds = allStations.Select(s => s.Id).ToList();
+            
+            // Delete TimeFrameHistories first (references both TimeFrames and Stations)
+            var relatedTimeFrameHistories = await context.TimeFrameHistories
+                .Where(tfh => tfh.StationId.HasValue && stationIds.Contains(tfh.StationId.Value))
+                .ToListAsync();
+            
+            context.TimeFrameHistories.RemoveRange(relatedTimeFrameHistories);
+            
+            // Delete TimeFrames (referenced by MotionAlerts)
+            var relatedTimeFrames = await context.TimeFrames
+                .Where(tf => tf.StationId.HasValue && stationIds.Contains(tf.StationId.Value))
+                .ToListAsync();
+            
+            context.TimeFrames.RemoveRange(relatedTimeFrames);
+            
+            // Delete related MotionAlerts
+            var relatedAlerts = await context.MotionAlerts
+                .Where(ma => ma.StationId.HasValue && stationIds.Contains(ma.StationId.Value))
+                .ToListAsync();
+            
+            context.MotionAlerts.RemoveRange(relatedAlerts);
+            
+            // Delete related MotionEvents
+            var relatedEvents = await context.MotionEvents
+                .Where(me => me.StationId.HasValue && stationIds.Contains(me.StationId.Value))
+                .ToListAsync();
+            
+            context.MotionEvents.RemoveRange(relatedEvents);
+            
+            // Finally delete the stations
+            context.Stations.RemoveRange(allStations);
+            await context.SaveChangesAsync();
+            
+            Console.WriteLine($"[DbSeeder] Removed {allStations.Count} existing stations with their related data");
+        }
+
+        // Check if real stations already exist (should be 0 now)
+        var existingCount = await context.Stations.CountAsync();
+        if (existingCount >= 21)
+        {
+            Console.WriteLine("[DbSeeder] Stations already seeded, skipping...");
+            return;
+        }
+
+        // Create 21 real stations
+        var stations = new[]
+        {
+            new Station
+            {
+                StationCode = "ST000001",
+                Name = "Trạm Lê Phan Gia",
+                Address = "Lô E15 và E16, đường N4 và D1, KCN Nam Tân Uyên mở rộng, Thành phố Dĩ An, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000002",
+                Name = "Trạm Dielac 1",
+                Address = "KCN Biên Hòa 1, Xa lộ Hà Nội, Thành phố Biên Hòa, Tỉnh Đồng Nai",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000003",
+                Name = "Trạm Kolon",
+                Address = "Lô C_5_CN, KCN Bàu Bàng mở rộng, Thị xã Bàu Bàng, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000004",
+                Name = "URC2",
+                Address = "Số 42 VSIP Đại lộ Tự Do, KCN Việt Nam - Singapore I-A, Phường Vĩnh Tân, Thành phố Tân Uyên",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000005",
+                Name = "Trạm Sài Gòn Cam",
+                Address = "Lô A3, Nhóm NAY, Khu công nghiệp NAY Phước 2, Phường Bửu Hòa, Thành phố Biên Hòa, Tỉnh Đồng Nai, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000006",
+                Name = "Trạm Lipol",
+                Address = "Số 28-3, Khu phố 2, Đường An Phú Đông, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000007",
+                Name = "Trạm Mỹ Phước 3",
+                Address = "Lô D_2-CN, đường NE8, KCN Mỹ Phước 3, Đường Thới Hòa, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000008",
+                Name = "Trạm Đại Thiên Lộc",
+                Address = "Ô 13D, Lô CN 3, đường CN3, Phường Bình Đường, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000009",
+                Name = "Trạm URC1",
+                Address = "Số 3C, đường số 6, Khu công nghiệp Việt Nam - Singapore I-A, Phường Vĩnh Tân, Thành phố Tân Uyên, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000010",
+                Name = "Trạm Tiên Thủ Đức",
+                Address = "Tên đề 9 đường Võ Nguyên Giáp, Phường Thủ Đức, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000011",
+                Name = "Trạm Lonat",
+                Address = "Địa chỉ đường số 9, KCN Linh Xuân 3, Khu công nghiệp Mỹ Phước, Phường Thới Hòa, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000012",
+                Name = "Trạm Hoàng Sen",
+                Address = "Lô CN7, đường N4, Khu công nghiệp Song Thần 1, Phường Bình Phước, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000013",
+                Name = "Trạm Thuận Đạo",
+                Address = "Lô 7, đường số II, KCN Tân Phú Trung, Xã Long Cang, Tỉnh Tiền Giang",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000014",
+                Name = "Trạm Vinacoy",
+                Address = "Số 5, đường số 11, KCN Tân Đô, Đức Hòa, Phường Vĩnh Tân, Tỉnh Thuận An, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000015",
+                Name = "Trạm URC 3",
+                Address = "Số 22 VSIP II-A, Đường số 25, KCN Việt Nam - Singapore II-A, Phường Vĩnh Tân, Thành phố Thuận An, Tỉnh Bình Dương, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000016",
+                Name = "Trạm Dialoc2",
+                Address = "Số 9 Đại Lộ 1A, Tỉnh Đồng Nai, KCN Việt Nam - Singapore, Khu B, Phường Vĩnh Tân, Thành phố Thuận An, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000017",
+                Name = "Trị Thành",
+                Address = "K12, 34 Tân Nhựt, Tỉnh Đồng Tháp",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000018",
+                Name = "Zhyo Ziluc Industry",
+                Address = "Lô 0-5, 61-3-1, đường N10, đường NE 1, đường Dĩ An, Phường Dĩ An, Tỉnh Tây Ninh, Thành phố Dĩ An",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000019",
+                Name = "Nestle 1",
+                Address = "Số 7, Đường Tân Bình Cong Nghiep Binh Bich 1, Phường Long Bình, Tỉnh Đồng Nai",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000020",
+                Name = "Aceclo",
+                Address = "Lô 311-312, đường số 17, KCN Việt Nam - Singapore II-A, Phường Vĩnh Tân, Thành phố Thuận An, Thành phố Hồ Chí Minh",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Station
+            {
+                StationCode = "ST000021",
+                Name = "Nestle 2",
+                Address = "Lô 311, Đường 09, KCN Amata, Phường Long Bình, Tỉnh Đồng Nai",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Stations.AddRangeAsync(stations);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine($"[DbSeeder] Successfully seeded {stations.Length} real stations");
+    }
 }

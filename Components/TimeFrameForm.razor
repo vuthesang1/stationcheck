@@ -25,47 +25,57 @@
                 <!-- Name -->
                 <div class="mb-3">
                     <label class="form-label">Tên khung thời gian <span class="text-danger">*</span></label>
-                    <InputText @bind-Value="TimeFrame.Name" class="form-control" placeholder="Ví dụ: Ca sáng, Ca chiều..." />
+                    <InputText @bind-Value="TimeFrame.Name" class="form-control" placeholder="Ví dụ: Giám sát chính, Giám sát dự phòng..." />
                     <ValidationMessage For="@(() => TimeFrame.Name)" />
                 </div>
 
-                <!-- Time Range -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Bắt đầu <span class="text-danger">*</span></label>
-                        <input type="time" value="@startTimeInput" @onchange="@(e => { startTimeInput = e.Value?.ToString() ?? "09:00"; CalculateMaxFrequency(); })" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Kết thúc <span class="text-danger">*</span></label>
-                        <input type="time" value="@endTimeInput" @onchange="@(e => { endTimeInput = e.Value?.ToString() ?? "17:00"; CalculateMaxFrequency(); })" class="form-control" />
-                    </div>
+                <!-- Hidden Time Range (auto 00:00-24:00) -->
+                <div class="alert alert-info py-2 mb-3">
+                    <i class="fas fa-clock"></i> <strong>Thời gian giám sát:</strong> 00:00 - 24:00 (Cả ngày)
                 </div>
-                @if (!string.IsNullOrEmpty(timeRangeError))
+
+                @if (IsDebugMode)
                 {
-                    <div class="alert alert-danger py-2 mb-3">
-                        <i class="fas fa-exclamation-triangle"></i> @timeRangeError
+                    <!-- Frequency Input (Minutes for testing) -->
+                    <div class="mb-3">
+                        <label class="form-label">Tần suất kiểm tra (phút) <span class="text-danger">*</span></label>
+                        <input type="number" 
+                               @bind="TimeFrame.FrequencyMinutes" 
+                               @bind:after="OnFrequencyChanged"
+                               class="form-control" 
+                               min="1" 
+                               max="1440"
+                               placeholder="Nhập số phút (ví dụ: 60 = 1 giờ)" />
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Chế độ testing:</strong> Nhập tần suất tính bằng phút (1-1440 phút). VD: 5 phút, 10 phút, 60 phút (1 giờ)
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <!-- Frequency Dropdown (1-7 hours for production) -->
+                    <div class="mb-3">
+                        <label class="form-label">Tần suất kiểm tra <span class="text-danger">*</span></label>
+                        <select @bind="selectedFrequencyHours" @bind:after="OnFrequencyChanged" class="form-select">
+                            <option value="1">1 giờ</option>
+                            <option value="2">2 giờ</option>
+                            <option value="3">3 giờ</option>
+                            <option value="4">4 giờ</option>
+                            <option value="5">5 giờ</option>
+                            <option value="6">6 giờ</option>
+                            <option value="7">7 giờ</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Hệ thống sẽ kiểm tra mỗi @selectedFrequencyHours giờ (= @(selectedFrequencyHours * 60) phút)
+                        </small>
                     </div>
                 }
 
-                <!-- Frequency with validation message -->
-                <div class="mb-3">
-                    <label class="form-label">Tần suất kiểm tra (phút) <span class="text-danger">*</span></label>
-                    <input type="number" 
-                           @bind="TimeFrame.FrequencyMinutes" 
-                           @bind:after="CalculateNextRun" 
-                           class="form-control" 
-                           min="1" 
-                           max="@maxFrequencyMinutes"
-                           placeholder="Nhập số phút" />
-                    <small class="form-text text-muted">
-                        <i class="fas fa-info-circle"></i>
-                        Tối thiểu: 1 phút | Tối đa: @maxFrequencyMinutes phút (dựa trên khoảng thời gian @startTimeInput - @endTimeInput)
-                    </small>
-                </div>
-
                 <!-- Buffer time -->
                 <div class="mb-3">
-                    <label class="form-label">Thời gian buffer (phút) </label>
+                    <label class="form-label">Thời gian buffer (phút) <span class="text-muted">(Tùy chọn)</span></label>
                     <input type="number" 
                            @bind="TimeFrame.BufferMinutes" 
                            class="form-control" 
@@ -73,8 +83,11 @@
                            max="60"
                            placeholder="Nhập số phút buffer (mặc định: 0)" />
                     <small class="form-text text-muted">
-                        <i class="fas fa-clock"></i>
-                        Dung sai cho check-in sớm/trễ. VD: Buffer 15 phút với tần suất 60 phút → Chấp nhận từ 09:45 đến 10:15 cho khung 10:00
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Buffer là khoảng dung sai cho phép motion đến sớm/trễ.</strong><br/>
+                        • VD 1: Tần suất 1 giờ, Buffer 15 phút → Checkpoint 10:00 sẽ chấp nhận motion từ 09:45 đến 10:15<br/>
+                        • VD 2: Tần suất 2 giờ, Buffer 30 phút → Checkpoint 12:00 sẽ chấp nhận motion từ 11:30 đến 12:30<br/>
+                        • <em>Để 0 nếu yêu cầu motion đúng giờ checkpoint</em>
                     </small>
                 
                 @if (nextRunTimes.Any())
@@ -97,40 +110,9 @@
                     }
                 </div>
 
-                <!-- Days of Week -->
-                <div class="mb-3">
-                    <label class="form-label">Ngày trong tuần</label>
-                    <div class="d-flex flex-wrap" style="gap: 1rem;">
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day1" @bind="day1" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day1">Thứ 2</label>
-                        </div>
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day2" @bind="day2" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day2">Thứ 3</label>
-                        </div>
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day3" @bind="day3" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day3">Thứ 4</label>
-                        </div>
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day4" @bind="day4" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day4">Thứ 5</label>
-                        </div>
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day5" @bind="day5" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day5">Thứ 6</label>
-                        </div>
-                        <div class="form-check" style="min-width: 80px;">
-                            <input type="checkbox" class="form-check-input" id="day6" @bind="day6" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day6">Thứ 7</label>
-                        </div>
-                        <div class="form-check" style="min-width: 100px;">
-                            <input type="checkbox" class="form-check-input" id="day7" @bind="day7" @bind:after="CalculateNextRun" />
-                            <label class="form-check-label" for="day7">Chủ nhật</label>
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Không chọn = áp dụng mọi ngày</small>
+                <!-- Days of Week (Hidden - Auto All Days) -->
+                <div class="alert alert-success py-2 mb-3">
+                    <i class="fas fa-calendar-week"></i> <strong>Ngày áp dụng:</strong> Tất cả các ngày trong tuần (24/7)
                 </div>
 
                 <!-- Is Enabled -->
@@ -168,14 +150,18 @@
     [Parameter] public EventCallback OnSaved { get; set; }
 
     private bool isSaving = false;
-    private int maxFrequency = 0;
-    private int maxFrequencyMinutes = 1440; // Max 24 hours = 1440 minutes
-    private int maxFrequencyHours = 1;
+    private bool isInitialized = false;
     private int selectedFrequencyHours = 1;
     private List<int> frequencyOptions = new();
     private string timeRangeError = string.Empty;
     private string frequencyError = string.Empty;
     private List<string> nextRunTimes = new();
+
+#if DEBUG
+    private bool IsDebugMode => true;
+#else
+    private bool IsDebugMode => false;
+#endif
 
     // Day checkboxes
     private bool day1, day2, day3, day4, day5, day6, day7;
@@ -188,30 +174,47 @@
     {
         if (Visible)
         {
+            // Always set 24/7 mode
+            startTimeInput = "00:00";
+            endTimeInput = "23:59";
+            
+            // All days selected (24/7)
+            day1 = day2 = day3 = day4 = day5 = day6 = day7 = true;
+            
             if (TimeFrame.Id != Guid.Empty)
             {
                 // Edit mode - populate from existing
-                // TimeSpan is stored as local time (no timezone conversion needed)
-                startTimeInput = TimeFrame.StartTime.ToString(@"hh\:mm");
-                endTimeInput = TimeFrame.EndTime.ToString(@"hh\:mm");
-                ParseDaysOfWeek(TimeFrame.DaysOfWeek);
-                
-                // Convert minutes to hours for display
-                selectedFrequencyHours = Math.Max(1, TimeFrame.FrequencyMinutes / 60);
+                if (!IsDebugMode)
+                {
+                    // In Release mode, convert FrequencyMinutes to hours for dropdown
+                    selectedFrequencyHours = TimeFrame.FrequencyMinutes / 60;
+                    if (selectedFrequencyHours < 1) selectedFrequencyHours = 1;
+                    if (selectedFrequencyHours > 7) selectedFrequencyHours = 7;
+                }
+                isInitialized = true;
             }
-            else
+            else if (!isInitialized)
             {
-                // Add mode - defaults
-                startTimeInput = "09:00";
-                endTimeInput = "17:00";
+                // Add mode - defaults (only set once on first open)
                 TimeFrame.IsEnabled = true;
-                TimeFrame.FrequencyMinutes = 30; // Default 30 minutes for testing
-                selectedFrequencyHours = 1;
-                day1 = day2 = day3 = day4 = day5 = true; // Mon-Fri default
-                day6 = day7 = false;
+                if (IsDebugMode)
+                {
+                    TimeFrame.FrequencyMinutes = 60; // Default 1 hour for testing
+                }
+                else
+                {
+                    selectedFrequencyHours = 1; // Default 1 hour for production
+                    TimeFrame.FrequencyMinutes = 60;
+                }
+                isInitialized = true;
             }
 
             CalculateMaxFrequency();
+        }
+        else
+        {
+            // Reset when modal closes
+            isInitialized = false;
         }
     }
 
@@ -219,88 +222,51 @@
     {
         timeRangeError = string.Empty;
         frequencyOptions.Clear();
+        frequencyError = string.Empty;
         
-        if (TimeSpan.TryParse(startTimeInput, out var start) && TimeSpan.TryParse(endTimeInput, out var end))
+        // Generate frequency options (1-7 hours only)
+        for (int i = 1; i <= 7; i++)
         {
-            // Validate: EndTime > StartTime for same-day ranges
-            if (end <= start)
-            {
-                timeRangeError = "Thời gian kết thúc phải lớn hơn thời gian bắt đầu!";
-                maxFrequency = 0;
-                maxFrequencyMinutes = 0;
-                maxFrequencyHours = 0;
-                nextRunTimes.Clear();
-                return;
-            }
-            
-            var duration = end - start;
-            maxFrequency = (int)duration.TotalMinutes;
-            maxFrequencyMinutes = (int)duration.TotalMinutes;
-            maxFrequencyHours = Math.Max(1, (int)duration.TotalHours);
-            
-            // Generate frequency options (1 hour, 2 hours, ..., maxFrequencyHours)
-            for (int i = 1; i <= maxFrequencyHours; i++)
-            {
-                frequencyOptions.Add(i);
-            }
-            
-            // Ensure selected value is within range
-            if (selectedFrequencyHours > maxFrequencyHours)
-            {
-                selectedFrequencyHours = maxFrequencyHours;
-            }
-            
-            // Clear any frequency error
-            frequencyError = string.Empty;
-            
-            // Calculate next run after changing time range
-            CalculateNextRun();
+            frequencyOptions.Add(i);
         }
-        else
-        {
-            timeRangeError = "Định dạng thời gian không hợp lệ!";
-            maxFrequency = 0;
-            maxFrequencyHours = 0;
-            nextRunTimes.Clear();
-        }
+        
+        // Ensure selected value is within 1-7 hours
+        if (selectedFrequencyHours < 1) selectedFrequencyHours = 1;
+        if (selectedFrequencyHours > 7) selectedFrequencyHours = 7;
+        
+        // Calculate next run
+        CalculateNextRun();
     }
 
     private void CalculateNextRun()
     {
         nextRunTimes.Clear();
         
-        if (!TimeSpan.TryParse(startTimeInput, out var start) || 
-            !TimeSpan.TryParse(endTimeInput, out var end) ||
-            !frequencyOptions.Any())
+        if (TimeFrame.FrequencyMinutes <= 0)
         {
             return;
         }
         
-        var now = DateTime.UtcNow;
-        var selectedDays = GetSelectedDays();
+        // Use local time (UTC+7)
+        var now = DateTime.Now;
+        var start = TimeSpan.Zero; // 00:00
+        var end = TimeSpan.FromHours(24); // 24:00
         
-        // If no specific days selected, assume all days
-        if (!selectedDays.Any())
-        {
-            selectedDays = new List<int> { 1, 2, 3, 4, 5, 6, 7 };
-        }
+        // All days (24/7)
+        var selectedDays = new List<int> { 1, 2, 3, 4, 5, 6, 7 };
         
-        var frequencySpan = TimeSpan.FromHours(selectedFrequencyHours);
+        var frequencySpan = TimeSpan.FromMinutes(TimeFrame.FrequencyMinutes);
         var foundRuns = new List<DateTime>();
         
-        // Search for next 3 runs within next 7 days
-        for (int dayOffset = 0; dayOffset < 7 && foundRuns.Count < 3; dayOffset++)
+        // Search for next 3 runs within next 2 days
+        for (int dayOffset = 0; dayOffset < 2 && foundRuns.Count < 3; dayOffset++)
         {
             var checkDate = now.Date.AddDays(dayOffset);
-            int checkDayOfWeek = ((int)checkDate.DayOfWeek == 0) ? 7 : (int)checkDate.DayOfWeek;
-            
-            // Skip if not a selected day
-            if (!selectedDays.Contains(checkDayOfWeek))
-                continue;
             
             // Calculate all possible run times for this day
+            // Start from 00:00, increment by frequency
             var currentRunTime = start;
-            while (currentRunTime <= end)
+            while (currentRunTime < end && foundRuns.Count < 3)
             {
                 var fullDateTime = checkDate.Add(currentRunTime);
                 
@@ -308,14 +274,11 @@
                 if (fullDateTime > now)
                 {
                     foundRuns.Add(fullDateTime);
-                    if (foundRuns.Count >= 3)
-                        break;
                 }
                 
                 currentRunTime = currentRunTime.Add(frequencySpan);
             }
         }
-        
         // Format the messages
         foreach (var runTime in foundRuns)
         {
@@ -397,16 +360,8 @@
 
     private string GetDaysOfWeekString()
     {
-        var days = new List<int>();
-        if (day1) days.Add(1);
-        if (day2) days.Add(2);
-        if (day3) days.Add(3);
-        if (day4) days.Add(4);
-        if (day5) days.Add(5);
-        if (day6) days.Add(6);
-        if (day7) days.Add(7);
-
-        return days.Any() ? string.Join(",", days) : "1,2,3,4,5,6,7";
+        // Always return all days (24/7)
+        return "1,2,3,4,5,6,7";
     }
 
     private async Task HandleSubmit()
@@ -447,23 +402,17 @@
                 return;
             }
             
-            // Store TimeSpan as local time (UTC+7) - no conversion needed
-            // User inputs: 09:00 → Store as TimeSpan(9, 0, 0)
-            // AlertGenerationService will compare with local TimeOfDay
-            TimeFrame.StartTime = parsedStart;
-            TimeFrame.EndTime = parsedEnd;
-            TimeFrame.DaysOfWeek = GetDaysOfWeekString();
+            // Always set to 24/7 mode (00:00 - 23:59)
+            TimeFrame.StartTime = TimeSpan.Zero; // 00:00
+            TimeFrame.EndTime = new TimeSpan(23, 59, 59); // 23:59:59 (SQL Server time max)
+            TimeFrame.DaysOfWeek = "1,2,3,4,5,6,7"; // All days
             
-            // FrequencyMinutes already bound directly to input, no conversion needed
-            // TimeFrame.FrequencyMinutes = selectedFrequencyHours * 60; // Removed
+            // FrequencyMinutes is already set from input binding, no conversion needed
 
-            // Client-side validation
-            var duration = TimeFrame.EndTime - TimeFrame.StartTime;
-            var maxMinutes = (int)duration.TotalMinutes;
-            
-            if (TimeFrame.FrequencyMinutes < 1 || TimeFrame.FrequencyMinutes > maxMinutes)
+            // Client-side validation (1 minute to 24 hours)
+            if (TimeFrame.FrequencyMinutes < 1 || TimeFrame.FrequencyMinutes > 1440)
             {
-                await JS.InvokeVoidAsync("alert", $"Tần suất phải từ 1 phút đến {maxMinutes} phút!");
+                await JS.InvokeVoidAsync("alert", "Tần suất phải từ 1 phút đến 1440 phút (24 giờ)!");
                 return;
             }
 
@@ -494,6 +443,17 @@
     private async Task Cancel()
     {
         await VisibleChanged.InvokeAsync(false);
+    }
+    
+    private void OnFrequencyChanged()
+    {
+        if (!IsDebugMode)
+        {
+            // In Release mode, convert hours to minutes
+            TimeFrame.FrequencyMinutes = selectedFrequencyHours * 60;
+        }
+        // Recalculate next run times
+        CalculateNextRun();
     }
 }
 

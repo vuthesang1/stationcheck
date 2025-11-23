@@ -199,6 +199,9 @@ using (var scope = app.Services.CreateScope())
     
     // Seed initial data
     await DbSeeder.SeedAsync(db);
+    
+    // Seed real stations (removes test stations)
+    await DbSeeder.SeedStationsAsync(db);
 }
 
 // Configure Swagger (chạy ở cả Development và Production để test API dễ dàng)

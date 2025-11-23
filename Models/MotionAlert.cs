@@ -84,6 +84,9 @@ namespace StationCheck.Models
         [MaxLength(1000)]
         public string? Notes { get; set; }
 
+        // Soft delete flag - when alert is resolved, mark as deleted
+        public bool IsDeleted { get; set; } = false;
+
         // Audit fields
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         

@@ -320,7 +320,8 @@ namespace StationCheck.BackgroundServices
                     timeFrame.BufferMinutes,
                     station.LastMotionDetectedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Unknown"
                 );
-                return false;
+                // Return true to create a resolved alert for station status calculation
+                return true;
             }
 
             // No motion in tolerance window - generate alert
@@ -344,7 +345,9 @@ namespace StationCheck.BackgroundServices
 
         /// <summary>
         /// Create a new motion alert with configuration snapshot
-        /// Each check cycle creates a new alert if conditions are met (no duplicate prevention)
+        /// Creates alert for every check cycle to track station status:
+        /// - If no motion in tolerance window → Alert unresolved (station needs attention)
+        /// - If motion detected → Alert auto-resolved and deleted (station status = normal)
         /// </summary>
         private async Task CreateAlertAsync(
             ApplicationDbContext context,
@@ -353,9 +356,12 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            // ✅ REMOVED: No longer check for existing alerts
-            // Each check cycle should create a new alert if conditions are met
-            // This allows multiple alerts for the same timeframe (e.g., 9h, 10h, 11h)
+            // Check if there's motion in tolerance window for this checkpoint
+            var checkToleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
+            var checkWindowStart = now.AddMinutes(-checkToleranceMinutes);
+            var hasRecentMotion = await context.MotionEvents
+                .Where(me => me.StationId == station.Id && me.DetectedAt >= checkWindowStart)
+                .AnyAsync(cancellationToken);
 
             // ✅ Get latest TimeFrameHistory for audit trail
             var timeFrameHistory = await context.TimeFrameHistories
@@ -518,6 +524,12 @@ namespace StationCheck.BackgroundServices
                 ? AlertSeverity.Critical
                 : AlertSeverity.Warning;
 
+            // If motion detected in tolerance window, create resolved alert immediately
+            var isResolved = hasRecentMotion;
+            var message = hasRecentMotion
+                ? $"Trạm {station.Name} Online lúc {nowLocal}"
+                : $"Trạm {station.Name} Offline lúc {nowLocal}";
+
             var alert = new MotionAlert
             {
                 StationId = station.Id,
@@ -528,58 +540,88 @@ namespace StationCheck.BackgroundServices
                 ConfigurationSnapshot = JsonSerializer.Serialize(configSnapshot),
                 AlertTime = alertTime,
                 Severity = severity,
-                Message = $"Không phát hiện chuyển động tại {station.Name} vào lúc {bufferFrom} - {bufferTo}",
+                Message = message,
                 ExpectedFrequencyMinutes = timeFrame.FrequencyMinutes,
                 LastMotionAt = station.LastMotionDetectedAt,
                 LastMotionCameraId = lastMotionEvent?.CameraId,
                 LastMotionCameraName = lastMotionEvent?.CameraName,
                 MinutesSinceLastMotion = minutesSinceLastMotion,
-                IsResolved = false
+                IsResolved = isResolved,
+                ResolvedAt = isResolved ? now : null,
+                ResolvedBy = isResolved ? "System" : null,
+                IsDeleted = false, // Keep all alerts visible - use IsResolved for status tracking
+                Notes = isResolved ? $"Motion detected within tolerance window at checkpoint {nowLocal}" : null
             };
 
             context.MotionAlerts.Add(alert);
             await context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogWarning(
-                "[AlertGeneration] Created alert {AlertId} for Station {StationId} ({StationName}). ProfileVersion: {ProfileVersion}, TimeFrameVersion: {TimeFrameVersion}, Last motion: {LastMotion}, Minutes since: {Minutes}",
-                alert.Id,
-                station.Id,
-                station.Name,
-                profileHistory?.Version.ToString() ?? "N/A",
-                timeFrameHistory?.Version.ToString() ?? "N/A",
-                station.LastMotionDetectedAt?.ToString() ?? "Never",
-                minutesSinceLastMotion
-            );
+            if (isResolved)
+            {
+                _logger.LogInformation(
+                    "[AlertGeneration] Created RESOLVED alert {AlertId} for Station {StationId} ({StationName}). Motion detected at checkpoint. Last motion: {LastMotion}",
+                    alert.Id,
+                    station.Id,
+                    station.Name,
+                    station.LastMotionDetectedAt?.ToString() ?? "Unknown"
+                );
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "[AlertGeneration] Created UNRESOLVED alert {AlertId} for Station {StationId} ({StationName}). ProfileVersion: {ProfileVersion}, TimeFrameVersion: {TimeFrameVersion}, Last motion: {LastMotion}, Minutes since: {Minutes}",
+                    alert.Id,
+                    station.Id,
+                    station.Name,
+                    profileHistory?.Version.ToString() ?? "N/A",
+                    timeFrameHistory?.Version.ToString() ?? "N/A",
+                    station.LastMotionDetectedAt?.ToString() ?? "Never",
+                    minutesSinceLastMotion
+                );
+            }
 
-            // ✅ CRITICAL FIX: Auto-resolve immediately if motion detected within tolerance window
+            // ✅ Additional check: Auto-resolve if motion detected within buffer window of AlertTime
             // This handles cases where motion event arrived BEFORE alert was created
             // Example: Motion at 20:38:15, Alert created at 20:39:00 for window 20:38-20:40
-            var alertWindowStart = alertTime.AddMinutes(-timeFrame.BufferMinutes);
-            var alertWindowEnd = alertTime.AddMinutes(timeFrame.BufferMinutes);
-
-            var recentMotion = await context.MotionEvents
-                .Where(me => me.StationId == station.Id 
-                          && me.DetectedAt >= alertWindowStart 
-                          && me.DetectedAt <= alertWindowEnd)
-                .OrderByDescending(me => me.DetectedAt)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (recentMotion != null)
+            // Only check if alert is not already resolved
+            if (!alert.IsResolved)
             {
-                alert.IsResolved = true;
-                alert.ResolvedAt = now;
-                alert.ResolvedBy = "System (Auto-resolved - motion detected in tolerance window)";
-                alert.Notes = $"Motion detected at {recentMotion.DetectedAt:yyyy-MM-dd HH:mm:ss} within tolerance [{alertWindowStart:HH:mm}-{alertWindowEnd:HH:mm}]";
-                
-                await context.SaveChangesAsync(cancellationToken);
+                var alertWindowStart = alertTime.AddMinutes(-timeFrame.BufferMinutes);
+                var alertWindowEnd = alertTime.AddMinutes(timeFrame.BufferMinutes);
 
-                _logger.LogInformation(
-                    "[AlertGeneration] Auto-resolved alert {AlertId} immediately after creation. Motion at {MotionTime:HH:mm:ss} within tolerance [{WindowStart:HH:mm}-{WindowEnd:HH:mm}]",
-                    alert.Id,
-                    recentMotion.DetectedAt,
-                    alertWindowStart,
-                    alertWindowEnd
-                );
+                var recentMotion = await context.MotionEvents
+                    .Where(me => me.StationId == station.Id 
+                              && me.DetectedAt >= alertWindowStart 
+                              && me.DetectedAt <= alertWindowEnd)
+                    .OrderByDescending(me => me.DetectedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (recentMotion != null)
+                {
+                    alert.IsResolved = true;
+                    alert.ResolvedAt = now;
+                    alert.ResolvedBy = "System (Auto-resolved - motion detected in tolerance window)";
+                    // Keep alert visible - IsDeleted stays false
+                    
+                    // Convert UTC times to Vietnam local time (UTC+7) for display
+                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    var motionLocalTime = TimeZoneInfo.ConvertTimeFromUtc(recentMotion.DetectedAt, vietnamTimeZone);
+                    var alertWindowStartLocal = TimeZoneInfo.ConvertTimeFromUtc(alertWindowStart, vietnamTimeZone);
+                    var alertWindowEndLocal = TimeZoneInfo.ConvertTimeFromUtc(alertWindowEnd, vietnamTimeZone);
+                    
+                    alert.Notes = $"Motion detected at {motionLocalTime:yyyy-MM-dd HH:mm:ss} within tolerance [{alertWindowStartLocal:HH:mm}-{alertWindowEndLocal:HH:mm}]";
+                    alert.Message = $"Trạm {station.Name} Online lúc {nowLocal}"; // Update message to Online
+                    
+                    await context.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogInformation(
+                        "[AlertGeneration] Auto-resolved alert {AlertId} immediately after creation. Motion at {MotionTime:HH:mm:ss} within tolerance [{WindowStart:HH:mm}-{WindowEnd:HH:mm}]",
+                        alert.Id,
+                        recentMotion.DetectedAt,
+                        alertWindowStart,
+                        alertWindowEnd
+                    );
+                }
             }
         }
 
@@ -628,7 +670,17 @@ namespace StationCheck.BackgroundServices
                     alert.IsResolved = true;
                     alert.ResolvedAt = now;
                     alert.ResolvedBy = "System (Auto-resolved by motion detection)";
-                    alert.Notes = $"Motion detected at {motionTime:yyyy-MM-dd HH:mm:ss} within tolerance [{windowStart:HH:mm}-{windowEnd:HH:mm}]";
+                    // Keep alert visible - IsDeleted stays false
+                    
+                    // Convert UTC times to Vietnam local time (UTC+7) for display
+                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    var motionLocalTime = TimeZoneInfo.ConvertTimeFromUtc(motionTime, vietnamTimeZone);
+                    var windowStartLocal = TimeZoneInfo.ConvertTimeFromUtc(windowStart, vietnamTimeZone);
+                    var windowEndLocal = TimeZoneInfo.ConvertTimeFromUtc(windowEnd, vietnamTimeZone);
+                    var alertTimeLocal = alert.AlertTime.AddHours(7).ToString("HH:mm");
+                    
+                    alert.Notes = $"Motion detected at {motionLocalTime:yyyy-MM-dd HH:mm:ss} within tolerance [{windowStartLocal:HH:mm}-{windowEndLocal:HH:mm}]";
+                    alert.Message = $"Trạm {alert.StationName} Online lúc {alertTimeLocal}"; // Update message to Online
 
                     resolvedCount++;
 

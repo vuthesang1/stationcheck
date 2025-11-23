@@ -45,66 +45,9 @@
             {
                 var status = GetStationStatus(station);
                 <div class="station-card @GetStatusClass(status)" @onclick="() => ShowStationDetails(station)">
-                    <div class="station-header">
-                        <div class="station-info">
-                            <div class="station-name-large">
-                                <span class="status-indicator @GetStatusIndicatorClass(status)"></span>
-                                @station.Name
-                            </div>
-                        </div>
-                        <div class="station-status">
-                            <span class="badge @GetStatusBadgeClass(status)">
-                                @GetStatusText(status)
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="station-body">
-                        @if (status == StationStatus.Normal)
-                        {
-                            <div class="status-detail">
-                                <i class="bi bi-check-circle text-success"></i>
-                                <span>Phát hiện chuyển động: @station.LastMotionDetectedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</span>
-                            </div>
-                        }
-                        else if (status == StationStatus.Alert)
-                        {
-                            var alertCount = stationAlertCounts.GetValueOrDefault(station.Id, 0);
-                            <div class="status-detail">
-                                <i class="bi bi-exclamation-triangle text-danger"></i>
-                                <span>@alertCount cảnh báo đang chờ xử lý</span>
-                            </div>
-                            @if (station.LastMotionDetectedAt.HasValue)
-                            {
-                                var minutesSince = (DateTime.UtcNow - station.LastMotionDetectedAt.Value).TotalMinutes;
-                                <div class="status-detail">
-                                    <i class="bi bi-clock-history"></i>
-                                    <span>Không có chuyển động: @((int)minutesSince) phút</span>
-                                </div>
-                            }
-                        }
-                        else if (status == StationStatus.Paused)
-                        {
-                            <div class="status-detail">
-                                <i class="bi bi-pause-circle text-secondary"></i>
-                                <span>Giám sát tạm ngưng</span>
-                            </div>
-                        }
-                        
-                        @if (!string.IsNullOrEmpty(station.Address))
-                        {
-                            <div class="station-address">
-                                <i class="bi bi-geo-alt"></i>
-                                <small>@station.Address</small>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="station-footer">
-                        <small class="text-muted">
-                            Click để xem chi tiết
-                            <i class="bi bi-chevron-right"></i>
-                        </small>
+                    <div class="station-compact">
+                        <span class="status-indicator @GetStatusIndicatorClass(status)"></span>
+                        <span class="station-name-compact">@station.Name</span>
                     </div>
                 </div>
             }
@@ -139,7 +82,7 @@
                     <h5 class="modal-title">
                         <i class="bi bi-building"></i> Chi tiết trạm: @selectedStation.Name
                     </h5>
-                    <button type="button" class="btn-close" @onclick="CloseStationModal" @onclick:stopPropagation="true"></button>
+                    <button type="button" class="close" @onclick="CloseStationModal" @onclick:stopPropagation="true"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" role="tablist">
@@ -228,7 +171,7 @@
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-warning text-dark">Chưa xử lý</span>
+                                                        <span class="badge bg-warning text-dark">Cảnh báo</span>
                                                     }
                                                 </CellDisplayTemplate>
                                             </DxGridDataColumn>
@@ -261,14 +204,15 @@
                                 }
                                 else
                                 {
-                                    @foreach (var alert in alertHistory)
+                                    @* Only display alerts that are not deleted (IsDeleted = false) *@
+                                    @foreach (var alert in alertHistory.Where(a => !a.IsDeleted))
                                     {
                                         <div class="alert-card mb-3 border rounded">
                                             <div class="d-flex justify-content-between align-items-start p-3">
                                                 <div class="flex-grow-1">
                                                     <div class="d-flex align-items-center gap-2 mb-2">
                                                         <span class="badge @(alert.IsResolved ? "bg-secondary" : "bg-danger")">
-                                                            @(alert.IsResolved ? "Đã xử lý" : "Chưa xử lý")
+                                                            @(alert.IsResolved ? "Đã xử lý" : "Cảnh báo")
                                                         </span>
                                                         <span class="badge bg-warning text-dark">@alert.Severity</span>
                                                         <small class="text-muted">@alert.AlertTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</small>
@@ -311,6 +255,7 @@
                                                             @(expandedSnapshots.Contains(alert.Id) ? "Ẩn" : "Xem")
                                                         </button>
                                                     }
+                                                    @* Temporarily hidden - Resolve button
                                                     @if (!alert.IsResolved)
                                                     {
                                                         <button class="btn btn-sm btn-success" 
@@ -319,6 +264,7 @@
                                                             <i class="bi bi-check-circle"></i> Resolve
                                                         </button>
                                                     }
+                                                    *@
                                                 </div>
                                             </div>
                                             
@@ -572,7 +518,7 @@
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-warning text-dark">Chưa xử lý</span>
+                                                        <span class="badge bg-warning text-dark">Cảnh báo</span>
                                                     }
                                                 </td>
                                             </tr>
@@ -936,7 +882,7 @@
 
 @code {
     private List<Station> stations = new();
-    private Dictionary<Guid, int> stationAlertCounts = new();
+    private Dictionary<Guid, MotionAlert> latestStationAlerts = new();
     private HashSet<Guid> stationsWithActiveMonitoring = new();
     private bool isLoading = false;
     private DateTime lastUpdateTime = DateTime.Now;
@@ -1006,14 +952,21 @@
                 .OrderBy(s => s.Name)
                 .ToListAsync();
 
-            // Load unresolved alert counts for each station
-            var alertGroups = await context.MotionAlerts
-                .Where(a => !a.IsResolved && a.StationId != null)
-                .GroupBy(a => a.StationId)
-                .Select(g => new { StationId = g.Key!.Value, Count = g.Count() })
+            // Load latest alert for each station (to determine current status)
+            // Include resolved alerts to calculate station status correctly
+            var latestAlerts = await context.MotionAlerts
+                .Where(a => a.StationId != null)
+                .GroupBy(a => a.StationId!.Value)
+                .Select(g => new
+                {
+                    StationId = g.Key,
+                    LatestAlert = g.OrderByDescending(a => a.AlertTime).FirstOrDefault()
+                })
                 .ToListAsync();
 
-            stationAlertCounts = alertGroups.ToDictionary(x => x.StationId, x => x.Count);
+            latestStationAlerts = latestAlerts
+                .Where(x => x.LatestAlert != null)
+                .ToDictionary(x => x.StationId, x => x.LatestAlert!);
             
             // Load stations with active monitoring (enabled TimeFrames)
             var activeStationIds = await context.TimeFrames
@@ -1042,10 +995,15 @@
             return StationStatus.Paused;
         }
 
-        // Check if station has unresolved alerts
-        if (stationAlertCounts.ContainsKey(station.Id) && stationAlertCounts[station.Id] > 0)
+        // Check latest alert status - if latest alert is resolved or no alerts, status is Normal
+        // If latest alert is unresolved, status is Alert
+        if (latestStationAlerts.ContainsKey(station.Id))
         {
-            return StationStatus.Alert;
+            var latestAlert = latestStationAlerts[station.Id];
+            if (!latestAlert.IsResolved)
+            {
+                return StationStatus.Alert;
+            }
         }
 
         return StationStatus.Normal;
@@ -1110,12 +1068,12 @@
             .Take(1000) // Limit to 1000 most recent records
             .ToListAsync();
 
-        // Load alert history (last 30 days)
+        // Load alert history (last 30 days) - only show unresolved alerts
         var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
         alertHistory = await context.MotionAlerts
             .Include(a => a.TimeFrame)
             .Include(a => a.TimeFrameHistorySnapshot)
-            .Where(a => a.StationId == station.Id && a.AlertTime >= thirtyDaysAgo)
+            .Where(a => a.StationId == station.Id && a.AlertTime >= thirtyDaysAgo && !a.IsDeleted)
             .OrderByDescending(a => a.AlertTime)
             .ToListAsync();
 
@@ -1241,6 +1199,7 @@
                 alert.IsResolved = true;
                 alert.ResolvedAt = DateTime.UtcNow;
                 alert.ResolvedBy = "Manual Resolve"; // TODO: Get current user name
+                alert.IsDeleted = true; // Hide resolved alert from display
                 alert.Notes = reason; // ✅ Save the reason
                 
                 await context.SaveChangesAsync();
@@ -1250,7 +1209,7 @@
                 alertHistory = await context.MotionAlerts
                     .Include(a => a.TimeFrame)
                     .Include(a => a.TimeFrameHistorySnapshot)
-                    .Where(a => a.StationId == selectedStation!.Id && a.AlertTime >= thirtyDaysAgo)
+                    .Where(a => a.StationId == selectedStation!.Id && a.AlertTime >= thirtyDaysAgo && !a.IsDeleted)
                     .OrderByDescending(a => a.AlertTime)
                     .ToListAsync();
                 
@@ -1552,25 +1511,37 @@
 
     .stations-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 15px;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 10px;
         margin-bottom: 20px;
     }
 
     /* Responsive: điều chỉnh số cột dựa trên kích thước màn hình */
     @@media (max-width: 1920px) {
         .stations-grid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    @@media (max-width: 1600px) {
+        .stations-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    @@media (max-width: 1200px) {
+        .stations-grid {
             grid-template-columns: repeat(4, 1fr);
         }
     }
 
-    @@media (max-width: 1400px) {
+    @@media (max-width: 992px) {
         .stations-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
 
-    @@media (max-width: 992px) {
+    @@media (max-width: 768px) {
         .stations-grid {
             grid-template-columns: repeat(2, 1fr);
         }
@@ -1583,36 +1554,40 @@
     }
 
     .station-card {
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 16px 12px;
         background: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-height: 120px;
+        transition: all 0.2s ease;
+        min-height: 75px;
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        cursor: pointer;
     }
 
     .station-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
 
     .station-card.status-normal {
-        border-left: 5px solid #198754;
+        border-left: 4px solid #10b981;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
     }
 
     .station-card.status-alert {
-        border-left: 5px solid #dc3545;
-        background: #fff5f5;
+        border-left: 4px solid #ef4444;
+        background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
     }
 
     .station-card.status-paused {
-        border-left: 5px solid #6c757d;
-        background: #f8f9fa;
+        border-left: 4px solid #9ca3af;
+        background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
     }
 
+    /* Station header (for modal only) */
     .station-header {
         display: flex;
         justify-content: space-between;
@@ -1620,7 +1595,27 @@
         margin-bottom: 12px;
     }
 
-    /* Tên trạm nổi bật */
+    /* Layout compact cho station card */
+    .station-compact {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Tên trạm compact */
+    .station-name-compact {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        line-height: 1.4;
+        word-break: break-word;
+        text-align: center;
+    }
+
+    /* Tên trạm nổi bật (legacy - keep for modal) */
     .station-name-large {
         font-size: 22px;
         font-weight: 700;
@@ -1634,35 +1629,48 @@
 
     .status-indicator {
         display: inline-block;
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
-        animation: pulse 2s infinite;
         flex-shrink: 0;
+        box-shadow: 0 0 0 0 rgba(0,0,0,0.1);
+        position: relative;
     }
 
     .status-indicator.status-normal {
-        background-color: #198754;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        animation: pulse-green 2s infinite;
     }
 
     .status-indicator.status-alert {
-        background-color: #dc3545;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        animation: pulse-red 2s infinite;
     }
 
     .status-indicator.status-paused {
-        background-color: #6c757d;
-        animation: none;
+        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+        opacity: 0.7;
     }
 
-    @@keyframes pulse {
+    @@keyframes pulse-green {
         0%, 100% {
-            opacity: 1;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
         }
         50% {
-            opacity: 0.5;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
         }
     }
 
+    @@keyframes pulse-red {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+        }
+    }
+
+    /* Modal-only styles */
     .station-body {
         margin: 12px 0;
         flex-grow: 1;

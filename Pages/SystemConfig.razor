@@ -109,7 +109,7 @@
         {
             <div class="alert @(isError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
                 @message
-                <button type="button" class="btn-close" @onclick="() => message = null"></button>
+                <button type="button" class="close" @onclick="() => message = null"></button>
             </div>
         }
     }

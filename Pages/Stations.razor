@@ -10,6 +10,7 @@
 @implements IDisposable
 @attribute [Authorize(Roles = "Admin,Manager")]
 @inject IStationService StationService
+@inject IMonitoringService MonitoringService
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
 @inject AuthenticationStateProvider AuthStateProvider
@@ -273,10 +274,11 @@
 </DxPopup>
 
 <!-- TimeFrame Configuration Modal -->
-@if (showTimeFramesModal)
+@if (showTimeFramesModal && selectedStationId != Guid.Empty)
 {
     <TimeFrameConfigModal 
         StationId="@selectedStationId"
+        Title="@selectedStationName"
         @bind-Visible="@showTimeFramesModal" />
 }
 
@@ -464,6 +466,31 @@
                     CreatedAt = DateTime.UtcNow
                 };
                 await StationService.CreateStationAsync(newStation);
+                
+                // Auto-create default 24/7 timeframe for new station
+                try
+                {
+                    var defaultTimeFrame = new TimeFrame
+                    {
+                        Name = "Giám sát 24/7",
+                        StartTime = TimeSpan.Zero,
+                        EndTime = new TimeSpan(23, 59, 59),
+                        FrequencyMinutes = 60, // Default 1 hour
+                        BufferMinutes = 5,
+                        DaysOfWeek = "1,2,3,4,5,6,7",
+                        IsEnabled = true,
+                        StationId = newStation.Id,
+                        CreatedBy = userName,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await MonitoringService.CreateTimeFrameForStationAsync(newStation.Id, defaultTimeFrame);
+                }
+                catch (Exception tfEx)
+                {
+                    // Log error but don't fail station creation
+                    Console.WriteLine($"Error creating default timeframe: {tfEx.Message}");
+                }
+                
                 await JS.InvokeVoidAsync("showToast", "Tạo trạm thành công", "success", 3000);
             }
             else
@@ -577,6 +604,14 @@
             // Close all other modals first
             showModal = false;
             editingStation = null;
+            
+            // Reset TimeFrames modal state
+            showTimeFramesModal = false;
+            selectedStationId = Guid.Empty;
+            selectedStationName = string.Empty;
+            
+            // Small delay to ensure modal is closed
+            await Task.Delay(100);
             
             var station = await StationService.GetStationByIdAsync(stationId);
             if (station != null)

@@ -137,6 +137,7 @@ public class MotionDetectionService : IMotionDetectionService
                     alert.IsResolved = true;
                     alert.ResolvedAt = now;
                     alert.ResolvedBy = "System Auto-Resolve";
+                    alert.IsDeleted = true; // Hide resolved alert from display
                     alert.Notes = "Motion detected, alert auto-resolved";
                 }
 
@@ -170,6 +171,7 @@ public class MotionDetectionService : IMotionDetectionService
         alert.IsResolved = true;
         alert.ResolvedAt = DateTime.UtcNow;
         alert.ResolvedBy = resolvedBy;
+        // Keep alert visible - don't mark as deleted
         alert.Notes = notes;
 
         await context.SaveChangesAsync();

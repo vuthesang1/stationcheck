@@ -22,7 +22,7 @@ window.renderMotionChart = function (labels, data) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Số lần phát hiện chuyển động',
+                label: 'Số lần Online',
                 data: data,
                 backgroundColor: 'rgba(54, 162, 235, 0.5)',
                 borderColor: 'rgba(54, 162, 235, 1)',

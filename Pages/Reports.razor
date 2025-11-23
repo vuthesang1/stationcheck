@@ -183,8 +183,8 @@
                         <label class="form-label">Trạng thái</label>
                         <select class="form-select form-select-sm" @bind="alertStatus" @bind:after="LoadAlertData">
                             <option value="all">Tất cả</option>
-                            <option value="active">Chưa xử lý</option>
-                            <option value="resolved">Đã xử lý</option>
+                            <option value="active">Offline</option>
+                            <option value="resolved">Online</option>
                         </select>
                     </div>
                     @if (alertPeriod == "custom")
@@ -236,6 +236,16 @@
                             </DxGridDataColumn>
                             <DxGridDataColumn FieldName="StationName" Caption="Trạm" Width="200px" />
                             <DxGridDataColumn FieldName="Message" Caption="Thông điệp" MinWidth="300" />
+                            <DxGridDataColumn FieldName="IsResolved" Caption="Trạng thái" Width="120px">
+                                <CellDisplayTemplate>
+                                    @{
+                                        var alert = (MotionAlert)context.Grid.GetDataItem(context.VisibleIndex);
+                                    }
+                                    <span class="badge @(alert.IsResolved ? "bg-success" : "bg-danger")">
+                                        @(alert.IsResolved ? "Online" : "Offline")
+                                    </span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
                             @* <DxGridDataColumn FieldName="Severity" Caption="Mức độ" Width="100px" />
                             <DxGridDataColumn FieldName="IsResolved" Caption="Trạng thái" Width="120px">
                                 <CellDisplayTemplate>
@@ -278,8 +288,8 @@
 
                     <div class="mt-3">
                         <strong>Tổng số cảnh báo:</strong> @alerts.Count |
-                        <strong>Chưa xử lý:</strong> @alerts.Count(a => !a.IsResolved) |
-                        <strong>Đã xử lý:</strong> @alerts.Count(a => a.IsResolved)
+                        <strong>Offline:</strong> @alerts.Count(a => !a.IsResolved) |
+                        <strong>Online:</strong> @alerts.Count(a => a.IsResolved)
                     </div>
                 }
             </div>
@@ -498,7 +508,7 @@
                     <h5 class="modal-title">
                         <i class="fas fa-file-text"></i> Chi tiết thay đổi cấu hình
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" @onclick="CloseAuditDetailModal" @onclick:stopPropagation="true"></button>
+                    <button type="button" class="close btn-close-white" @onclick="CloseAuditDetailModal" @onclick:stopPropagation="true"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
@@ -708,7 +718,7 @@
                     <h5 class="modal-title">
                         <i class="fas fa-bell"></i> Chi tiết Cảnh báo
                     </h5>
-                    <button type="button" class="btn-close" @onclick="CloseAlertDetailModal"></button>
+                    <button type="button" class="close" @onclick="CloseAlertDetailModal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
@@ -960,9 +970,10 @@
 
             var (startDate, endDate) = GetDateRange(alertPeriod, alertStartDate, alertEndDate);
 
+            // Only show unresolved alerts in reports
             var query = context.MotionAlerts
                 .Include(a => a.TimeFrame)
-                .Where(a => a.AlertTime >= startDate && a.AlertTime <= endDate.AddDays(1));
+                .Where(a => a.AlertTime >= startDate && a.AlertTime <= endDate.AddDays(1) && !a.IsDeleted);
 
             if (selectedStationId != Guid.Empty)
             {

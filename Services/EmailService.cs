@@ -420,6 +420,7 @@ namespace StationCheck.Services
                                 alert.IsResolved = true;
                                 alert.ResolvedAt = DateTime.UtcNow;
                                 alert.ResolvedBy = "System (Auto-resolved by email motion detection)";
+                                alert.IsDeleted = true; // Hide resolved alert from display
                                 alert.Notes = $"Auto-resolved: Motion at {motionEvent.DetectedAt:yyyy-MM-dd HH:mm:ss} within tolerance [{windowStart:HH:mm}-{windowEnd:HH:mm}]";
                                 _context.MotionAlerts.Update(alert);
                                 resolvedCount++;
