@@ -238,12 +238,11 @@
                 <DxFormLayoutItem Caption="@GetText("station.phone_label", "Điện thoại")" ColSpanMd="6" CaptionPosition="CaptionPosition.Vertical">
                     <Template>
                         <DxMaskedInput @bind-Value="@stationForm.ContactPhone"
-                                       Mask="0000-000-000"
-                                       NullText="@GetText("station.phone_placeholder", "Nhập số điện thoại")"
+                                       Mask="9999-999-999"
                                        ShowValidationIcon="true"
-                                       CssClass="form-control">
-                        </DxMaskedInput>
-                        <ValidationMessage For="@(() => stationForm.ContactPhone)" />
+                                       CssClass="form-control"
+                                       MaxLength="11"
+                                       ></DxMaskedInput>
                     </Template>
                 </DxFormLayoutItem>
 
@@ -391,6 +390,11 @@
         {
             isModalOperationInProgress = true;
             
+            // Close all other modals first
+            showTimeFramesModal = false;
+            selectedStationId = Guid.Empty;
+            selectedStationName = string.Empty;
+            
             // Reset state
             editingStation = null;
             stationForm = new StationFormModel { IsActive = true };
@@ -412,8 +416,11 @@
         {
             isModalOperationInProgress = true;
             
-            // Close edit modal
+            // Close all other modals first
             showModal = false;
+            showTimeFramesModal = false;
+            selectedStationId = Guid.Empty;
+            selectedStationName = string.Empty;
             
             var station = await StationService.GetStationByIdAsync(stationId);
             if (station != null)
@@ -442,6 +449,11 @@
         showModal = false;
         editingStation = null;
         stationForm = new StationFormModel { IsActive = true };
+        
+        // Also reset TimeFrames modal state to prevent conflicts
+        showTimeFramesModal = false;
+        selectedStationId = Guid.Empty;
+        selectedStationName = string.Empty;
     }
 
     private async Task SaveStation()
@@ -666,7 +678,6 @@
             return null;
         }
     }
-
     private string GetText(string key, string defaultText)
     {
         try

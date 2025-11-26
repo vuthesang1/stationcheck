@@ -195,13 +195,40 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     
-    // Seed initial data
-    await DbSeeder.SeedAsync(db);
-    
-    // Seed real stations (removes test stations)
-    await DbSeeder.SeedStationsAsync(db);
+    try
+    {
+        // Apply pending migrations only
+        var pendingMigrations = db.Database.GetPendingMigrations().ToList();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count);
+            db.Database.Migrate();
+        }
+        else
+        {
+            logger.LogInformation("Database is up to date");
+        }
+        
+        // ✅ CHỈ seed data nếu database TRỐNG (lần đầu tiên chạy)
+        if (!db.Users.Any())
+        {
+            logger.LogInformation("Database is empty. Seeding initial data...");
+            await DbSeeder.SeedAsync(db);
+            await DbSeeder.SeedStationsAsync(db);
+            logger.LogInformation("Initial data seeded successfully");
+        }
+        else
+        {
+            logger.LogInformation("Database already has data. Skipping seed.");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while migrating or seeding the database");
+        throw;
+    }
 }
 
 // Configure Swagger (chạy ở cả Development và Production để test API dễ dàng)

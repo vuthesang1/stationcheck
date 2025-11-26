@@ -261,48 +261,71 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            // ✅ STEP 1: Check if current time is a scheduled check point
-            // Example: StartTime=09:00, Frequency=3min → Check at 09:00, 09:03, 09:06, 09:09...
-            // If now=09:02, skip this check (not a scheduled time)
+            // ✅ STEP 1: Check if current time is AFTER a checkpoint (within tolerance window)
+            // Example: Checkpoint at 09:00, Job runs at 09:01 → Check ✓
+            //          Checkpoint at 09:00, Job runs at 08:59 → Skip (too early)
+            //          Checkpoint at 09:00, Job runs at 09:04 → Skip (too late, already checked)
             
             // Convert to local time for TimeFrame comparison (TimeSpan is stored as local time)
             var localNow = now.AddHours(7);
             var currentTime = localNow.TimeOfDay;
             var startTime = timeFrame.StartTime;
-            var frequencySpan = TimeSpan.FromMinutes(timeFrame.FrequencyMinutes);
             
             // Calculate elapsed time since start of timeframe
             var elapsed = currentTime - startTime;
             
-            // Check if we're NOT at a scheduled checkpoint (allow ±1 minute tolerance for timing)
-            if (elapsed.TotalMinutes < 0 || elapsed.TotalMinutes % timeFrame.FrequencyMinutes > 1)
+            // Tolerance: Check within 3 minutes AFTER checkpoint (not before)
+            const double toleranceMinutes = 3.0;
+            
+            if (elapsed.TotalMinutes < 0)
             {
                 _logger.LogDebug(
-                    "[AlertGeneration] Station {StationId} - Current time {CurrentTime} is NOT a scheduled checkpoint (Start={Start}, Frequency={Freq}min, Elapsed={Elapsed:F1}min)",
+                    "[AlertGeneration] Station {StationId} - Before timeframe start (Current={Current}, Start={Start})",
                     station.Id,
                     currentTime.ToString(@"hh\:mm\:ss"),
-                    startTime.ToString(@"hh\:mm\:ss"),
-                    timeFrame.FrequencyMinutes,
-                    elapsed.TotalMinutes
+                    startTime.ToString(@"hh\:mm\:ss")
+                );
+                return false;
+            }
+            
+            // Calculate distance from last checkpoint
+            // Example: elapsed=61min, freq=60min → remainder=1min (1 minute AFTER checkpoint)
+            //          elapsed=59min, freq=60min → remainder=59min (1 minute BEFORE next checkpoint)
+            var remainder = elapsed.TotalMinutes % timeFrame.FrequencyMinutes;
+            
+            // Check if we're within tolerance window AFTER a checkpoint
+            // remainder 0-3 = within 0-3 minutes after checkpoint ✓
+            // remainder > 3 = too late, already processed ✗
+            if (remainder > toleranceMinutes)
+            {
+                _logger.LogDebug(
+                    "[AlertGeneration] Station {StationId} - NOT in checkpoint window. Current={Current}, MinutesAfterCheckpoint={Minutes:F1}min, Tolerance={Tolerance}min (Elapsed={Elapsed:F1}min, Freq={Freq}min)",
+                    station.Id,
+                    currentTime.ToString(@"hh\:mm\:ss"),
+                    remainder,
+                    toleranceMinutes,
+                    elapsed.TotalMinutes,
+                    timeFrame.FrequencyMinutes
                 );
                 return false;
             }
             
             _logger.LogInformation(
-                "[AlertGeneration] Station {StationId} - Current time {CurrentTime} IS a scheduled checkpoint (Start={Start}, Frequency={Freq}min, Elapsed={Elapsed:F1}min)",
+                "[AlertGeneration] Station {StationId} - IN checkpoint window ✓ Current={Current}, MinutesAfterCheckpoint={Minutes:F1}min (Elapsed={Elapsed:F1}min, Freq={Freq}min, Start={Start})",
                 station.Id,
                 currentTime.ToString(@"hh\:mm\:ss"),
-                startTime.ToString(@"hh\:mm\:ss"),
+                remainder,
+                elapsed.TotalMinutes,
                 timeFrame.FrequencyMinutes,
-                elapsed.TotalMinutes
+                startTime.ToString(@"hh\:mm\:ss")
             );
 
-            // ✅ STEP 2: Calculate the tolerance window
-            // If frequency is 3 min and buffer is 2 min:
-            // - Check if there's any motion in the last 5 minutes (3+2)
+            // ✅ STEP 2: Calculate the motion check window
+            // If frequency is 60 min and buffer is 5 min:
+            // - Check if there's any motion in the last 65 minutes (60+5)
             // - If yes, no alert needed
-            var toleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
-            var windowStart = now.AddMinutes(-toleranceMinutes);
+            var motionCheckWindowMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
+            var windowStart = now.AddMinutes(-motionCheckWindowMinutes);
 
             // Check if there's any motion event in the tolerance window
             var hasRecentMotion = await context.MotionEvents
@@ -312,7 +335,7 @@ namespace StationCheck.BackgroundServices
             if (hasRecentMotion)
             {
                 _logger.LogInformation(
-                    "[AlertGeneration] Station {StationId} has motion within tolerance window. Window: {WindowStart} to {Now} (UTC), Frequency: {Frequency}min, Buffer: {Buffer}min. Last motion: {LastMotion}",
+                    "[AlertGeneration] Station {StationId} has motion within check window ✓ Window: {WindowStart} to {Now} (UTC), Frequency: {Frequency}min, Buffer: {Buffer}min. Last motion: {LastMotion}",
                     station.Id,
                     windowStart.ToString("yyyy-MM-dd HH:mm:ss"),
                     now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -331,11 +354,11 @@ namespace StationCheck.BackgroundServices
                 : double.MaxValue;
 
             _logger.LogWarning(
-                "[AlertGeneration] ⚠️ Station {StationId} exceeds tolerance window. Last motion: {LastMotion}, Minutes: {Minutes:F0}, Tolerance: {Tolerance} min (Frequency: {Frequency} + Buffer: {Buffer})",
+                "[AlertGeneration] ⚠️ Station {StationId} exceeds check window. Last motion: {LastMotion}, Minutes: {Minutes:F0}, Window: {Window} min (Frequency: {Frequency} + Buffer: {Buffer})",
                 station.Id,
                 lastMotion,
                 minutesSinceLastMotion,
-                toleranceMinutes,
+                motionCheckWindowMinutes,
                 timeFrame.FrequencyMinutes,
                 timeFrame.BufferMinutes
             );
@@ -356,7 +379,57 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            // Check if there's motion in tolerance window for this checkpoint
+            // ✅ STEP 1: Calculate the LAST PASSED checkpoint time (without seconds)
+            // Example: if now is 19:26 and freq=3min, checkpoint is 19:24 (NOT 19:27)
+            // Use Math.Floor to get the last checkpoint that has ALREADY occurred
+            var localNow = now.AddHours(7);
+            var currentTime = localNow.TimeOfDay;
+            var elapsed = currentTime - timeFrame.StartTime;
+            
+            // Find the last checkpoint that has passed (use Floor, not Round)
+            var checkpointsSinceStart = Math.Floor(elapsed.TotalMinutes / timeFrame.FrequencyMinutes);
+            var checkpointTime = timeFrame.StartTime.Add(TimeSpan.FromMinutes(checkpointsSinceStart * timeFrame.FrequencyMinutes));
+            
+            // Convert checkpoint time to UTC DateTime (remove seconds)
+            var checkpointDateTime = new DateTime(
+                now.Year, now.Month, now.Day,
+                checkpointTime.Hours, checkpointTime.Minutes, 0,
+                DateTimeKind.Utc
+            ).AddHours(-7); // Convert local back to UTC
+            
+            _logger.LogDebug(
+                "[AlertGeneration] Station {StationId} - Checkpoint calculated: {Checkpoint}, Now: {Now}",
+                station.Id,
+                checkpointDateTime.AddHours(7).ToString("HH:mm:ss"),
+                now.AddHours(7).ToString("HH:mm:ss")
+            );
+            
+            // ✅ STEP 2: Check if alert already exists for this checkpoint
+            // Look for alerts within ±1 minute of checkpoint time to handle race conditions
+            var checkpointWindowStart = checkpointDateTime.AddMinutes(-1);
+            var checkpointWindowEnd = checkpointDateTime.AddMinutes(1);
+            
+            var existingAlert = await context.MotionAlerts
+                .Where(a => a.StationId == station.Id 
+                         && a.TimeFrameId == timeFrame.Id
+                         && a.AlertTime >= checkpointWindowStart
+                         && a.AlertTime <= checkpointWindowEnd
+                         && !a.IsDeleted)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (existingAlert != null)
+            {
+                _logger.LogInformation(
+                    "[AlertGeneration] Alert already exists for Station {StationId} at checkpoint {Checkpoint}. Skipping. AlertId={AlertId}, IsResolved={IsResolved}",
+                    station.Id,
+                    checkpointDateTime.AddHours(7).ToString("HH:mm"),
+                    existingAlert.Id,
+                    existingAlert.IsResolved
+                );
+                return; // Skip creating duplicate alert
+            }
+            
+            // ✅ STEP 3: Check if there's motion in tolerance window for this checkpoint
             var checkToleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
             var checkWindowStart = now.AddMinutes(-checkToleranceMinutes);
             var hasRecentMotion = await context.MotionEvents
@@ -509,12 +582,9 @@ namespace StationCheck.BackgroundServices
             var toleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
             var windowStart = now.AddMinutes(-toleranceMinutes);
             var windowStartLocal = windowStart.AddHours(7).ToString("HH:mm");
-            var nowLocal = now.AddHours(7).ToString("HH:mm");
-            var bufferFrom =now.AddHours(7).AddMinutes(-timeFrame.BufferMinutes).ToString("HH:mm");
-            var bufferTo =now.AddHours(7).AddMinutes(timeFrame.BufferMinutes).ToString("HH:mm");
-
-            // ✅ Remove seconds from AlertTime - only keep hour:minute
-            var alertTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, DateTimeKind.Utc);
+            var checkpointLocal = checkpointDateTime.AddHours(7).ToString("HH:mm");
+            var bufferFrom = now.AddHours(7).AddMinutes(-timeFrame.BufferMinutes).ToString("HH:mm");
+            var bufferTo = now.AddHours(7).AddMinutes(timeFrame.BufferMinutes).ToString("HH:mm");
 
             // Calculate severity based on how long since last motion
             // - Warning: If just missed (within FrequencyMinutes to FrequencyMinutes * 1.5)
@@ -524,11 +594,13 @@ namespace StationCheck.BackgroundServices
                 ? AlertSeverity.Critical
                 : AlertSeverity.Warning;
 
-            // If motion detected in tolerance window, create resolved alert immediately
+            // ✅ STEP 4: Determine alert status and message
+            // - If motion detected → Resolved (Online)
+            // - If no motion → Unresolved (Offline at checkpoint time)
             var isResolved = hasRecentMotion;
             var message = hasRecentMotion
-                ? $"Trạm {station.Name} Online lúc {nowLocal}"
-                : $"Trạm {station.Name} Offline lúc {nowLocal}";
+                ? $"Trạm {station.Name} Online lúc {checkpointLocal}"
+                : $"Trạm {station.Name} Offline lúc {checkpointLocal}";
 
             var alert = new MotionAlert
             {
@@ -538,7 +610,7 @@ namespace StationCheck.BackgroundServices
                 ProfileHistoryId = profileHistory?.Id,  // ✅ Link to profile version
                 TimeFrameHistoryId = timeFrameHistory?.Id,  // ✅ Link to timeframe version
                 ConfigurationSnapshot = JsonSerializer.Serialize(configSnapshot),
-                AlertTime = alertTime,
+                AlertTime = checkpointDateTime,  // Use checkpoint time, not current time
                 Severity = severity,
                 Message = message,
                 ExpectedFrequencyMinutes = timeFrame.FrequencyMinutes,
@@ -550,7 +622,7 @@ namespace StationCheck.BackgroundServices
                 ResolvedAt = isResolved ? now : null,
                 ResolvedBy = isResolved ? "System" : null,
                 IsDeleted = false, // Keep all alerts visible - use IsResolved for status tracking
-                Notes = isResolved ? $"Motion detected within tolerance window at checkpoint {nowLocal}" : null
+                Notes = isResolved ? $"Motion detected within tolerance window at checkpoint {checkpointLocal}" : null
             };
 
             context.MotionAlerts.Add(alert);
@@ -586,8 +658,8 @@ namespace StationCheck.BackgroundServices
             // Only check if alert is not already resolved
             if (!alert.IsResolved)
             {
-                var alertWindowStart = alertTime.AddMinutes(-timeFrame.BufferMinutes);
-                var alertWindowEnd = alertTime.AddMinutes(timeFrame.BufferMinutes);
+                var alertWindowStart = checkpointDateTime.AddMinutes(-timeFrame.BufferMinutes);
+                var alertWindowEnd = checkpointDateTime.AddMinutes(timeFrame.BufferMinutes);
 
                 var recentMotion = await context.MotionEvents
                     .Where(me => me.StationId == station.Id 
@@ -610,7 +682,7 @@ namespace StationCheck.BackgroundServices
                     var alertWindowEndLocal = TimeZoneInfo.ConvertTimeFromUtc(alertWindowEnd, vietnamTimeZone);
                     
                     alert.Notes = $"Motion detected at {motionLocalTime:yyyy-MM-dd HH:mm:ss} within tolerance [{alertWindowStartLocal:HH:mm}-{alertWindowEndLocal:HH:mm}]";
-                    alert.Message = $"Trạm {station.Name} Online lúc {nowLocal}"; // Update message to Online
+                    alert.Message = $"Trạm {station.Name} Online lúc {checkpointLocal}"; // Update message to Online
                     
                     await context.SaveChangesAsync(cancellationToken);
 
