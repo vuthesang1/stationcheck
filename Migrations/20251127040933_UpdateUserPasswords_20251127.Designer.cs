@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StationCheck.Data;
 
@@ -11,9 +12,11 @@ using StationCheck.Data;
 namespace StationCheck.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127040933_UpdateUserPasswords_20251127")]
+    partial class UpdateUserPasswords_20251127
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,36 +110,36 @@ namespace StationCheck.Migrations
                         new
                         {
                             Id = "USR001",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 466, DateTimeKind.Utc).AddTicks(4648),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 348, DateTimeKind.Utc).AddTicks(729),
                             Email = "admin@stationcheck.com",
                             FullName = "System Administrator",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$FKY.URnpScprgBbtLEYjjebPqcK5kELXAUxjixkRbomXgK5ieG52i",
+                            PasswordHash = "$2a$12$TmPM8b1fhw4PB4w2qKPSoeZ7DSlRzB4yGfAa0iLxC/qhC6jhVwjH2",
                             Role = 2,
                             Username = "admin"
                         },
                         new
                         {
                             Id = "USR002",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 717, DateTimeKind.Utc).AddTicks(2894),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 600, DateTimeKind.Utc).AddTicks(4314),
                             Email = "manager@stationcheck.com",
                             FullName = "Department Manager",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$HLH9JGUlM6o33Q3c45nmCu0C8qb4ynyqlCCjfknEeMz3jTv9bMfsK",
+                            PasswordHash = "$2a$12$zzHK8Ytppz0.htb.WkavMO60WazOICLxR2HMWvyGVHIRQgbrjuF9.",
                             Role = 1,
                             Username = "manager"
                         },
                         new
                         {
                             Id = "USR003",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 970, DateTimeKind.Utc).AddTicks(2888),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 852, DateTimeKind.Utc).AddTicks(6344),
                             Email = "employee1@stationcheck.com",
                             FullName = "Nhân viên Trạm 1",
                             IsActive = true,
                             IsDeleted = false,
-                            PasswordHash = "$2a$12$7JGRqTv2PKanAnlK5zPrW.aW3XMh4cde.a9ZDfC5YXjCpcQZJCeO.",
+                            PasswordHash = "$2a$12$Rx3GZxR6ECPq.qf57k5xXu.IsV8a/fg4xLelWoLb5f4CgrQjpM12W",
                             Role = 0,
                             Username = "employee1"
                         });
@@ -323,7 +326,7 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "vi",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 973, DateTimeKind.Utc).AddTicks(4768),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 855, DateTimeKind.Utc).AddTicks(8352),
                             FlagIcon = "vn",
                             IsActive = true,
                             IsDefault = true,
@@ -333,7 +336,7 @@ namespace StationCheck.Migrations
                         new
                         {
                             Code = "en",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 973, DateTimeKind.Utc).AddTicks(4770),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 855, DateTimeKind.Utc).AddTicks(8354),
                             FlagIcon = "us",
                             IsActive = true,
                             IsDefault = false,
@@ -774,213 +777,29 @@ namespace StationCheck.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0dc77265-5e58-41e4-86d7-ac3a210a0079"),
-                            Address = "Acredo Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1165),
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Address = "Quận Hoàn Kiếm, Hà Nội",
+                            ContactPerson = "Nguyễn Văn A",
+                            ContactPhone = "0123456789",
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 30, 332, DateTimeKind.Utc).AddTicks(6473),
+                            Description = "Trạm quan trắc chất lượng nước sông Hồng",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "ACREDO",
-                            StationCode = "ACREDO"
+                            Name = "Trạm Quan Trắc Sông Hồng",
+                            StationCode = "123123123"
                         },
                         new
                         {
-                            Id = new Guid("308f2eb9-4d46-43c0-93db-67cb7ff0994b"),
-                            Address = "Đại Thiên Lộc Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1168),
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Address = "Quận Đống Đa, Hà Nội",
+                            ContactPerson = "Trần Thị B",
+                            ContactPhone = "0987654321",
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 30, 332, DateTimeKind.Utc).AddTicks(6476),
+                            Description = "Trạm quan trắc chất lượng nước sông Tô Lịch",
                             IsActive = true,
                             IsDeleted = false,
-                            Name = "ĐẠI THIÊN LỘC",
-                            StationCode = "DAITHIENLOC"
-                        },
-                        new
-                        {
-                            Id = new Guid("1ff18562-4c7c-4675-ad39-2c1bb3f3ec7e"),
-                            Address = "Dielac 1 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1174),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "DIELAC 1",
-                            StationCode = "DIELAC1"
-                        },
-                        new
-                        {
-                            Id = new Guid("c5b560d1-e995-44c3-94fb-5c68520b9bed"),
-                            Address = "Dielac 2 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1176),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "DIELAC 2",
-                            StationCode = "DIELAC2"
-                        },
-                        new
-                        {
-                            Id = new Guid("0aebf9c4-6ec5-447e-9059-34a9269c9c71"),
-                            Address = "Hà Thanh Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1179),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "HÀ THANH",
-                            StationCode = "HATHANH"
-                        },
-                        new
-                        {
-                            Id = new Guid("728e94e5-68c1-4f82-943e-95d7c34b192f"),
-                            Address = "Hoàng Sơn Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1182),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "HOÀNG SƠN",
-                            StationCode = "HOANGSON"
-                        },
-                        new
-                        {
-                            Id = new Guid("92b38ae9-33f0-4f03-ba78-f063ab8b517d"),
-                            Address = "Kolon Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1198),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "KOLON",
-                            StationCode = "KOLON"
-                        },
-                        new
-                        {
-                            Id = new Guid("b9ed5095-8211-47f3-8780-7aa954125561"),
-                            Address = "Lê Phú Gia Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1200),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "LÊ PHÚ GIA",
-                            StationCode = "LEPHUGIA"
-                        },
-                        new
-                        {
-                            Id = new Guid("dbc80867-ae3e-4ca9-9fe9-108e07ef4608"),
-                            Address = "Lixil Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1203),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "LIXIL",
-                            StationCode = "LIXIL"
-                        },
-                        new
-                        {
-                            Id = new Guid("f690fdee-6c40-43bf-b0af-fce6a101ec0e"),
-                            Address = "Lmat Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1206),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "LMAT",
-                            StationCode = "LMAT"
-                        },
-                        new
-                        {
-                            Id = new Guid("01a972e2-2e46-4a53-a809-9f9b90331cf7"),
-                            Address = "Mỹ Phước 3 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1208),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "MỸ PHƯỚC 3",
-                            StationCode = "MYPHUOC3"
-                        },
-                        new
-                        {
-                            Id = new Guid("0eec31bc-5ef9-455a-81ad-64b8de7d23a8"),
-                            Address = "Nestle 1 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1210),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "NESTLE 1",
-                            StationCode = "NESTLE1"
-                        },
-                        new
-                        {
-                            Id = new Guid("dbf4fea3-b9f1-45df-8129-92c93ed03b02"),
-                            Address = "Nestle 2 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1212),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "NESTLE 2",
-                            StationCode = "NESTLE2"
-                        },
-                        new
-                        {
-                            Id = new Guid("6cb5470a-05ad-4616-8c78-b40331b0402e"),
-                            Address = "Saigon Cafe Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1215),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "SAIGON CAFE",
-                            StationCode = "SAIGONCAFE"
-                        },
-                        new
-                        {
-                            Id = new Guid("6eccf979-6a69-4878-a30b-7cb395de864b"),
-                            Address = "Thép Thủ Đức Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1220),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "THÉP THỦ ĐỨC",
-                            StationCode = "THEPTHUDUC"
-                        },
-                        new
-                        {
-                            Id = new Guid("8ac3808d-fef1-46fc-9f8c-406c04b66a79"),
-                            Address = "Thuận Đạo Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1222),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "THUẬN ĐẠO",
-                            StationCode = "THUANDAO"
-                        },
-                        new
-                        {
-                            Id = new Guid("a59fb50e-3e6e-4063-af21-796062cb1f55"),
-                            Address = "URC 3 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1255),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "URC 3",
-                            StationCode = "URC3"
-                        },
-                        new
-                        {
-                            Id = new Guid("84dcf4bf-462f-43ea-82d0-3f854f476124"),
-                            Address = "URC1 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1257),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "URC1",
-                            StationCode = "URC1"
-                        },
-                        new
-                        {
-                            Id = new Guid("48c5195c-9cd7-451c-99ae-eb39fe88fcb7"),
-                            Address = "URC2 Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1259),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "URC2",
-                            StationCode = "URC2"
-                        },
-                        new
-                        {
-                            Id = new Guid("71d97313-e14e-4e06-993e-eadb748450f8"),
-                            Address = "Vinasoy Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1262),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "VINASOY",
-                            StationCode = "VINASOY"
-                        },
-                        new
-                        {
-                            Id = new Guid("36bad358-762d-4dfd-a029-6a89647e086a"),
-                            Address = "Zhiyi Zinc Station",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 20, 444, DateTimeKind.Utc).AddTicks(1264),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "ZHIYI ZINC",
-                            StationCode = "ZHIYIZINC"
+                            Name = "Trạm Quan Trắc Sông Tô Lịch",
+                            StationCode = "121123123"
                         });
                 });
 
@@ -1047,7 +866,7 @@ namespace StationCheck.Migrations
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 974, DateTimeKind.Utc).AddTicks(1159),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 856, DateTimeKind.Utc).AddTicks(2915),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian quét email mới (giây)",
                             DisplayName = "Email Monitor Interval",
@@ -1060,7 +879,7 @@ namespace StationCheck.Migrations
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                             Category = "BackgroundServices",
-                            CreatedAt = new DateTime(2025, 11, 27, 15, 19, 21, 974, DateTimeKind.Utc).AddTicks(1161),
+                            CreatedAt = new DateTime(2025, 11, 27, 4, 9, 31, 856, DateTimeKind.Utc).AddTicks(2919),
                             CreatedBy = "System",
                             Description = "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)",
                             DisplayName = "Alert Generation Interval",

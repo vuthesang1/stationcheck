@@ -58,10 +58,10 @@ namespace StationCheck.Services
                 await allMail.OpenAsync(FolderAccess.ReadWrite);
                 _logger.LogInformation("[EmailService] Opened All Mail folder");
                 
-                // Search for UNREAD emails with [stm] prefix
-                var searchQuery = SearchQuery.SubjectContains("[stm]").And(SearchQuery.NotSeen);
+                // Search for UNREAD emails containing StationCode pattern
+                var searchQuery = SearchQuery.SubjectContains("ST").And(SearchQuery.NotSeen);
                 var uids = await allMail.SearchAsync(searchQuery);
-                _logger.LogInformation("[EmailService] Found {Count} UNREAD email(s) with [stm] prefix in All Mail", uids.Count);
+                _logger.LogInformation("[EmailService] Found {Count} UNREAD email(s) with 'ST' in subject", uids.Count);
                 
                 foreach (var uid in uids)
                 {
@@ -153,19 +153,16 @@ namespace StationCheck.Services
         {
             try
             {
-                // Extract StationId from subject with [stm] prefix
-                // Format examples: 
-                //   - "[stm] ST000001"
-                //   - "[stm] 4" 
-                //   - "[STM] ST000001"
+                // Extract StationCode from subject
+                // Format: Subject contains StationCode directly (e.g., "ST000001", "ST000002")
+                // No [stm] prefix anymore
                 Guid? stationId = null;
                 string? stationCode = null;
                 
-                // Remove [stm] prefix (case insensitive) and trim
-                var subjectWithoutPrefix = Regex.Replace(subject ?? "", @"^\[stm\]\s*", "", RegexOptions.IgnoreCase).Trim();
+                // Extract StationCode pattern: ST + 6 digits
+                var subjectTrimmed = (subject ?? "").Trim();
+                var stationCodeMatch = Regex.Match(subjectTrimmed, @"ST\d{6}");
                 
-                // Try to parse as StationCode first (ST000001)
-                var stationCodeMatch = Regex.Match(subjectWithoutPrefix, @"ST\d{6}");
                 if (stationCodeMatch.Success)
                 {
                     stationCode = stationCodeMatch.Value;
@@ -182,28 +179,10 @@ namespace StationCheck.Services
                         _logger.LogWarning("[EmailService] Station not found for code: {StationCode}", stationCode);
                     }
                 }
-                // Try to parse as direct StationId (number only) - DISABLED: Legacy int ID parsing not supported with Guid migration
-                /*
                 else
                 {
-                    // Try to parse as direct StationId (number only)
-                    var stationIdMatch = Regex.Match(subjectWithoutPrefix, @"^\d+");
-                    if (stationIdMatch.Success && int.TryParse(stationIdMatch.Value, out int id))
-                    {
-                        var station = await _context.Stations.FindAsync(id);
-                        if (station != null)
-                        {
-                            stationId = id;
-                            stationCode = station.StationCode;
-                            _logger.LogInformation("[EmailService] Found station by ID: {StationId} -> StationCode={StationCode}", stationId, stationCode);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("[EmailService] Station not found for ID: {StationId}", id);
-                        }
-                    }
+                    _logger.LogWarning("[EmailService] Could not extract StationCode from subject: {Subject}", subject);
                 }
-                */
 
                 if (!stationId.HasValue)
                 {

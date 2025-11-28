@@ -1721,6 +1721,18 @@
     }
 
     /* Modal styles */
+    .modal.show {
+        z-index: 10000 !important; /* Higher than fullscreen panel (9999) */
+    }
+
+    .modal-dialog {
+        z-index: 10001 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 9999 !important;
+    }
+
     .motion-history, .alerts-history {
         max-height: 600px;
         overflow-y: auto;

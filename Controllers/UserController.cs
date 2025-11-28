@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,6 +19,26 @@ public class UserController : ControllerBase
     {
         _userService = userService;
         _logger = logger;
+    }
+
+    [HttpPost("change-password")]
+    [Authorize(Roles = "Admin,Manager")] // Chỉ cho phép gọi từ UI đã phân quyền
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        // Lấy user hiện tại từ token
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        try
+        {
+            await _userService.ChangePasswordAsync(request.UserId, request.NewPassword, currentUserId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpGet]

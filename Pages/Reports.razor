@@ -9,6 +9,7 @@
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@attribute [Authorize(Roles = "Admin,Manager")]
 
 <PageTitle>Báo cáo và Lịch sử</PageTitle>
 

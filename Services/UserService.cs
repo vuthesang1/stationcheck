@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using StationCheck.Data;
 using StationCheck.Interfaces;
@@ -9,6 +10,35 @@ public class UserService : IUserService
 {
     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly ILogger<UserService> _logger;
+
+    public async Task ChangePasswordAsync(string userId, string newPassword, string changedById)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+        if (user == null)
+            throw new Exception("User không tồn tại");
+
+        var changer = await context.Users.FirstOrDefaultAsync(u => u.Id == changedById && !u.IsDeleted);
+        if (changer == null)
+            throw new Exception("Người đổi mật khẩu không hợp lệ");
+
+        // Rule: Admin đổi được mọi user, nhưng chỉ đổi pass admin cho chính mình
+        if (user.Role == UserRole.Admin)
+        {
+            if (changer.Role != UserRole.Admin || changer.Id != user.Id)
+                throw new Exception("Chỉ admin đó mới được đổi mật khẩu admin này");
+        }
+        else
+        {
+            if (changer.Role != UserRole.Admin)
+                throw new Exception("Chỉ admin mới được đổi mật khẩu user khác");
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.ModifiedAt = DateTime.UtcNow;
+        user.ModifiedBy = changedById;
+        await context.SaveChangesAsync();
+    }
 
     public UserService(IDbContextFactory<ApplicationDbContext> contextFactory, ILogger<UserService> logger)
     {

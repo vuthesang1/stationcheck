@@ -275,8 +275,8 @@ public class ApplicationDbContext : DbContext
         // Seed default users
         // Generate hashes at seed time to ensure they're correct
         var adminHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 12);
-        var managerHash = BCrypt.Net.BCrypt.HashPassword("Manager@123", 12);
-        var employeeHash = BCrypt.Net.BCrypt.HashPassword("Employee@123", 12);
+        var managerHash = BCrypt.Net.BCrypt.HashPassword("Manager@2025", 12);
+        var employeeHash = BCrypt.Net.BCrypt.HashPassword("Employee@2025", 12);
         
         modelBuilder.Entity<ApplicationUser>().HasData(
             new ApplicationUser
@@ -284,7 +284,7 @@ public class ApplicationDbContext : DbContext
                 Id = "USR001",
                 Username = "admin",
                 Email = "admin@stationcheck.com",
-                PasswordHash = adminHash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@2025", 12),
                 FullName = "System Administrator",
                 Role = UserRole.Admin,
                 IsActive = true,
@@ -295,7 +295,7 @@ public class ApplicationDbContext : DbContext
                 Id = "USR002",
                 Username = "manager",
                 Email = "manager@stationcheck.com",
-                PasswordHash = managerHash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager@2025", 12),
                 FullName = "Department Manager",
                 Role = UserRole.Manager,
                 IsActive = true,
@@ -306,7 +306,7 @@ public class ApplicationDbContext : DbContext
                 Id = "USR003",
                 Username = "employee1",
                 Email = "employee1@stationcheck.com",
-                PasswordHash = employeeHash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Employee@2025", 12),
                 FullName = "Nhân viên Trạm 1",
                 Role = UserRole.StationEmployee,
                 IsActive = true,

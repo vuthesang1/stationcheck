@@ -111,7 +111,8 @@ namespace StationCheck.BackgroundServices
 
         private async Task GenerateAlertsAsync(CancellationToken cancellationToken)
         {
-            var now = DateTime.UtcNow;
+            // Use local time (UTC+7 for Vietnam) since TimeFrame is stored in local time
+            var now = DateTime.Now;
             _logger.LogInformation("[AlertGeneration] Running check at {Time}", now);
 
             using var scope = _serviceProvider.CreateScope();

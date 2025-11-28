@@ -10,4 +10,5 @@ public interface IUserService
     Task<ApplicationUser> UpdateUserAsync(string id, UpdateUserRequest request, string modifiedById);
     Task DeleteUserAsync(string id, string deletedById);
     Task<bool> CanModifyUserAsync(UserRole currentUserRole, UserRole targetUserRole);
+    Task ChangePasswordAsync(string userId, string newPassword, string changedById);
 }

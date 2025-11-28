@@ -84,10 +84,10 @@
                            placeholder="Nhập số phút buffer (mặc định: 0)" />
                     <small class="form-text text-muted">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Buffer là khoảng dung sai cho phép motion đến sớm/trễ.</strong><br/>
-                        • VD 1: Tần suất 1 giờ, Buffer 15 phút → Checkpoint 10:00 sẽ chấp nhận motion từ 09:45 đến 10:15<br/>
-                        • VD 2: Tần suất 2 giờ, Buffer 30 phút → Checkpoint 12:00 sẽ chấp nhận motion từ 11:30 đến 12:30<br/>
-                        • <em>Để 0 nếu yêu cầu motion đúng giờ checkpoint</em>
+                        <strong>Buffer là khoảng dung sai cho phép đến sớm/trễ.</strong><br/>
+                        • VD 1: Tần suất 1 giờ, Buffer 15 phút → Checkpoint 10:00 sẽ chấp nhận đến từ 09:45 đến 10:15<br/>
+                        • VD 2: Tần suất 2 giờ, Buffer 30 phút → Checkpoint 12:00 sẽ chấp nhận đến từ 11:30 đến 12:30<br/>
+                        • <em>Để 0 nếu yêu cầu đến đúng giờ checkpoint</em>
                     </small>
                 
                 @if (nextRunTimes.Any())

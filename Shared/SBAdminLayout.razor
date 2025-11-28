@@ -21,12 +21,12 @@
                     <div class="sidebar-brand-text mx-3">StationCheck</div>
                 </a>
 
-                <!-- Divider -->
-                <hr class="sidebar-divider my-0">
-
-                @* Tạm thời ẩn Dashboard *@
+                @* Tạm thời ẩn Dashboard và divider *@
                 <!-- Nav Item - Dashboard -->
                 <AuthorizeView Roles="hidden">
+                    <!-- Divider -->
+                    <hr class="sidebar-divider my-0">
+                    
                     <li class="nav-item @(IsActive("/") ? "active" : "")">
                         <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
                             <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -35,11 +35,9 @@
                     </li>
                 </AuthorizeView>
 
-                <!-- Divider -->
-                <hr class="sidebar-divider">
-
-                <!-- Heading - Only show if user has access to at least one item below -->
+                <!-- Divider & Heading for Management (Admin & Manager) -->
                 <AuthorizeView Roles="Admin,Manager">
+                    <hr class="sidebar-divider">
                     <div class="sidebar-heading">
                         @GetText("menu.management", "Quản lý")
                     </div>
@@ -86,11 +84,9 @@
                     </li>
                 </AuthorizeView> *@
 
-                <!-- Divider -->
-                <hr class="sidebar-divider">
-
-                <!-- Heading - Only show for Admin & Manager -->
+                <!-- Divider & Heading for Monitoring (Admin & Manager) -->
                 <AuthorizeView Roles="Admin,Manager">
+                    <hr class="sidebar-divider">
                     <div class="sidebar-heading">
                         @GetText("menu.monitoring", defaultText: "Giám sát")
                     </div>
@@ -139,7 +135,7 @@
                 </AuthorizeView>
 
                 <!-- Nav Item - System Configuration (Admin Only) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="hidden">
                     <li class="nav-item @(IsActive("/email-simulator") ? "active" : "")">
                         <NavLink class="nav-link" href="/email-simulator">
                             <i class="fas fa-fw fa-cogs"></i>
@@ -151,10 +147,7 @@
 
                 <!-- Divider & Heading for Personnel (Admin Only) -->
                 <AuthorizeView Roles="Admin">
-                    <!-- Divider -->
                     <hr class="sidebar-divider">
-
-                    <!-- Heading -->
                     <div class="sidebar-heading">
                         @GetText("menu.personnel", "Nhân sự")
                     </div>
@@ -184,10 +177,7 @@
 
                 <!-- Divider & Heading for System (Admin Only) -->
                 <AuthorizeView Roles="Admin">
-                    <!-- Divider -->
                     <hr class="sidebar-divider">
-
-                    <!-- Heading -->
                     <div class="sidebar-heading">
                         @GetText("menu.system", "Hệ thống")
                     </div>

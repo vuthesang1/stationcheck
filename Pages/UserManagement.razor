@@ -3,7 +3,7 @@
 @using StationCheck.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
-@attribute [Authorize(Policy = "ManagerOrAbove")]
+@attribute [Authorize(Roles = "Admin")]
 @inject IUserService UserService
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -129,11 +129,38 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         }
+                                        @if (CanChangePassword(user))
+                                        {
+                                            <button class="btn btn-info btn-sm" title="Đổi mật khẩu" @onclick="@(() => ShowChangePasswordModal(user))">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                        }
                                     </div>
                                 }
-                                else
+                                @if (showChangePasswordModal && userToChangePassword != null && userToChangePassword.Id == user.Id)
                                 {
-                                    <span class="text-muted small">@GetText("user.no_permission", "Không có quyền")</span>
+                                    <DxPopup @bind-Visible="showChangePasswordModal" HeaderText="Đổi mật khẩu" Width="400px">
+                                        <Content>
+                                            <EditForm Model="@changePasswordModel" OnValidSubmit="ChangePasswordAsync" Context="editFormCtx">
+                                                <DataAnnotationsValidator />
+                                                <DxFormLayout>
+                                                    <DxFormLayoutItem Caption="Mật khẩu mới" ColSpanMd="12">
+                                                        <Template Context="changePwdCtx">
+                                                            <DxTextBox @bind-Text="changePasswordModel.NewPassword" Password="true" NullText="Nhập mật khẩu mới" />
+                                                        </Template>
+                                                    </DxFormLayoutItem>
+                                                    <DxFormLayoutItem ColSpanMd="12">
+                                                        <Template Context="changePwdBtnCtx">
+                                                            <div class="text-right">
+                                                                <DxButton Text="Hủy" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => showChangePasswordModal = false)" />
+                                                                <DxButton Text="Lưu" RenderStyle="ButtonRenderStyle.Primary" SubmitFormOnClick="true" />
+                                                            </div>
+                                                        </Template>
+                                                    </DxFormLayoutItem>
+                                                </DxFormLayout>
+                                            </EditForm>
+                                        </Content>
+                                    </DxPopup>
                                 }
                             </CellDisplayTemplate>
                         </DxGridDataColumn>
@@ -364,6 +391,49 @@
         
         public UserRole Role { get; set; } = UserRole.StationEmployee;
         public bool IsActive { get; set; } = true;
+    }
+
+    // Password change modal state and logic
+    private bool showChangePasswordModal = false;
+    private ChangePasswordModel changePasswordModel = new();
+    private UserInfo? userToChangePassword;
+
+    private void ShowChangePasswordModal(UserInfo user)
+    {
+        userToChangePassword = user;
+        changePasswordModel = new ChangePasswordModel();
+        showChangePasswordModal = true;
+    }
+
+    private bool CanChangePassword(UserInfo user)
+    {
+        // Admin có thể đổi pass cho mọi user, nhưng chỉ đổi pass admin cho chính mình
+        if (currentUser == null) return false;
+        if (user.Role == UserRole.Admin)
+            return currentUser.Role == UserRole.Admin && user.Id == currentUser.Id;
+        return currentUser.Role == UserRole.Admin;
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        if (userToChangePassword == null) return;
+        try
+        {
+            await UserService.ChangePasswordAsync(userToChangePassword.Id, changePasswordModel.NewPassword, currentUser?.Id ?? "");
+            showChangePasswordModal = false;
+            successMessage = "Đổi mật khẩu thành công";
+        }
+        catch (Exception ex)
+        {
+            modalErrorMessage = $"Lỗi đổi mật khẩu: {ex.Message}";
+        }
+    }
+
+    public class ChangePasswordModel
+    {
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
+        public string NewPassword { get; set; } = string.Empty;
     }
 
     protected override async Task OnInitializedAsync()
