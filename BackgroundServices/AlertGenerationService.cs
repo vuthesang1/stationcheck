@@ -40,42 +40,82 @@ namespace StationCheck.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("[AlertGeneration] Service started");
+            _logger.LogInformation("[AlertGeneration] ⚙️ Service starting...");
 
-            // Load interval from database
-            await LoadIntervalAsync();
-
-            // Wait a bit before starting to ensure app is fully initialized
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    await GenerateAlertsAsync(stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[AlertGeneration] Error during alert generation cycle");
-                }
-
-                // Reload interval from DB every cycle (in case admin changed it)
+                // Load interval from database
                 await LoadIntervalAsync();
 
-                // Wait for next check interval (can be cancelled by config change)
-                try
-                {
-                    _delayCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                    await Task.Delay(_checkInterval, _delayCts.Token);
-                }
-                catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
-                {
-                    // Config changed, reload immediately
-                    _logger.LogInformation("[AlertGeneration] Delay cancelled due to configuration change");
-                }
-            }
+                // Wait longer to avoid race with EmailMonitoringService
+                _logger.LogInformation("[AlertGeneration] ⏳ Waiting 30s for app initialization...");
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                
+                _logger.LogInformation("[AlertGeneration] ✅ Service fully started at {Time}", DateTime.Now);
 
-            _logger.LogInformation("[AlertGeneration] Service stopped");
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        _logger.LogDebug("[AlertGeneration] Starting alert generation cycle at {Time}", DateTime.Now);
+                        await GenerateAlertsAsync(stoppingToken);
+                        _logger.LogDebug("[AlertGeneration] Alert generation cycle completed successfully");
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("[AlertGeneration] ⚠️ Service cancellation requested");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[AlertGeneration] ❌ CRITICAL ERROR during alert generation cycle - Type: {Type}, Message: {Message}", 
+                            ex.GetType().Name, ex.Message);
+                        // Continue running despite error - don't let one bad cycle kill the entire service
+                    }
+
+                    // Reload interval from DB every cycle (in case admin changed it)
+                    try
+                    {
+                        await LoadIntervalAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[AlertGeneration] ❌ Error loading interval, using current: {Interval}s", 
+                            _checkInterval.TotalSeconds);
+                    }
+
+                    // Wait for next check interval (can be cancelled by config change)
+                    try
+                    {
+                        _logger.LogInformation("[AlertGeneration] ⏱️ Waiting {Interval} seconds until next check...", 
+                            _checkInterval.TotalSeconds);
+                        _delayCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                        await Task.Delay(_checkInterval, _delayCts.Token);
+                    }
+                    catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
+                    {
+                        // Config changed, reload immediately
+                        _logger.LogInformation("[AlertGeneration] ⚡ Delay cancelled due to configuration change");
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("[AlertGeneration] ⚠️ Delay cancelled due to shutdown request");
+                        break;
+                    }
+                }
+
+                _logger.LogInformation("[AlertGeneration] 🛑 Service stopped gracefully at {Time}", DateTime.Now);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("[AlertGeneration] ⚠️ Service cancelled during startup");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "[AlertGeneration] 💥 CRITICAL ERROR in ExecuteAsync - Service will terminate! Type: {Type}, Message: {Message}, StackTrace: {StackTrace}", 
+                    ex.GetType().Name, ex.Message, ex.StackTrace);
+                throw; // Re-throw to crash and force restart
+            }
         }
 
         private async Task LoadIntervalAsync()
@@ -111,9 +151,11 @@ namespace StationCheck.BackgroundServices
 
         private async Task GenerateAlertsAsync(CancellationToken cancellationToken)
         {
-            // Use local time (UTC+7 for Vietnam) since TimeFrame is stored in local time
+            // Use UTC time for internal calculations, then convert to local for display/comparison
+            // DateTime.Now is already in server's local timezone (UTC+7), so use it directly
             var now = DateTime.Now;
-            _logger.LogInformation("[AlertGeneration] Running check at {Time}", now);
+            var utcNow = DateTime.UtcNow;
+            _logger.LogInformation("[AlertGeneration] Running check at {UtcTime} (UTC) | {LocalTime} (Local)", utcNow, now);
 
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -146,11 +188,10 @@ namespace StationCheck.BackgroundServices
                         if (!matchingTimeFrames.Any())
                         {
                             _logger.LogInformation(
-                                "[AlertGeneration] Station {StationId} ({StationName}) has no matching timeframes for current time {Time} (UTC+7: {LocalTime})",
+                                "[AlertGeneration] Station {StationId} ({StationName}) has no matching timeframes for current time {LocalTime} (UTC+7)",
                                 station.Id,
                                 station.Name,
-                                now.ToString("HH:mm:ss"),
-                                now.AddHours(7).ToString("HH:mm:ss")
+                                now.ToString("HH:mm:ss")
                             );
                             continue;
                         }
@@ -208,10 +249,9 @@ namespace StationCheck.BackgroundServices
             DateTime now,
             CancellationToken cancellationToken)
         {
-            // Convert UTC to local time (UTC+7) for TimeFrame comparison
-            var localNow = now.AddHours(7);
-            var currentTime = localNow.TimeOfDay;
-            var currentDayOfWeek = ((int)localNow.DayOfWeek == 0 ? 7 : (int)localNow.DayOfWeek).ToString(); // 1=Monday, 7=Sunday
+            // 'now' is already in local timezone (UTC+7), use directly without adding hours
+            var currentTime = now.TimeOfDay;
+            var currentDayOfWeek = ((int)now.DayOfWeek == 0 ? 7 : (int)now.DayOfWeek).ToString(); // 1=Monday, 7=Sunday
 
             var timeFrames = await context.TimeFrames
                 .Where(tf => tf.StationId == stationId && tf.IsEnabled)
@@ -267,9 +307,8 @@ namespace StationCheck.BackgroundServices
             //          Checkpoint at 09:00, Job runs at 08:59 → Skip (too early)
             //          Checkpoint at 09:00, Job runs at 09:04 → Skip (too late, already checked)
             
-            // Convert to local time for TimeFrame comparison (TimeSpan is stored as local time)
-            var localNow = now.AddHours(7);
-            var currentTime = localNow.TimeOfDay;
+            // 'now' is already in local timezone (UTC+7), use directly without adding hours
+            var currentTime = now.TimeOfDay;
             var startTime = timeFrame.StartTime;
             
             // Calculate elapsed time since start of timeframe
@@ -325,8 +364,14 @@ namespace StationCheck.BackgroundServices
             // If frequency is 60 min and buffer is 5 min:
             // - Check if there's any motion in the last 65 minutes (60+5)
             // - If yes, no alert needed
+            // Convert to UTC for database query
+            var utcNowForCheck = new DateTime(
+                now.Year, now.Month, now.Day,
+                now.Hour, now.Minute, now.Second, now.Millisecond,
+                DateTimeKind.Local
+            ).ToUniversalTime();
             var motionCheckWindowMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
-            var windowStart = now.AddMinutes(-motionCheckWindowMinutes);
+            var windowStart = utcNowForCheck.AddMinutes(-motionCheckWindowMinutes);
 
             // Check if there's any motion event in the tolerance window
             var hasRecentMotion = await context.MotionEvents
@@ -339,7 +384,7 @@ namespace StationCheck.BackgroundServices
                     "[AlertGeneration] Station {StationId} has motion within check window ✓ Window: {WindowStart} to {Now} (UTC), Frequency: {Frequency}min, Buffer: {Buffer}min. Last motion: {LastMotion}",
                     station.Id,
                     windowStart.ToString("yyyy-MM-dd HH:mm:ss"),
-                    now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    utcNowForCheck.ToString("yyyy-MM-dd HH:mm:ss"),
                     timeFrame.FrequencyMinutes,
                     timeFrame.BufferMinutes,
                     station.LastMotionDetectedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Unknown"
@@ -350,8 +395,14 @@ namespace StationCheck.BackgroundServices
 
             // No motion in tolerance window - generate alert
             var lastMotion = station.LastMotionDetectedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Never";
+            // Convert to UTC for proper time calculation
+            var utcNowForMinutes = new DateTime(
+                now.Year, now.Month, now.Day,
+                now.Hour, now.Minute, now.Second, now.Millisecond,
+                DateTimeKind.Local
+            ).ToUniversalTime();
             var minutesSinceLastMotion = station.LastMotionDetectedAt.HasValue
-                ? (now - station.LastMotionDetectedAt.Value).TotalMinutes
+                ? (utcNowForMinutes - station.LastMotionDetectedAt.Value).TotalMinutes
                 : double.MaxValue;
 
             _logger.LogWarning(
@@ -383,8 +434,8 @@ namespace StationCheck.BackgroundServices
             // ✅ STEP 1: Calculate the LAST PASSED checkpoint time (without seconds)
             // Example: if now is 19:26 and freq=3min, checkpoint is 19:24 (NOT 19:27)
             // Use Math.Floor to get the last checkpoint that has ALREADY occurred
-            var localNow = now.AddHours(7);
-            var currentTime = localNow.TimeOfDay;
+            // 'now' is already in local timezone (UTC+7), use directly without adding hours
+            var currentTime = now.TimeOfDay;
             var elapsed = currentTime - timeFrame.StartTime;
             
             // Find the last checkpoint that has passed (use Floor, not Round)
@@ -392,11 +443,12 @@ namespace StationCheck.BackgroundServices
             var checkpointTime = timeFrame.StartTime.Add(TimeSpan.FromMinutes(checkpointsSinceStart * timeFrame.FrequencyMinutes));
             
             // Convert checkpoint time to UTC DateTime (remove seconds)
+            // Since 'now' is in local time (UTC+7), subtract 7 hours to get UTC
             var checkpointDateTime = new DateTime(
                 now.Year, now.Month, now.Day,
                 checkpointTime.Hours, checkpointTime.Minutes, 0,
-                DateTimeKind.Utc
-            ).AddHours(-7); // Convert local back to UTC
+                DateTimeKind.Local
+            ).ToUniversalTime();
             
             _logger.LogDebug(
                 "[AlertGeneration] Station {StationId} - Checkpoint calculated: {Checkpoint}, Now: {Now}",
@@ -430,12 +482,30 @@ namespace StationCheck.BackgroundServices
                 return; // Skip creating duplicate alert
             }
             
-            // ✅ STEP 3: Check if there's motion in tolerance window for this checkpoint
-            var checkToleranceMinutes = timeFrame.FrequencyMinutes + timeFrame.BufferMinutes;
-            var checkWindowStart = now.AddMinutes(-checkToleranceMinutes);
+            // ✅ STEP 3: Check if there's motion in tolerance window (+Buffer AFTER checkpoint)
+            // IMPORTANT: Only check +Buffer minutes AFTER checkpoint, NOT before
+            // Example: Checkpoint at 19:00, Buffer 5min
+            //   → Check motion from 19:00 to 19:05 (checkpoint + 5min)
+            //   → Motion at 18:55 is OUTSIDE window → Unresolved
+            //   → Motion at 19:03 is INSIDE window → Resolved
+            var checkWindowStart = checkpointDateTime;
+            var checkWindowEnd = checkpointDateTime.AddMinutes(timeFrame.BufferMinutes);
+            
             var hasRecentMotion = await context.MotionEvents
-                .Where(me => me.StationId == station.Id && me.DetectedAt >= checkWindowStart)
+                .Where(me => me.StationId == station.Id 
+                          && me.DetectedAt >= checkWindowStart 
+                          && me.DetectedAt <= checkWindowEnd)
                 .AnyAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "[AlertGeneration] Station {StationId} - Checking motion for checkpoint {Checkpoint}. Window: {WindowStart} to {WindowEnd} (±{Buffer}min). HasMotion: {HasMotion}",
+                station.Id,
+                checkpointDateTime.AddHours(7).ToString("HH:mm"),
+                checkWindowStart.AddHours(7).ToString("HH:mm:ss"),
+                checkWindowEnd.AddHours(7).ToString("HH:mm:ss"),
+                timeFrame.BufferMinutes,
+                hasRecentMotion
+            );
 
             // ✅ Get latest TimeFrameHistory for audit trail
             var timeFrameHistory = await context.TimeFrameHistories
@@ -541,13 +611,15 @@ namespace StationCheck.BackgroundServices
                 StartTime = timeFrame.StartTime.ToString(),
                 EndTime = timeFrame.EndTime.ToString(),
                 FrequencyMinutes = timeFrame.FrequencyMinutes,
+                BufferMinutes = timeFrame.BufferMinutes, // ✅ CRITICAL: Include BufferMinutes for EmailService tolerance window matching
                 DaysOfWeek = timeFrame.DaysOfWeek,
                 ProfileVersion = profileHistory?.Version,
-                CheckedAt = now
+                CheckedAt = checkpointDateTime // Use checkpoint time, not current time
             };
 
+            // Calculate minutes since last motion FROM CHECKPOINT TIME (not from now)
             var minutesSinceLastMotion = station.LastMotionDetectedAt.HasValue
-                ? (int)(now - station.LastMotionDetectedAt.Value).TotalMinutes
+                ? (int)(checkpointDateTime - station.LastMotionDetectedAt.Value).TotalMinutes
                 : int.MaxValue;
 
             // Get last motion details from most recent MotionEvent
@@ -620,7 +692,7 @@ namespace StationCheck.BackgroundServices
                 LastMotionCameraName = lastMotionEvent?.CameraName,
                 MinutesSinceLastMotion = minutesSinceLastMotion,
                 IsResolved = isResolved,
-                ResolvedAt = isResolved ? now : null,
+                ResolvedAt = isResolved ? checkpointDateTime : null, // Use checkpoint time, not utcNow
                 ResolvedBy = isResolved ? "System" : null,
                 IsDeleted = false, // Keep all alerts visible - use IsResolved for status tracking
                 Notes = isResolved ? $"Motion detected within tolerance window at checkpoint {checkpointLocal}" : null
@@ -655,11 +727,11 @@ namespace StationCheck.BackgroundServices
 
             // ✅ Additional check: Auto-resolve if motion detected within buffer window of AlertTime
             // This handles cases where motion event arrived BEFORE alert was created
-            // Example: Motion at 20:38:15, Alert created at 20:39:00 for window 20:38-20:40
+            // Example: Motion at 20:03:15, Alert created at 20:05:00 for window 20:00-20:05
             // Only check if alert is not already resolved
             if (!alert.IsResolved)
             {
-                var alertWindowStart = checkpointDateTime.AddMinutes(-timeFrame.BufferMinutes);
+                var alertWindowStart = checkpointDateTime;
                 var alertWindowEnd = checkpointDateTime.AddMinutes(timeFrame.BufferMinutes);
 
                 var recentMotion = await context.MotionEvents
@@ -672,7 +744,7 @@ namespace StationCheck.BackgroundServices
                 if (recentMotion != null)
                 {
                     alert.IsResolved = true;
-                    alert.ResolvedAt = now;
+                    alert.ResolvedAt = checkpointDateTime;  // Use checkpoint time, not utcNow
                     alert.ResolvedBy = "System (Auto-resolved - motion detected in tolerance window)";
                     // Keep alert visible - IsDeleted stays false
                     
@@ -713,6 +785,13 @@ namespace StationCheck.BackgroundServices
                 return 0;
             }
 
+            // Convert local time to UTC for database updates
+            var utcNow = new DateTime(
+                now.Year, now.Month, now.Day,
+                now.Hour, now.Minute, now.Second, now.Millisecond,
+                DateTimeKind.Local
+            ).ToUniversalTime();
+
             // Find all active (unresolved) alerts for this station
             var activeAlerts = await context.MotionAlerts
                 .Include(a => a.TimeFrame) // Need TimeFrame for BufferMinutes
@@ -733,15 +812,15 @@ namespace StationCheck.BackgroundServices
             {
                 if (alert.TimeFrame == null) continue;
 
-                // Calculate tolerance window: ± BufferMinutes around AlertTime
-                var windowStart = alert.AlertTime.AddMinutes(-alert.TimeFrame.BufferMinutes);
+                // Calculate tolerance window: +BufferMinutes after AlertTime (checkpoint)
+                var windowStart = alert.AlertTime;
                 var windowEnd = alert.AlertTime.AddMinutes(alert.TimeFrame.BufferMinutes);
 
                 // Check if motion falls within this alert's tolerance window
                 if (motionTime >= windowStart && motionTime <= windowEnd)
                 {
                     alert.IsResolved = true;
-                    alert.ResolvedAt = now;
+                    alert.ResolvedAt = utcNow;  // Use UTC time for database
                     alert.ResolvedBy = "System (Auto-resolved by motion detection)";
                     // Keep alert visible - IsDeleted stays false
                     

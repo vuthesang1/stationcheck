@@ -4,6 +4,7 @@
 @using Microsoft.EntityFrameworkCore
 @using System.Text.Json
 @using DevExpress.Blazor
+@using DevExpress.Data
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JSRuntime
@@ -85,48 +86,67 @@
                     <button type="button" class="close" @onclick="CloseStationModal" @onclick:stopPropagation="true"></button>
                 </div>
                 <div class="modal-body">
-                    <ul class="nav nav-tabs mb-3" role="tablist">
-                        @if (!isManagerRole)
-                        {
+                    @if (isLoadingStationDetails)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Đang tải dữ liệu...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Đang tải dữ liệu trạm...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            @if (!isStationEmployeeRole)
+                            {
+                                <li class="nav-item">
+                                    <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
+                                            @onclick="SwitchToMotionTab">
+                                        <i class="bi bi-activity"></i> Lịch sử nhấn nút
+                                    </button>
+                                </li>
+                            }
                             <li class="nav-item">
-                                <button class="nav-link @(activeTab == "motion" ? "active" : "")" 
-                                        @onclick='() => activeTab = "motion"'>
-                                    <i class="bi bi-activity"></i> Lịch sử chuyển động
+                                <button class="nav-link @(activeTab == "alerts" ? "active" : "")" 
+                                        @onclick="SwitchToAlertsTab">
+                                    <i class="bi bi-exclamation-triangle"></i> Cảnh báo
                                 </button>
                             </li>
-                        }
-                        <li class="nav-item">
-                            <button class="nav-link @(activeTab == "alerts" ? "active" : "")" 
-                                    @onclick='() => activeTab = "alerts"'>
-                                <i class="bi bi-exclamation-triangle"></i> Lịch sử cảnh báo
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link @(activeTab == "config-history" ? "active" : "")" 
-                                    @onclick='() => activeTab = "config-history"'>
-                                <i class="bi bi-clock-history"></i> Lịch sử thay đổi cấu hình
-                            </button>
-                        </li>
-                    </ul>
+                            <li class="nav-item">
+                                <button class="nav-link @(activeTab == "config-history" ? "active" : "")" 
+                                        @onclick="SwitchToConfigTab">
+                                    <i class="bi bi-clock-history"></i> Lịch sử cấu hình
+                                </button>
+                            </li>
+                        </ul>
 
-                    <div class="tab-content">
-                        @if (activeTab == "motion" && !isManagerRole)
+                        <div class="tab-content">
+                        @if (activeTab == "motion" && !isStationEmployeeRole)
                         {
                             <div class="motion-history">
-                                <h6>Lịch sử chuyển động gần nhất</h6>
+                                <h6 class="mb-3">Lịch sử nhấn nút</h6>
+                                
                                 @if (motionHistory == null || !motionHistory.Any())
                                 {
                                     <div class="alert alert-info">
-                                        <i class="bi bi-info-circle"></i> Chưa có dữ liệu chuyển động.
+                                        <i class="bi bi-info-circle"></i> Chưa có dữ liệu nhấn nút.
                                     </div>
                                 }
                                 else
                                 {
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            Tổng số @motionHistory.Count sự kiện
+                                        </small>
+                                    </div>
+                                    
                                     <DxGrid Data="@motionHistory"
                                             PageSize="20"
                                             ShowPager="true"
                                             PagerNavigationMode="PagerNavigationMode.InputBox"
                                             PageSizeSelectorVisible="true"
+                                            PageSizeSelectorItems="@(new int[] { 10, 20, 50, 100 })"
                                             AllowSelectRowByClick="false"
                                             HighlightRowOnHover="true"
                                             FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
@@ -149,7 +169,7 @@
                                                     }
                                                     @if (!string.IsNullOrEmpty(motion.EventType))
                                                     {
-                                                        <span>@motion.EventType</span>
+                                                        <span>@(motion.EventType == "Motion" ? "Nhấn nút" : motion.EventType)</span>
                                                     }
                                                     else
                                                     {
@@ -158,7 +178,7 @@
                                                 </CellDisplayTemplate>
                                             </DxGridDataColumn>
 
-                                            <DxGridDataColumn FieldName="CameraName" Caption="Camera" />
+                                            <DxGridDataColumn FieldName="CameraName" Caption="Ghi nhận" />
                                             
                                             <DxGridDataColumn FieldName="IsProcessed" Caption="Đã xử lý" Width="100px">
                                                 <CellDisplayTemplate>
@@ -204,8 +224,8 @@
                                 }
                                 else
                                 {
-                                    @* Only display alerts that are not deleted (IsDeleted = false) *@
-                                    @foreach (var alert in alertHistory.Where(a => !a.IsDeleted))
+                                    @* Only display alerts that are not deleted and not resolved (actual warnings) *@
+                                    @foreach (var alert in alertHistory.Where(a => !a.IsDeleted && !a.IsResolved))
                                     {
                                         <div class="alert-card mb-3 border rounded">
                                             <div class="d-flex justify-content-between align-items-start p-3">
@@ -225,7 +245,7 @@
                                                         <div class="text-muted small">
                                                             <strong>@alert.TimeFrame.Name</strong> - 
                                                             Tần suất: @alert.TimeFrame.FrequencyMinutes phút - 
-                                                            Buffer: ±@alert.TimeFrame.BufferMinutes phút
+                                                            Buffer: +@alert.TimeFrame.BufferMinutes phút
                                                         </div>
                                                     }
                                                     @if (alert.IsResolved && alert.ResolvedAt.HasValue)
@@ -326,7 +346,7 @@
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted">Buffer:</td>
-                                                                                    <td><strong>±@config.GetValueOrDefault("BufferMinutes", "N/A") phút</strong></td>
+                                                                                    <td><strong>+@config.GetValueOrDefault("BufferMinutes", "N/A") phút</strong></td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="text-muted">Ngày áp dụng:</td>
@@ -454,7 +474,8 @@
                                 }
                             </div>
                         }
-                    </div>
+                        </div>
+                    }
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseStationModal">Đóng</button>
@@ -472,7 +493,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title">
-                        <i class="bi bi-activity"></i> Chi tiết sự kiện chuyển động
+                        <i class="bi bi-activity"></i> Chi tiết sự kiện nhấn nút
                     </h5>
                     <button type="button" class="close text-white" @onclick="CloseMotionDetailModal" @onclick:stopPropagation="true">
                         <span aria-hidden="true">&times;</span>
@@ -488,10 +509,6 @@
                                 <div class="card-body">
                                     <table class="table table-sm table-borderless mb-0">
                                         <tbody>
-                                            <tr>
-                                                <td class="text-muted" style="width: 150px;">ID:</td>
-                                                <td><code>@selectedMotionEvent.Id</code></td>
-                                            </tr>
                                             <tr>
                                                 <td class="text-muted">Thời gian phát hiện:</td>
                                                 <td><strong>@selectedMotionEvent.DetectedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</strong></td>
@@ -536,31 +553,6 @@
                                     <table class="table table-sm table-borderless mb-0">
                                         <tbody>
                                             <tr>
-                                                <td class="text-muted" style="width: 150px;">Camera ID:</td>
-                                                <td><code>@(selectedMotionEvent.CameraId ?? "N/A")</code></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-muted">Tên Camera:</td>
-                                                <td><strong>@(selectedMotionEvent.CameraName ?? "N/A")</strong></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-muted">Station ID:</td>
-                                                <td><code>@(selectedMotionEvent.StationId?.ToString() ?? "N/A")</code></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="text-muted">Email Message ID:</td>
-                                                <td>
-                                                    @if (!string.IsNullOrEmpty(selectedMotionEvent.EmailMessageId))
-                                                    {
-                                                        <code class="small">@selectedMotionEvent.EmailMessageId</code>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted">N/A</span>
-                                                    }
-                                                </td>
-                                            </tr>
-                                            <tr>
                                                 <td class="text-muted">Email Subject:</td>
                                                 <td>
                                                     @if (!string.IsNullOrEmpty(selectedMotionEvent.EmailSubject))
@@ -578,7 +570,20 @@
                                 </div>
                             </div>
                         </div>
-                        @if (!string.IsNullOrEmpty(selectedMotionEvent.Payload))
+                        @if (!string.IsNullOrEmpty(selectedMotionEvent.EmailBody))
+                        {
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Nội dung email</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <pre class="bg-dark text-light p-3 mb-0" style="max-height: 400px; overflow-y: auto; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">@selectedMotionEvent.EmailBody</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (!string.IsNullOrEmpty(selectedMotionEvent.Payload))
                         {
                             <div class="col-12">
                                 <div class="card">
@@ -650,7 +655,7 @@
                     <h5 class="modal-title">
                         <i class="bi bi-file-earmark-text"></i> Chi tiết thay đổi cấu hình
                     </h5>
-                    <button type="button" class="close text-white" @onclick="CloseConfigDetailModal" @onclick:stopPropagation="true">
+                    <button type="button" class="close" @onclick="CloseConfigDetailModal" @onclick:stopPropagation="true">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -888,10 +893,11 @@
     private DateTime lastUpdateTime = DateTime.Now;
     private System.Threading.Timer? refreshTimer;
     private bool isFullscreen = false;
-    private bool isManagerRole = false;
+    private bool isStationEmployeeRole = false;
 
     // Modal state
     private bool showStationModal = false;
+    private bool isLoadingStationDetails = false; // 🔥 Loading spinner for modal
     private Station? selectedStation = null;
     private string activeTab = "motion";
     private List<MotionEvent> motionHistory = new();
@@ -912,10 +918,15 @@
     private string? resolveAlertId = null;
     private string resolveReason = string.Empty;
 
+    // Pagination for motion history
+    private int motionPageSize = 20;
+    private int motionPageIndex = 0;
+    private int motionTotalCount = 0;
+
     public enum StationStatus
     {
-        Normal,   // 🟢 Có chuyển động trong khoảng cho phép
-        Alert,    // 🔴 Quá thời gian không có chuyển động
+        Normal,   // 🟢 Có nhấn nút trong khoảng cho phép
+        Alert,    // 🔴 Quá thời gian không có nhấn nút
         Paused    // ⚪ Tạm ngưng giám sát
     }
 
@@ -924,7 +935,7 @@
         // Check user role
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        isManagerRole = user.IsInRole("Manager");
+        isStationEmployeeRole = user.IsInRole("StationEmployee");
         
         await LoadStations();
         
@@ -948,7 +959,6 @@
             
             // Load all active stations
             stations = await context.Stations
-                .Where(s => s.IsActive)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
 
@@ -990,7 +1000,7 @@
         // Check if station has active monitoring (has enabled timeframes)
         var hasActiveMonitoring = stationsWithActiveMonitoring.Contains(station.Id);
 
-        if (!hasActiveMonitoring)
+        if (!hasActiveMonitoring || !station.IsActive)
         {
             return StationStatus.Paused;
         }
@@ -1055,45 +1065,82 @@
 
     private async Task ShowStationDetails(Station station)
     {
+        // Show modal immediately with loading spinner
         selectedStation = station;
-        activeTab = isManagerRole ? "alerts" : "motion";
+        activeTab = isStationEmployeeRole ? "alerts" : "motion";
         expandedSnapshots.Clear();
-
-        using var context = await DbContextFactory.CreateDbContextAsync();
+        motionPageIndex = 0;
+        motionHistory.Clear();
+        alertHistory.Clear();
+        configHistory.Clear();
         
-        // Load motion history (all records, ordered by most recent)
-        motionHistory = await context.MotionEvents
-            .Where(m => m.StationId == station.Id)
-            .OrderByDescending(m => m.DetectedAt)
-            .Take(1000) // Limit to 1000 most recent records
-            .ToListAsync();
+        showStationModal = true;
+        isLoadingStationDetails = true;
+        StateHasChanged(); // Force render to show spinner
 
-        // Load alert history (last 30 days) - only show unresolved alerts
+        try
+        {
+            using var context = await DbContextFactory.CreateDbContextAsync();
+            
+            // 🔥 OPTIMIZATION: Load only the active tab data first
+            if (activeTab == "alerts")
+            {
+                // Load alert history first (most important for employees)
+                await LoadAlertHistoryAsync(context, station.Id);
+            }
+            else if (activeTab == "motion")
+            {
+                // Load motion history with pagination (top 100 records)
+                await LoadMotionHistoryAsync(context, station.Id);
+            }
+            
+            // Render immediately with first tab data
+            StateHasChanged();
+        }
+        finally
+        {
+            isLoadingStationDetails = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAlertHistoryAsync(ApplicationDbContext context, Guid stationId)
+    {
         var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
         alertHistory = await context.MotionAlerts
             .Include(a => a.TimeFrame)
             .Include(a => a.TimeFrameHistorySnapshot)
-            .Where(a => a.StationId == station.Id && a.AlertTime >= thirtyDaysAgo && !a.IsDeleted)
+            .Where(a => a.StationId == stationId && a.AlertTime >= thirtyDaysAgo && !a.IsDeleted)
             .OrderByDescending(a => a.AlertTime)
             .ToListAsync();
+    }
 
-        // Load configuration history (last 90 days) - for both Station and TimeFrame changes
+    private async Task LoadMotionHistoryAsync(ApplicationDbContext context, Guid stationId)
+    {
+        // 🔥 OPTIMIZATION: Load only top 100 motion events instead of ALL
+        motionHistory = await context.MotionEvents
+            .Where(m => m.StationId == stationId)
+            .OrderByDescending(m => m.DetectedAt)
+            .Take(100) // Only load latest 100 records
+            .ToListAsync();
+    }
+
+    private async Task LoadConfigHistoryAsync(ApplicationDbContext context, Guid stationId)
+    {
         var ninetyDaysAgo = DateTime.UtcNow.AddDays(-90);
         
         // Get all TimeFrame IDs for this station
         var timeFrameIds = await context.TimeFrames
-            .Where(tf => tf.StationId == station.Id)
+            .Where(tf => tf.StationId == stationId)
             .Select(tf => tf.Id)
             .ToListAsync();
         
         configHistory = await context.ConfigurationAuditLogs
             .Where(a => a.ChangedAt >= ninetyDaysAgo && 
-                       ((a.EntityType == "Station" && a.EntityId == station.Id) ||
+                       ((a.EntityType == "Station" && a.EntityId == stationId) ||
                         (a.EntityType == "TimeFrame" && timeFrameIds.Contains(a.EntityId))))
             .OrderByDescending(a => a.ChangedAt)
             .ToListAsync();
-
-        showStationModal = true;
     }
 
     private void CloseStationModal()
@@ -1104,6 +1151,8 @@
         alertHistory.Clear();
         configHistory.Clear();
         expandedSnapshots.Clear();
+        motionPageIndex = 0;
+        motionTotalCount = 0;
     }
 
     private void ShowMotionDetail(MotionEvent motion)
@@ -1464,6 +1513,79 @@
     {
         isFullscreen = !isFullscreen;
         await JSRuntime.InvokeVoidAsync("toggleFullscreen", isFullscreen);
+    }
+
+    // 🔥 Tab switching methods with lazy loading
+    private async Task SwitchToMotionTab()
+    {
+        if (activeTab == "motion") return;
+        
+        activeTab = "motion";
+        
+        if (motionHistory.Count == 0 && selectedStation != null)
+        {
+            isLoadingStationDetails = true;
+            StateHasChanged();
+            
+            try
+            {
+                using var context = await DbContextFactory.CreateDbContextAsync();
+                await LoadMotionHistoryAsync(context, selectedStation.Id);
+            }
+            finally
+            {
+                isLoadingStationDetails = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SwitchToAlertsTab()
+    {
+        if (activeTab == "alerts") return;
+        
+        activeTab = "alerts";
+        
+        if (alertHistory.Count == 0 && selectedStation != null)
+        {
+            isLoadingStationDetails = true;
+            StateHasChanged();
+            
+            try
+            {
+                using var context = await DbContextFactory.CreateDbContextAsync();
+                await LoadAlertHistoryAsync(context, selectedStation.Id);
+            }
+            finally
+            {
+                isLoadingStationDetails = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SwitchToConfigTab()
+    {
+        if (activeTab == "config-history") return;
+        
+        activeTab = "config-history";
+        
+        if (configHistory.Count == 0 && selectedStation != null)
+        {
+            isLoadingStationDetails = true;
+            StateHasChanged();
+            
+            try
+            {
+                using var context = await DbContextFactory.CreateDbContextAsync();
+                await LoadConfigHistoryAsync(context, selectedStation.Id);
+            }
+            finally
+            {
+                isLoadingStationDetails = false;
+                StateHasChanged();
+            }
+        }
     }
 
     public void Dispose()

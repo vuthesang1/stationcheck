@@ -80,13 +80,14 @@
                            @bind="TimeFrame.BufferMinutes" 
                            class="form-control" 
                            min="0" 
-                           max="60"
+                           max="@(TimeFrame.FrequencyMinutes > 0 ? TimeFrame.FrequencyMinutes - 1 : 60)"
                            placeholder="Nhập số phút buffer (mặc định: 0)" />
                     <small class="form-text text-muted">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Buffer là khoảng dung sai cho phép đến sớm/trễ.</strong><br/>
-                        • VD 1: Tần suất 1 giờ, Buffer 15 phút → Checkpoint 10:00 sẽ chấp nhận đến từ 09:45 đến 10:15<br/>
-                        • VD 2: Tần suất 2 giờ, Buffer 30 phút → Checkpoint 12:00 sẽ chấp nhận đến từ 11:30 đến 12:30<br/>
+                        <strong>Buffer là khoảng dung sai cho phép đến trễ (sau checkpoint).</strong><br/>
+                        • Buffer phải nhỏ hơn tần suất (max: @(TimeFrame.FrequencyMinutes > 0 ? TimeFrame.FrequencyMinutes - 1 : 60) phút)<br/>
+                        • VD 1: Tần suất 1 giờ, Buffer 15 phút → Checkpoint 10:00 sẽ chấp nhận đến từ 10:00 đến 10:15<br/>
+                        • VD 2: Tần suất 2 giờ, Buffer 30 phút → Checkpoint 12:00 sẽ chấp nhận đến từ 12:00 đến 12:30<br/>
                         • <em>Để 0 nếu yêu cầu đến đúng giờ checkpoint</em>
                     </small>
                 
@@ -413,6 +414,13 @@
             if (TimeFrame.FrequencyMinutes < 1 || TimeFrame.FrequencyMinutes > 1440)
             {
                 await JS.InvokeVoidAsync("alert", "Tần suất phải từ 1 phút đến 1440 phút (24 giờ)!");
+                return;
+            }
+
+            // Validate buffer is less than frequency
+            if (TimeFrame.BufferMinutes >= TimeFrame.FrequencyMinutes)
+            {
+                await JS.InvokeVoidAsync("alert", $"Buffer ({TimeFrame.BufferMinutes} phút) phải nhỏ hơn tần suất ({TimeFrame.FrequencyMinutes} phút)!");
                 return;
             }
 

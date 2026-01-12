@@ -39,7 +39,7 @@ INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [C
 (NEWID(), 'en', 'reports.page_title', 'Reports and History', 'page', GETUTCDATE()),
 (NEWID(), 'vi', 'reports.tab_alert_report', N'Báo cáo Cảnh báo', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'reports.tab_alert_report', 'Alert Report', 'tab', GETUTCDATE()),
-(NEWID(), 'vi', 'reports.tab_motion_report', N'Báo cáo Chuyển động', 'tab', GETUTCDATE()),
+(NEWID(), 'vi', 'reports.tab_motion_report', N'Báo cáo nhấn nút', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'reports.tab_motion_report', 'Motion Report', 'tab', GETUTCDATE()),
 (NEWID(), 'vi', 'reports.tab_config_history', N'Lịch sử Thay đổi Cấu hình', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'reports.tab_config_history', 'Configuration History', 'tab', GETUTCDATE());
@@ -457,7 +457,7 @@ INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [C
 INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [CreatedAt]) VALUES
 (NEWID(), 'vi', 'service.timeframe_overlap_error', N'Khung thời gian bị trùng với ''{0}'' ({1} - {2})', 'message', GETUTCDATE()),
 (NEWID(), 'en', 'service.timeframe_overlap_error', 'Time frame overlaps with ''{0}'' ({1} - {2})', 'message', GETUTCDATE()),
-(NEWID(), 'vi', 'service.no_motion_alert_message', N'Trạm ''{0}'' không phát hiện chuyển động trong {1} phút (ngưỡng: {2} phút)', 'message', GETUTCDATE()),
+(NEWID(), 'vi', 'service.no_motion_alert_message', N'Trạm ''{0}'' không phát hiện nhấn nút trong {1} phút (ngưỡng: {2} phút)', 'message', GETUTCDATE()),
 (NEWID(), 'en', 'service.no_motion_alert_message', 'Station ''{0}'' no motion detected for {1} minutes (threshold: {2} minutes)', 'message', GETUTCDATE());
 
 -- UserService
@@ -473,7 +473,7 @@ INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [C
 
 -- MotionDetectionService
 INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [CreatedAt]) VALUES
-(NEWID(), 'vi', 'service.motion_detection_alert', N'Không phát hiện chuyển động trong {0} phút (mong đợi: {1} phút)', 'message', GETUTCDATE()),
+(NEWID(), 'vi', 'service.motion_detection_alert', N'Không phát hiện nhấn nút trong {0} phút (mong đợi: {1} phút)', 'message', GETUTCDATE()),
 (NEWID(), 'en', 'service.motion_detection_alert', 'No motion detected for {0} minutes (expected: {1} minutes)', 'message', GETUTCDATE());
 
 -- ========================================

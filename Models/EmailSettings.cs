@@ -10,5 +10,6 @@ namespace StationCheck.Models
         public int CheckIntervalMinutes { get; set; } = 1;
         public bool MarkAsRead { get; set; } = true;
         public bool DeleteAfterProcessing { get; set; } = false;
+        public bool ProcessUnreadOnly { get; set; } = false; // If true, only process unread emails
     }
 }

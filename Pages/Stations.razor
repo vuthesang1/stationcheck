@@ -5,16 +5,25 @@
 @using StationCheck.Models
 @using StationCheck.Interfaces
 @using StationCheck.Services
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
 @using DevExpress.Data.Linq
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
 @inherits OwningComponentBase
 @implements IDisposable
-@attribute [Authorize(Roles = "Admin,Manager")]
+@attribute [Authorize(Roles = "Admin,Manager,StationEmployee")]
 @inject IStationService StationService
 @inject IMonitoringService MonitoringService
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject ILogger<Stations> Logger
+@inject HttpClient HttpClient
+@inject IForceLogoutService ForceLogoutService
+@inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>@GetText("station.page_title", "Quản lý Trạm")</PageTitle>
 
@@ -79,194 +88,187 @@
         <h6 class="m-0 font-weight-bold text-primary">@GetText("station.list_title", "Danh sách Trạm")</h6>
     </div>
     <div class="card-body">
-        <DxGrid @ref="Grid"
-                    Data="@InstantFeedbackSource" 
-                    PageSize="20"
-                    ShowPager="true"
-                    PagerNavigationMode="PagerNavigationMode.InputBox"
-                    PageSizeSelectorVisible="true"
-                    AllowSelectRowByClick="false"
-                    HighlightRowOnHover="true"
-                    TextWrapEnabled="false"
-                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
-                    @bind-SearchText="@SearchText"
-                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                    SizeMode="SizeMode.Medium">
-                <Columns>
-                    <DxGridDataColumn FieldName="Id" Caption="ID" Visible="false" />
-                    <DxGridDataColumn FieldName="StationCode" Caption="@StationCodeColumnCaption" Width="120px" />
-                    <DxGridDataColumn FieldName="Name" Caption="@NameColumnCaption" MinWidth="150" />
-                    <DxGridDataColumn FieldName="Description" Caption="@DescriptionColumnCaption" Visible="false" />
-                    <DxGridDataColumn FieldName="Address" Caption="@AddressColumnCaption" MinWidth="200" />
-                    <DxGridDataColumn FieldName="ContactPerson" Caption="@ContactColumnCaption" Width="150px" />
-                    <DxGridDataColumn FieldName="ContactPhone" Caption="@PhoneColumnCaption" Width="150" />
-                    <DxGridDataColumn FieldName="IsActive" Caption="@MonitoringStatusColumnCaption" Width="150">
-                        <CellDisplayTemplate>
-                            @{
-                                var isActive = (bool)context.Value;
-                            }
-                            @if (isActive)
-                            {
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check-circle"></i> @GetText("station.monitoring_active", "Đang giám sát")
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">
-                                    <i class="fas fa-pause-circle"></i> @GetText("station.monitoring_inactive", "Tạm dừng")
-                                </span>
-                            }
-                        </CellDisplayTemplate>
-                    </DxGridDataColumn>
-                    <DxGridDataColumn FieldName="CreatedAt" Caption="@CreatedAtColumnCaption" DisplayFormat="dd/MM/yyyy" Visible="false" />
-                    <DxGridDataColumn FieldName="ModifiedAt" Caption="@ModifiedAtColumnCaption" DisplayFormat="dd/MM/yyyy" Visible="false" />
+        <DxGrid @ref="Grid" Data="@InstantFeedbackSource" PageSize="20" ShowPager="true"
+            PagerNavigationMode="PagerNavigationMode.InputBox" PageSizeSelectorVisible="true"
+            AllowSelectRowByClick="false" HighlightRowOnHover="true" TextWrapEnabled="false"
+            FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always" @bind-SearchText="@SearchText"
+            ColumnResizeMode="GridColumnResizeMode.NextColumn" SizeMode="SizeMode.Medium">
+            <Columns>
+                <DxGridDataColumn FieldName="Id" Caption="ID" Visible="false" />
+                <DxGridDataColumn FieldName="StationCode" Caption="@StationCodeColumnCaption" Width="120px" />
+                <DxGridDataColumn FieldName="Name" Caption="@NameColumnCaption" MinWidth="150" />
+                <DxGridDataColumn FieldName="Description" Caption="@DescriptionColumnCaption" Visible="false" />
+                <DxGridDataColumn FieldName="Address" Caption="@AddressColumnCaption" MinWidth="200" />
+                <DxGridDataColumn FieldName="ContactPerson" Caption="@ContactColumnCaption" Width="150px" />
+                <DxGridDataColumn FieldName="ContactPhone" Caption="@PhoneColumnCaption" Width="150" />
+                <DxGridDataColumn FieldName="IsActive" Caption="@MonitoringStatusColumnCaption" Width="150">
+                    <CellDisplayTemplate>
+                        @{
+                            var isActive = (bool)context.Value;
+                        }
+                        @if (isActive)
+                        {
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> @GetText("station.monitoring_active", "Đang giám sát")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">
+                                <i class="fas fa-pause-circle"></i> @GetText("station.monitoring_inactive", "Tạm dừng")
+                            </span>
+                        }
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="CreatedAt" Caption="@CreatedAtColumnCaption" DisplayFormat="dd/MM/yyyy"
+                    Visible="false" />
+                <DxGridDataColumn FieldName="ModifiedAt" Caption="@ModifiedAtColumnCaption" DisplayFormat="dd/MM/yyyy"
+                    Visible="false" />
 
-                    <DxGridDataColumn FieldName="Id" Caption="@GetText("station.actions_column", "Thao tác")" Width="225px" AllowSort="false">
-                        <CellDisplayTemplate>
-                            @{
-                                var stationId = (Guid)context.Value;
-                            }
-                            <div class="d-flex justify-content-center gap-1">
-                                <button class="btn btn-primary btn-sm" title="@GetText("station.config_monitoring_tooltip", "Cấu hình giám sát")" @onclick="@(() => ShowTimeFramesModalAsync(stationId))">
+                <DxGridDataColumn FieldName="Id" Caption="@GetText("station.actions_column", "Thao tác")"
+                    Width="225px" AllowSort="false">
+                    <CellDisplayTemplate>
+                        @{
+                            var stationId = (Guid)context.Value;
+                        }
+                        <div class="d-flex justify-content-center gap-1">
+                            <AuthorizeView Roles="Admin,Manager" Context="authContext1">
+                                <button class="btn btn-primary btn-sm"
+                                    title="@GetText("station.config_monitoring_tooltip", "Cấu hình giám sát")"
+                                    @onclick="@(() => ShowTimeFramesModalAsync(stationId))">
                                     <i class="fas fa-clock"></i>
                                 </button>
-                                <button class="btn btn-info btn-sm" title="Xem lịch sử thay đổi" @onclick="@(() => ShowAuditLog(stationId))">
+                                <button class="btn btn-info btn-sm" title="Xem lịch sử thay đổi"
+                                    @onclick="@(() => ShowAuditLog(stationId))">
                                     <i class="fas fa-history"></i>
                                 </button>
-                                <AuthorizeView Roles="Admin" Context="authContext">
-                                    <button class="btn btn-warning btn-sm" title="@GetText("station.edit_tooltip", "Chỉnh sửa")" @onclick="@(() => ShowEditModalAsync(stationId))">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" title="@GetText("station.delete_tooltip", "Xóa")" @onclick="@(() => DeleteStation(stationId))">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </AuthorizeView>
-                            </div>
-                        </CellDisplayTemplate>
-                    </DxGridDataColumn>
-                </Columns>
-                <ToolbarTemplate>
-                    <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-                        <Items>
-                            <DxToolbarItem BeginGroup="true" Alignment="ToolbarItemAlignment.Right">
-                                <Template Context="toolbarContext">
-                                    <DxTextBox @bind-Text="@SearchText" 
-                                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                               NullText="@GetText("station.search_placeholder", "Tìm kiếm trạm...")"
-                                               ShowValidationIcon="false"
-                                               style="width: 300px;"
-                                               @onkeydown:stopPropagation="true">
-                                    </DxTextBox>
-                                </Template>
-                            </DxToolbarItem>
-                        </Items>
-                    </DxToolbar>
-                </ToolbarTemplate>
-            </DxGrid>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="Admin" Context="authContext2">
+                                <button class="btn btn-warning btn-sm"
+                                    title="@GetText("station.edit_tooltip", "Chỉnh sửa")"
+                                    @onclick="@(() => ShowEditModalAsync(stationId))">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm"
+                                    title="@GetText("station.delete_tooltip", "Xóa")"
+                                    @onclick="@(() => DeleteStation(stationId))">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </AuthorizeView>
+                        </div>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+            <ToolbarTemplate>
+                <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                    <Items>
+                        <DxToolbarItem BeginGroup="true" Alignment="ToolbarItemAlignment.Right">
+                            <Template Context="toolbarContext">
+                                <DxTextBox @bind-Text="@SearchText"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    NullText="@GetText("station.search_placeholder", "Tìm kiếm trạm...")"
+                                    ShowValidationIcon="false" style="width: 300px;" @onkeydown:stopPropagation="true">
+                                </DxTextBox>
+                            </Template>
+                        </DxToolbarItem>
+                    </Items>
+                </DxToolbar>
+            </ToolbarTemplate>
+        </DxGrid>
     </div>
 </div>
 
 <!-- Add/Edit Modal -->
 <DxPopup @bind-Visible="@showModal"
-         HeaderText="@(editingStation == null ? GetText("station.edit_title_add", "Thêm Trạm Mới") : GetText("station.edit_title_edit", "Chỉnh sửa Trạm"))"
-         ShowCloseButton="true"
-         Width="600px"
-         MaxWidth="90%"
-         Height="auto"
-         MaxHeight="90vh"
-         CloseOnOutsideClick="false">
+    HeaderText="@(editingStation == null ? GetText("station.edit_title_add", "Thêm Trạm Mới") : GetText("station.edit_title_edit", "Chỉnh sửa Trạm"))"
+    ShowCloseButton="true" Width="600px" MaxWidth="90%" Height="auto" MaxHeight="90vh" CloseOnOutsideClick="false">
     <BodyContentTemplate Context="popupContext">
         <EditForm Model="stationForm" OnValidSubmit="SaveStation" Context="formContext">
             <DataAnnotationsValidator />
-            
+
             <!-- Scrollable Form Content -->
             <div style="max-height: calc(90vh - 150px); overflow-y: auto; padding: 1.5rem;">
                 <DxFormLayout CssClass="w-100">
-                @if (editingStation != null)
-                {
-                    <DxFormLayoutItem Caption="@GetText("station.code_label", "Mã Trạm")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
+                    @if (editingStation != null)
+                    {
+                        <DxFormLayoutItem Caption="@GetText("station.code_label", "Mã Trạm")" ColSpanMd="12"
+                            CaptionPosition="CaptionPosition.Vertical">
+                            <Template>
+                                <DxTextBox @bind-Text="@editingStation.StationCode" ReadOnly="true"
+                                    CssClass="bg-light form-control-sm">
+                                </DxTextBox>
+                                <small class="form-text text-muted mt-1 d-block">@GetText("station.code_readonly_note", "Mã trạm tự động sinh ra và không thể chỉnh sửa")</small>
+                            </Template>
+                        </DxFormLayoutItem>
+                    }
+
+                    <DxFormLayoutItem Caption="@GetText("station.name_label", "Tên Trạm")" ColSpanMd="12"
+                        CaptionPosition="CaptionPosition.Vertical">
                         <Template>
-                            <DxTextBox @bind-Text="@editingStation.StationCode" 
-                                       ReadOnly="true"
-                                       CssClass="bg-light form-control-sm">
+                            <DxTextBox @bind-Text="@stationForm.Name"
+                                NullText="@GetText("station.name_placeholder", "Nhập tên trạm")"
+                                ShowValidationIcon="true" CssClass="form-control">
                             </DxTextBox>
-                            <small class="form-text text-muted mt-1 d-block">@GetText("station.code_readonly_note", "Mã trạm tự động sinh ra và không thể chỉnh sửa")</small>
+                            <ValidationMessage For="@(() => stationForm.Name)" />
                         </Template>
                     </DxFormLayoutItem>
-                }
-                
-                <DxFormLayoutItem Caption="@GetText("station.name_label", "Tên Trạm")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <DxTextBox @bind-Text="@stationForm.Name" 
-                                   NullText="@GetText("station.name_placeholder", "Nhập tên trạm")"
-                                   ShowValidationIcon="true"
-                                   CssClass="form-control">
-                        </DxTextBox>
-                        <ValidationMessage For="@(() => stationForm.Name)" />
-                    </Template>
-                </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="@GetText("station.address_label", "Địa chỉ")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <DxTextBox @bind-Text="@stationForm.Address" 
-                                   NullText="@GetText("station.address_placeholder", "Nhập địa chỉ")"
-                                   CssClass="form-control">
-                        </DxTextBox>
-                    </Template>
-                </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="@GetText("station.address_label", "Địa chỉ")" ColSpanMd="12"
+                        CaptionPosition="CaptionPosition.Vertical">
+                        <Template>
+                            <DxTextBox @bind-Text="@stationForm.Address"
+                                NullText="@GetText("station.address_placeholder", "Nhập địa chỉ")"
+                                CssClass="form-control">
+                            </DxTextBox>
+                        </Template>
+                    </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="@GetText("station.description_label", "Mô tả")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <DxMemo @bind-Text="@stationForm.Description"
-                                Rows="3"
+                    <DxFormLayoutItem Caption="@GetText("station.description_label", "Mô tả")" ColSpanMd="12"
+                        CaptionPosition="CaptionPosition.Vertical">
+                        <Template>
+                            <DxMemo @bind-Text="@stationForm.Description" Rows="3"
                                 NullText="@GetText("station.description_placeholder", "Nhập mô tả")"
                                 CssClass="form-control">
-                        </DxMemo>
-                    </Template>
-                </DxFormLayoutItem>
+                            </DxMemo>
+                        </Template>
+                    </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="@GetText("station.contact_label", "Người liên hệ")" ColSpanMd="6" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <DxTextBox @bind-Text="@stationForm.ContactPerson" 
-                                   NullText="@GetText("station.contact_placeholder", "Tên người liên hệ")"
-                                   CssClass="form-control">
-                        </DxTextBox>
-                    </Template>
-                </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="@GetText("station.contact_label", "Người liên hệ")" ColSpanMd="6"
+                        CaptionPosition="CaptionPosition.Vertical">
+                        <Template>
+                            <DxTextBox @bind-Text="@stationForm.ContactPerson"
+                                NullText="@GetText("station.contact_placeholder", "Tên người liên hệ")"
+                                CssClass="form-control">
+                            </DxTextBox>
+                        </Template>
+                    </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="@GetText("station.phone_label", "Điện thoại")" ColSpanMd="6" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <DxMaskedInput @bind-Value="@stationForm.ContactPhone"
-                                       Mask="9999-999-999"
-                                       ShowValidationIcon="true"
-                                       CssClass="form-control"
-                                       MaxLength="11"
-                                       ></DxMaskedInput>
-                    </Template>
-                </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="@GetText("station.phone_label", "Điện thoại")" ColSpanMd="6"
+                        CaptionPosition="CaptionPosition.Vertical">
+                        <Template>
+                            <DxMaskedInput @bind-Value="@stationForm.ContactPhone" Mask="9999-999-999"
+                                ShowValidationIcon="true" CssClass="form-control" MaxLength="11"></DxMaskedInput>
+                        </Template>
+                    </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="@GetText("station.active_label", "Trạng thái hoạt động")" ColSpanMd="12" CaptionPosition="CaptionPosition.Vertical">
-                    <Template>
-                        <div class="form-check">
-                            <DxCheckBox @bind-Checked="@stationForm.IsActive" 
-                                        CssClass="form-check-input" />
-                        </div>
-                    </Template>
-                </DxFormLayoutItem>
-            </DxFormLayout>
+                    <DxFormLayoutItem Caption="@GetText("station.active_label", "Trạng thái hoạt động")" ColSpanMd="12"
+                        CaptionPosition="CaptionPosition.Vertical">
+                        <Template>
+                            <div class="form-check">
+                                <DxCheckBox @bind-Checked="@stationForm.IsActive" CssClass="form-check-input" />
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
             </div>
-            
+
             <!-- Fixed Footer Buttons -->
             <div class="border-top p-3 bg-light d-flex justify-content-end gap-2">
-                <DxButton Text="@GetText("button.cancel", "Hủy")" 
-                          RenderStyle="ButtonRenderStyle.Secondary"
-                          Click="@CloseModal" />
-                <DxButton Text="@GetText("button.save", "Lưu")" 
-                          RenderStyle="ButtonRenderStyle.Primary"
-                          RenderStyleMode="ButtonRenderStyleMode.Contained"
-                          SubmitFormOnClick="true"
-                          IconCssClass="fas fa-save" />
+                <DxButton Text="@GetText("button.cancel", "Hủy")" RenderStyle="ButtonRenderStyle.Secondary"
+                    Click="@CloseModal" />
+                <DxButton Text="@GetText("button.save", "Lưu")" RenderStyle="ButtonRenderStyle.Primary"
+                    RenderStyleMode="ButtonRenderStyleMode.Contained" SubmitFormOnClick="true"
+                    IconCssClass="fas fa-save" />
             </div>
         </EditForm>
     </BodyContentTemplate>
@@ -275,9 +277,7 @@
 <!-- TimeFrame Configuration Modal -->
 @if (showTimeFramesModal && selectedStationId != Guid.Empty)
 {
-    <TimeFrameConfigModal 
-        StationId="@selectedStationId"
-        Title="@selectedStationName"
+    <TimeFrameConfigModal StationId="@selectedStationId" Title="@selectedStationName"
         @bind-Visible="@showTimeFramesModal" />
 }
 
@@ -285,21 +285,25 @@
     private bool showModal = false;
     private Station? editingStation = null;
     private StationFormModel stationForm = new();
-    
+
     // TimeFrames modal fields
     private bool showTimeFramesModal = false;
     private Guid selectedStationId = Guid.Empty;
     private string selectedStationName = string.Empty;
-    
+
     // Prevent multiple modals opening simultaneously
     private bool isModalOperationInProgress = false;
     
+    // Timer for access check
+    private Timer? _accessCheckTimer;
+    private bool _logoutInProgress = false;
+
     // Server Mode properties
     IGrid Grid { get; set; } = null!;
     EntityInstantFeedbackSource InstantFeedbackSource { get; set; } = null!;
     string SearchText = string.Empty;
 
-    // Column captions - reactive properties  
+    // Column captions - reactive properties
     private string StationCodeColumnCaption => GetText("station.code_column", "Mã Trạm");
     private string NameColumnCaption
     {
@@ -324,14 +328,17 @@
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("[Stations.OnInitializedAsync] START");
-        
+
+        // Kiểm tra quyền truy cập: nếu user là StationEmployee và không còn device nào được gán, logout
+        await CheckUserAccessAndLogoutIfNeeded();
+
         // Detect browser language
         string browserLanguage = "vi";
         try
         {
             var detected = await JS.InvokeAsync<string>("eval", "navigator.language || navigator.userLanguage");
             Console.WriteLine($"[Stations] Detected browser language: {detected}");
-            
+
             if (detected.StartsWith("vi"))
                 browserLanguage = "vi";
             else if (detected.StartsWith("en"))
@@ -344,7 +351,7 @@
             Console.WriteLine($"[Stations] Error detecting language: {ex.Message}");
             browserLanguage = "vi";
         }
-        
+
         // Load from localStorage if exists
         try
         {
@@ -356,49 +363,70 @@
             }
         }
         catch { }
-        
+
         // Initialize LocalizationState
         Console.WriteLine($"[Stations] Initializing LocalizationState with language: {browserLanguage}");
         await LocalizationState.InitializeAsync(browserLanguage);
         Console.WriteLine($"[Stations] LocalizationState initialized - IsLoaded={LocalizationState.IsLoaded}");
-        
+
         // Initialize InstantFeedbackSource for server-side data
         var stationService = ScopedServices.GetRequiredService<IStationService>();
-        InstantFeedbackSource = new EntityInstantFeedbackSource(e => {
+        InstantFeedbackSource = new EntityInstantFeedbackSource(e =>
+        {
             e.KeyExpression = nameof(Station.Id);
             e.QueryableSource = stationService.GetStationsQueryable();
         });
-        
+
         Console.WriteLine("[Stations.OnInitializedAsync] DONE");
     }
-
+@* 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_hasInitialized)
         {
             _hasInitialized = true;
-            Console.WriteLine($"[Stations.OnAfterRenderAsync] Triggering StateHasChanged for translations");
+            Logger.LogInformation($"[Stations.OnAfterRenderAsync] Triggering StateHasChanged for translations");
             StateHasChanged();
+            
+            // Check access immediately on page load
+            Logger.LogInformation($"[Stations.OnAfterRenderAsync] Calling CheckUserAccessAndLogoutIfNeeded immediately");
+            await CheckUserAccessAndLogoutIfNeeded();
+            
+            // Start timer only if not already running (prevent multiple timers)
+            Logger.LogInformation($"[Stations.OnAfterRenderAsync] Timer null check: _accessCheckTimer = {(_accessCheckTimer == null ? "null" : "not null")}");
+            if (_accessCheckTimer == null)
+            {
+                Logger.LogInformation($"[Stations.OnAfterRenderAsync] STARTING TIMER with 60 second interval");
+                _accessCheckTimer = new Timer(async _ =>
+                {
+                    Logger.LogInformation($"[Stations] Access check timer triggered at {DateTime.Now:HH:mm:ss.fff}");
+                    await CheckUserAccessAndLogoutIfNeeded();
+                }, null, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60));
+            }
+            else
+            {
+                Logger.LogInformation($"[Stations.OnAfterRenderAsync] TIMER ALREADY EXISTS - NOT CREATING NEW ONE");
+            }
         }
-    }
+    } *@
 
     private void ShowAddModal()
     {
         if (isModalOperationInProgress) return;
-        
+
         try
         {
             isModalOperationInProgress = true;
-            
+
             // Close all other modals first
             showTimeFramesModal = false;
             selectedStationId = Guid.Empty;
             selectedStationName = string.Empty;
-            
+
             // Reset state
             editingStation = null;
             stationForm = new StationFormModel { IsActive = true };
-            
+
             // Open add modal
             showModal = true;
         }
@@ -411,17 +439,17 @@
     private async Task ShowEditModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
-        
+
         try
         {
             isModalOperationInProgress = true;
-            
+
             // Close all other modals first
             showModal = false;
             showTimeFramesModal = false;
             selectedStationId = Guid.Empty;
             selectedStationName = string.Empty;
-            
+
             var station = await StationService.GetStationByIdAsync(stationId);
             if (station != null)
             {
@@ -449,7 +477,7 @@
         showModal = false;
         editingStation = null;
         stationForm = new StationFormModel { IsActive = true };
-        
+
         // Also reset TimeFrames modal state to prevent conflicts
         showTimeFramesModal = false;
         selectedStationId = Guid.Empty;
@@ -462,7 +490,7 @@
         {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var userName = authState.User.Identity?.Name ?? "System";
-            
+
             if (editingStation == null)
             {
                 // Create new
@@ -478,7 +506,7 @@
                     CreatedAt = DateTime.UtcNow
                 };
                 await StationService.CreateStationAsync(newStation);
-                
+
                 // Auto-create default 24/7 timeframe for new station
                 try
                 {
@@ -502,7 +530,7 @@
                     // Log error but don't fail station creation
                     Console.WriteLine($"Error creating default timeframe: {tfEx.Message}");
                 }
-                
+
                 await JS.InvokeVoidAsync("showToast", "Tạo trạm thành công", "success", 3000);
             }
             else
@@ -521,18 +549,19 @@
             }
 
             CloseModal();
-            
+
             // Refresh grid after modal closes - force reload from database
             await Task.Delay(100);
-            
+
             // Recreate InstantFeedbackSource to force data reload
             var stationService = ScopedServices.GetRequiredService<IStationService>();
             InstantFeedbackSource?.Dispose();
-            InstantFeedbackSource = new EntityInstantFeedbackSource(e => {
+            InstantFeedbackSource = new EntityInstantFeedbackSource(e =>
+            {
                 e.KeyExpression = nameof(Station.Id);
                 e.QueryableSource = stationService.GetStationsQueryable();
             });
-            
+
             StateHasChanged();
         }
         catch (Exception ex)
@@ -555,17 +584,18 @@
                     selectedStationId = Guid.Empty;
                     selectedStationName = string.Empty;
                 }
-                
+
                 await StationService.DeleteStationAsync(stationId);
-                
+
                 // Recreate InstantFeedbackSource to force data reload
                 var stationService = ScopedServices.GetRequiredService<IStationService>();
                 InstantFeedbackSource?.Dispose();
-                InstantFeedbackSource = new EntityInstantFeedbackSource(e => {
+                InstantFeedbackSource = new EntityInstantFeedbackSource(e =>
+                {
                     e.KeyExpression = nameof(Station.Id);
                     e.QueryableSource = stationService.GetStationsQueryable();
                 });
-                
+
                 StateHasChanged();
             }
             catch (Exception ex)
@@ -585,17 +615,17 @@
     private async Task ShowCamerasModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
-        
+
         try
         {
             isModalOperationInProgress = true;
-            
+
             // Close all other modals first
             showModal = false;
             showTimeFramesModal = false;
             selectedStationId = Guid.Empty;
             selectedStationName = string.Empty;
-            
+
             // TODO: Navigate to camera assignment page
             await Task.CompletedTask;
         }
@@ -608,23 +638,23 @@
     private async Task ShowTimeFramesModalAsync(Guid stationId)
     {
         if (isModalOperationInProgress) return;
-        
+
         try
         {
             isModalOperationInProgress = true;
-            
+
             // Close all other modals first
             showModal = false;
             editingStation = null;
-            
+
             // Reset TimeFrames modal state
             showTimeFramesModal = false;
             selectedStationId = Guid.Empty;
             selectedStationName = string.Empty;
-            
+
             // Small delay to ensure modal is closed
             await Task.Delay(100);
-            
+
             var station = await StationService.GetStationByIdAsync(stationId);
             if (station != null)
             {
@@ -642,6 +672,7 @@
     public void Dispose()
     {
         InstantFeedbackSource?.Dispose();
+        _accessCheckTimer?.Dispose();
     }
 
     public class StationFormModel
@@ -699,4 +730,46 @@
         }
         return defaultText;
     }
+
+    private async Task CheckUserAccessAndLogoutIfNeeded()
+    {
+        // Prevent showing alert multiple times
+        if (_logoutInProgress)
+            return;
+
+        try
+        {
+            Logger.LogInformation($"[Stations.CheckUserAccessAndLogoutIfNeeded] START at {DateTime.Now:HH:mm:ss.fff}");
+            // DISABLED: ForceLogoutService certificate checking (causes refresh loop for browser SSO)
+            // Certificate-based device validation is handled by AccessControlMiddleware with MAC address
+            // var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            // var user = authState.User;
+            // 
+            // Logger.LogInformation($"[Stations.CheckUserAccessAndLogoutIfNeeded] User.Identity.IsAuthenticated: {user.Identity?.IsAuthenticated}");
+            // Logger.LogInformation($"[Stations.CheckUserAccessAndLogoutIfNeeded] User.Identity.Name: {user.Identity?.Name}");
+            // 
+            // await ForceLogoutService.CheckAndLogoutIfNeededAsync(
+            //     user,
+            //     DbContextFactory,
+            //     HttpClient,
+            //     Navigation,
+            //     JS,
+            //     Logger,
+            //     _accessCheckTimer,
+            //     HttpContextAccessor);
+            // 
+            // _logoutInProgress = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"[Stations] Access check error: {ex.Message}");
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        _accessCheckTimer?.Dispose();
+        await ValueTask.CompletedTask;
+    }
 }
+

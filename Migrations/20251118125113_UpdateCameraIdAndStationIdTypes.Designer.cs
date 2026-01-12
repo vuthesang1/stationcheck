@@ -892,7 +892,7 @@ namespace StationCheck.Migrations
                             Category = "BackgroundServices",
                             CreatedAt = new DateTime(2025, 11, 18, 12, 51, 12, 750, DateTimeKind.Utc).AddTicks(6237),
                             CreatedBy = "System",
-                            Description = "Khoảng thời gian kiểm tra chuyển động (giây)",
+                            Description = "Khoảng thời gian kiểm tra nhấn nút (giây)",
                             DisplayName = "Motion Monitor Interval",
                             IsEditable = true,
                             Key = "MotionMonitorInterval",

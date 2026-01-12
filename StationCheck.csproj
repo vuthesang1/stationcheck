@@ -10,16 +10,21 @@
   <ItemGroup>
     <Compile Remove="GenerateHash.cs" />
     <Compile Remove="EmailSimulator\**" />
+    <Compile Remove="DeviceInstaller\**" />
+    <Compile Remove="DesktopLoginApp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Database -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="DevExpress.Blazor" Version="25.1.6" />
     <PackageReference Include="DevExpress.Blazor.Themes" Version="25.1.6" />
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Extensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
@@ -38,6 +43,11 @@
 
   <ItemGroup>
     <ProjectReference Include="EmailSimulator\EmailSimulator\EmailSimulator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure web.config is copied to publish output for IIS deployment -->
+    <None Update="web.config" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -111,7 +111,7 @@ Phát triển các chức năng cốt lõi của hệ thống quản lý trạm 
 
 ---
 
-## 🔄 **Module: Xử lý Sự kiện Chuyển động**
+## 🔄 **Module: Xử lý Sự kiện nhấn nút**
 
 ### ✅ API Nhận Sự kiện từ NVR - **Effort: 2** - **Status: Planned**
 - [ ] **Event API**

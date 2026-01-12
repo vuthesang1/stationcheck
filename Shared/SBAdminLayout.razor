@@ -3,10 +3,17 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using StationCheck.Services
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 @inject LocalizationStateService LocalizationState
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject HttpClient HttpClient
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ILogger<SBAdminLayout> Logger
+@inject IForceLogoutService ForceLogoutService
 
 <AuthorizeView>
     <Authorized Context="authContext">
@@ -26,7 +33,7 @@
                 <AuthorizeView Roles="hidden">
                     <!-- Divider -->
                     <hr class="sidebar-divider my-0">
-                    
+
                     <li class="nav-item @(IsActive("/") ? "active" : "")">
                         <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
                             <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -36,7 +43,7 @@
                 </AuthorizeView>
 
                 <!-- Divider & Heading for Management (Admin & Manager) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="Admin,Manager,StationEmployee">
                     <hr class="sidebar-divider">
                     <div class="sidebar-heading">
                         @GetText("menu.management", "Quản lý")
@@ -44,7 +51,7 @@
                 </AuthorizeView>
 
                 <!-- Nav Item - Stations (Admin & Manager) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="Admin,Manager,StationEmployee">
                     <li class="nav-item @(IsActive("/stations") ? "active" : "")">
                         <NavLink class="nav-link" href="/stations">
                             <i class="fas fa-fw fa-building"></i>
@@ -68,7 +75,7 @@
                     <li class="nav-item @(IsActive("/motion-monitoring") ? "active" : "")">
                         <NavLink class="nav-link" href="/motion-monitoring">
                             <i class="fas fa-fw fa-video"></i>
-                            <span>@GetText("menu.motion_monitoring", "Giám sát Chuyển động")</span>
+                            <span>@GetText("menu.motion_monitoring", "Giám sát nhấn nút")</span>
                         </NavLink>
                     </li>
                 </AuthorizeView> *@
@@ -85,7 +92,7 @@
                 </AuthorizeView> *@
 
                 <!-- Divider & Heading for Monitoring (Admin & Manager) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="Admin,Manager,StationEmployee">
                     <hr class="sidebar-divider">
                     <div class="sidebar-heading">
                         @GetText("menu.monitoring", defaultText: "Giám sát")
@@ -115,7 +122,7 @@
 
 
                 <!-- Nav Item - Station Monitor (Real-time Status) -->
-                <AuthorizeView Roles="Admin,Manager">
+                <AuthorizeView Roles="Admin,Manager,StationEmployee">
                     <li class="nav-item @(IsActive("/station-monitor") ? "active" : "")">
                         <NavLink class="nav-link" href="/station-monitor">
                             <i class="fas fa-fw fa-broadcast-tower"></i>
@@ -146,12 +153,14 @@
 
 
                 <!-- Divider & Heading for Personnel (Admin Only) -->
-                <AuthorizeView Roles="Admin">
+                <AuthorizeView Roles="Admin,Manager">
                     <hr class="sidebar-divider">
                     <div class="sidebar-heading">
                         @GetText("menu.personnel", "Nhân sự")
                     </div>
                 </AuthorizeView>
+
+
 
 
                 <!-- Nav Item - Employees (Manager & Admin) -->
@@ -172,8 +181,19 @@
                             <span>@GetText("menu.users", "Quản lý User")</span>
                         </NavLink>
                     </li>
+
+
                 </AuthorizeView>
 
+                <AuthorizeView Roles="Admin,Manager">
+
+                    <li class="nav-item @(IsActive("/device-management") ? "active" : "")">
+                        <NavLink class="nav-link" href="/device-management">
+                            <i class="fas fa-fw fa-tablet-alt"></i>
+                            <span>@GetText("menu.device_management", "Quản lý thiết bị")</span>
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
 
                 <!-- Divider & Heading for System (Admin Only) -->
                 <AuthorizeView Roles="Admin">
@@ -288,7 +308,9 @@
 
                     <!-- Begin Page Content -->
                     <div class="container-fluid">
-                        @Body
+                        <CascadingAuthenticationState>
+                            @Body
+                        </CascadingAuthenticationState>
                     </div>
                     <!-- /.container-fluid -->
                 </div>
@@ -320,6 +342,7 @@
 
 @code {
     private string currentLanguage = "vi";
+    private Timer? _accessCheckTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -332,6 +355,52 @@
 
             await LocalizationState.InitializeAsync(preferredLanguage);
             currentLanguage = preferredLanguage;
+        }
+
+        // DISABLED: ForceLogoutService certificate checking (causes refresh loop for browser SSO)
+        // Certificate-based device validation is handled by AccessControlMiddleware with MAC address
+        // var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        // var user = authState.User;
+        //
+        // if (user?.Identity?.IsAuthenticated == true)
+        // {
+        //     Logger.LogInformation($"[SBAdminLayout] Starting ForceLogoutService timer for user: {user.Identity.Name}");
+        //
+        //     // Check immediately
+        //     await CheckUserAccessAndLogoutIfNeeded();
+        //
+        //     // Then check every 5 seconds
+        //     _accessCheckTimer = new Timer(async _ =>
+        //     {
+        //         await InvokeAsync(async () => await CheckUserAccessAndLogoutIfNeeded());
+        //     }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+        // }
+    }
+
+    private async Task CheckUserAccessAndLogoutIfNeeded()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                await ForceLogoutService.CheckAndLogoutIfNeededAsync(
+                user,
+                DbContextFactory,
+                HttpClient,
+                Navigation,
+                JS,
+                Logger,
+                _accessCheckTimer,
+                HttpContextAccessor
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[SBAdminLayout] Error in CheckUserAccessAndLogoutIfNeeded");
         }
     }
 
@@ -372,6 +441,28 @@
                     StateHasChanged();
                 }
             }
+
+            // Initialize device status monitoring for real-time notifications
+            try
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+                
+                // Only initialize for authenticated StationEmployee users
+                if (user?.Identity?.IsAuthenticated == true)
+                {
+                    var role = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                    if (role == "StationEmployee")
+                    {
+                        await JS.InvokeVoidAsync("initDeviceStatusMonitor");
+                        Logger.LogInformation("[SBAdminLayout] Device status monitoring initialized for user: {Username}", user.Identity.Name);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "[SBAdminLayout] Failed to initialize device status monitoring");
+            }
         }
     }
 
@@ -387,6 +478,10 @@
         {
             LocalizationState.OnLanguageChanged -= HandleLanguageChanged;
         }
+
+        // Clean up ForceLogoutService timer
+        _accessCheckTimer?.Dispose();
+        _accessCheckTimer = null;
     }
 
     private bool IsActive(string href)
@@ -397,10 +492,28 @@
 
     private async Task Logout()
     {
-        if (AuthStateProvider is CustomAuthenticationStateProvider customAuthStateProvider)
+        // Don't call logout API if already on login page
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        if (currentPath != "/login")
         {
-            await customAuthStateProvider.NotifyUserLogout();
-            Navigation.NavigateTo("/login", true);
+            try
+            {
+                // ✅ Use JavaScript fetch to logout (handles cookies, storage, and redirect)
+                // JavaScript will do full page reload to clear Blazor circuit state
+                await JS.InvokeVoidAsync("logoutWithFetch");
+                // No need to call Navigation.NavigateTo - JavaScript handles redirect
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Logout] Error: {ex.Message}");
+                // Fallback: Force reload to login if JavaScript fails
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+        }
+        else
+        {
+            // Already on login page, just reload
+            Navigation.NavigateTo("/login", forceLoad: true);
         }
     }
 

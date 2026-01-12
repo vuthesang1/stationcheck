@@ -150,7 +150,7 @@ namespace StationCheck.Migrations
             migrationBuilder.InsertData(
                 table: "SystemConfigurations",
                 columns: new[] { "Id", "Category", "CreatedAt", "CreatedBy", "Description", "DisplayName", "IsEditable", "Key", "ModifiedAt", "ModifiedBy", "Value", "ValueType" },
-                values: new object[] { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "BackgroundServices", new DateTime(2025, 11, 18, 13, 49, 6, 922, DateTimeKind.Utc).AddTicks(4324), "System", "Khoảng thời gian kiểm tra chuyển động (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" });
+                values: new object[] { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "BackgroundServices", new DateTime(2025, 11, 18, 13, 49, 6, 922, DateTimeKind.Utc).AddTicks(4324), "System", "Khoảng thời gian kiểm tra nhấn nút (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" });
 
             migrationBuilder.UpdateData(
                 table: "Users",

@@ -1,0 +1,289 @@
+@page "/device-approval"
+@using Microsoft.AspNetCore.Components.Authorization
+@using StationCheck.Models
+@using Microsoft.EntityFrameworkCore
+@using StationCheck.Data
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-check-square mr-2"></i>
+                @GetText("device_approval_title", "Duyệt thiết bị")
+            </h2>
+            <small class="text-muted">@GetText("device_approval_desc", "Xem xét và duyệt/từ chối các thiết bị chờ phê    duyệt")</small>
+        </div>
+    </div>
+
+    <!-- Pending Devices Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-hourglass-half mr-2"></i>
+                        @GetText("device_pending_approvals", "Chờ phê duyệt") (@pendingDevices.Count)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (isLoadingPending)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">@GetText("common_loading", "Đang tải...")</span>
+                            </div>
+                        </div>
+                    }
+                    else if (pendingDevices.Count == 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            @GetText("device_no_pending", "Không có thiết bị chờ phê duyệt.")
+                        </div>
+                    }
+                    else
+                    {
+                        <DxGrid Data="@pendingDevices" PageSize="10" ShowPager="true"
+                            PagerNavigationMode="PagerNavigationMode.InputBox" AllowSelectRowByClick="false"
+                            HighlightRowOnHover="true" TextWrapEnabled="false"
+                            FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                            ColumnResizeMode="GridColumnResizeMode.NextColumn">
+                            <Columns>
+                                <DxGridDataColumn FieldName="DeviceName" Caption="@GetText("device_name", "Tên thiết bị")"
+                                    MinWidth="150" />
+                                <DxGridDataColumn FieldName="MacAddress"
+                                    Caption="@GetText("device_mac_address", "MAC Address")" Width="150px" />
+                                <DxGridDataColumn FieldName="CertificateValidFrom"
+                                    Caption="@GetText("device_valid_from", "Hiệu lực từ")" Width="120px"
+                                    DisplayFormat="dd/MM/yyyy" />
+                                <DxGridDataColumn FieldName="CertificateValidTo"
+                                    Caption="@GetText("device_valid_to", "Hết hạn")" Width="120px"
+                                    DisplayFormat="dd/MM/yyyy" />
+                                <DxGridDataColumn FieldName="CreatedAt"
+                                    Caption="@GetText("device_registered_date", "Ngày đăng ký")" Width="150px"
+                                    DisplayFormat="dd/MM/yyyy HH:mm" />
+                                <DxGridDataColumn FieldName="Id" Caption="@GetText("common_actions", "Thao tác")"
+                                    Width="230px" AllowSort="false">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var dev = (PendingDeviceDto)context.DataItem;
+                                        }
+                                        <button class="btn btn-sm btn-success mr-1"
+                                            title="@GetText("device_approve", "Duyệt")" @onclick="() => ApproveDevice(dev)">
+                                            <i class="fas fa-check"></i> @GetText("common_approve", "Duyệt")
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" title="@GetText("device_reject", "Từ chối")"
+                                            @onclick="() => RejectDevice(dev)">
+                                            <i class="fas fa-times"></i> @GetText("common_reject", "Từ chối")
+                                        </button>
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                            </Columns>
+                        </DxGrid>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Details Modal -->
+    <DxPopup @bind-Visible="@showDetailsModal" HeaderText="@GetText("device_details", "Chi tiết thiết bị")"
+        Width="600px">
+        <Content>
+            @if (selectedDevice != null)
+            {
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>@GetText("device_name", "Tên thiết bị"):</strong>
+                        <p>@selectedDevice.DeviceName</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>@GetText("device_thumbprint", "Thumbprint"):</strong>
+                        <p><code>@selectedDevice.CertificateThumbprint</code></p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>@GetText("device_certificate_subject", "Certificate Subject"):</strong>
+                        <p>@selectedDevice.CertificateSubject</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>@GetText("device_valid_from", "Hiệu lực từ"):</strong>
+                        <p>@selectedDevice.CertificateValidFrom.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>@GetText("device_valid_to", "Hết hạn"):</strong>
+                        <p>@selectedDevice.CertificateValidTo.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>@GetText("device_registered_date", "Ngày đăng ký"):</strong>
+                        <p>@selectedDevice.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                    </div>
+                </div>
+
+                <div class="text-right mt-4">
+                    <button class="btn btn-success mr-2" @onclick="() => ApproveDevice(selectedDevice)">
+                        <i class="fas fa-check mr-1"></i>@GetText("common_approve", "Duyệt")
+                    </button>
+                    <button class="btn btn-danger mr-2" @onclick="() => RejectDevice(selectedDevice)">
+                        <i class="fas fa-times mr-1"></i>@GetText("common_reject", "Từ chối")
+                    </button>
+                    <button class="btn btn-secondary" @onclick="() => showDetailsModal = false">
+                        @GetText("common_close", "Đóng")
+                    </button>
+                </div>
+            }
+        </Content>
+    </DxPopup>
+</div>
+
+@code {
+    private List<PendingDeviceDto> pendingDevices = new();
+    private PendingDeviceDto? selectedDevice;
+    private bool showDetailsModal = false;
+    private bool isLoadingPending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("[DeviceApproval] Component initialized");
+        await LoadPendingDevices();
+    }
+
+    private async Task LoadPendingDevices()
+    {
+        try
+        {
+            isLoadingPending = true;
+            Console.WriteLine("[DeviceApproval] Loading pending devices...");
+
+            // Query directly from database - Blazor Server has server-side access
+            await using var context = DbContextFactory.CreateDbContext();
+
+            var devices = await context.UserDevices
+            .Where(d => !d.IsApproved && !d.IsRevoked && !d.IsDeleted)
+            .Select(d => new PendingDeviceDto
+            {
+                Id = d.Id,
+                DeviceName = d.DeviceName,
+                CertificateThumbprint = d.CertificateThumbprint,
+                CertificateSubject = d.CertificateSubject,
+                CertificateValidFrom = d.CertificateValidFrom,
+                CertificateValidTo = d.CertificateValidTo,
+                CreatedAt = d.CreatedAt
+            })
+            .ToListAsync();
+
+            pendingDevices = devices;
+
+            Console.WriteLine($"[DeviceApproval] Loaded {pendingDevices.Count} pending devices");
+            foreach (var device in pendingDevices)
+            {
+                Console.WriteLine($"[DeviceApproval] - Device: {device.Id}, Name: {device.DeviceName}, Created: {device.CreatedAt}");
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"[DeviceApproval] HTTP Error: {ex.Message}");
+            Console.WriteLine($"[DeviceApproval] Status Code: {ex.StatusCode}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DeviceApproval] Error loading pending devices: {ex.Message}");
+            Console.WriteLine($"[DeviceApproval] Stack trace: {ex.StackTrace}");
+        }
+        finally
+        {
+            isLoadingPending = false;
+        }
+    }
+
+    private async Task ApproveDevice(PendingDeviceDto device)
+    {
+        try
+        {
+            Console.WriteLine($"[DeviceApproval] Approving device: {device.Id}");
+
+            await using var context = DbContextFactory.CreateDbContext();
+            var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.Id);
+
+            if (dbDevice != null)
+            {
+                dbDevice.IsApproved = true;
+                dbDevice.IsRevoked = false;
+                context.UserDevices.Update(dbDevice);
+                await context.SaveChangesAsync();
+
+                await LoadPendingDevices();
+                showDetailsModal = false;
+                await JS.InvokeVoidAsync("alert", $"Thiết bị '{device.DeviceName}' đã được duyệt.");
+                Console.WriteLine($"[DeviceApproval] Device approved: {device.Id}");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Không tìm thấy thiết bị.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DeviceApproval] Error approving device: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private async Task RejectDevice(PendingDeviceDto device)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn từ chối thiết bị '{device.DeviceName}'?"))
+        {
+            try
+            {
+                Console.WriteLine($"[DeviceApproval] Rejecting device: {device.Id}");
+
+                await using var context = DbContextFactory.CreateDbContext();
+                var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.Id);
+
+                if (dbDevice != null)
+                {
+                    dbDevice.IsRevoked = true;
+                    dbDevice.IsApproved = false;
+                    context.UserDevices.Update(dbDevice);
+                    await context.SaveChangesAsync();
+
+                    await LoadPendingDevices();
+                    showDetailsModal = false;
+                    await JS.InvokeVoidAsync("alert", $"Thiết bị '{device.DeviceName}' đã bị từ chối.");
+                    Console.WriteLine($"[DeviceApproval] Device rejected: {device.Id}");
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("alert", "Không tìm thấy thiết bị.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeviceApproval] Error rejecting device: {ex.Message}");
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private string GetText(string key, string defaultValue)
+    {
+        // TODO: Implement localization from service
+        return defaultValue;
+    }
+}

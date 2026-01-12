@@ -98,7 +98,7 @@
                                         <p class="alert-message">@alert.Message</p>
                                         <div class="alert-details">
                                             <div><i class="bi bi-clock-history"></i> Lần cuối phát hiện: @(alert.LastMotionAt?.ToString("HH:mm:ss") ?? "N/A")</div>
-                                            <div><i class="bi bi-hourglass-split"></i> Thời gian không có chuyển động: @alert.MinutesSinceLastMotion phút</div>
+                                            <div><i class="bi bi-hourglass-split"></i> Thời gian không có nhấn nút: @alert.MinutesSinceLastMotion phút</div>
                                         </div>
                                     </div>
                                 </div>
@@ -171,10 +171,10 @@
                         <div class="col-12">
                             <label class="fw-bold">Cửa sổ chấp nhận (Tolerance Window):</label>
                             <p class="text-info">
-                                ± @selectedTimeFrame.BufferMinutes phút quanh thời điểm cảnh báo
+                                +@selectedTimeFrame.BufferMinutes phút sau thời điểm cảnh báo
                             </p>
                             <small class="text-muted">
-                                Chuyển động phát hiện trong cửa sổ này sẽ tự động giải quyết cảnh báo
+                                Không nhấn nút trong cửa sổ này sẽ tự động giải quyết cảnh báo
                             </small>
                         </div>
                     </div>

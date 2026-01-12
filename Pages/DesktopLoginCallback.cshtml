@@ -1,0 +1,99 @@
+@page "/desktop-login-callback"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt
+@using Microsoft.IdentityModel.Tokens
+@using System.Text
+@model StationCheck.Pages.DesktopLoginCallbackModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Đang đăng nhập...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4e73df;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #e74a3b;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h4>@Model.StatusTitle</h4>
+        <p>@Model.StatusMessage</p>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="error">@Model.ErrorMessage</div>
+        }
+        @if (Model.RedirectUrl != null)
+        {
+            <p style="margin-top: 1rem; color: #666;">
+                Tự động chuyển hướng sau <span id="countdown">10</span> giây...
+            </p>
+            <button onclick="window.location.href='@Model.RedirectUrl'" 
+                    style="padding: 8px 16px; background: #4e73df; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px;">
+                Vào ngay
+            </button>
+        }
+    </div>
+    
+    @if (Model.RedirectUrl != null)
+    {
+        <script>
+            // Countdown timer
+            var seconds = Math.floor(@Model.RedirectDelayMs / 1000);
+            var countdownElement = document.getElementById('countdown');
+            
+            var interval = setInterval(function() {
+                seconds--;
+                if (countdownElement) {
+                    countdownElement.textContent = seconds;
+                }
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+            
+            // Auto redirect
+            setTimeout(function() {
+                window.location.href = '@Model.RedirectUrl';
+            }, @Model.RedirectDelayMs);
+        </script>
+    }
+</body>
+</html>

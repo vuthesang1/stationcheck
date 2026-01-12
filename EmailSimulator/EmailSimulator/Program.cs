@@ -60,27 +60,13 @@ namespace StationCheck.EmailSimulator
                 alarmTime = alarmTime == default ? DateTime.Now : alarmTime;
                 
                 // Subject format: [stm] {StationId}
-                var subject = $"[stm] {stationId}";
+                var subject = $"{stationId}";
                 
                 // Body format: Dahua NVR alarm email
-                var body = $@"Alarm Type: Motion Detection Alarm
-
-Alarm Event: Motion Detection
-
-Alarm Input Channel No.: 1
-
-Alarm Input Channel Name: {channelName}
-
-Alarm Start Time (D/M/Y H:M:S): {alarmTime:dd/MM/yyyy HH:mm:ss}
-
-Alarm Device Name: {deviceName}
-
-Alarm Name: 
-
-IP Address: {ipAddress}
-
-Alarm Details: 
-Motion detection triggered at {alarmTime:HH:mm:ss}";
+                var body = $@"Sự kiện báo động: Phát hiện chuyển động
+Mã kênh đầu vào cảnh báo: 3
+Tên kênh đầu vào báo động: Camera 03
+Thời gian bắt đầu cảnh báo(D/M/Y H:M:S): {alarmTime:dd/MM/yyyy HH:mm:ss}";
 
                 using (var smtpClient = new SmtpClient(_smtpServer, _smtpPort))
                 {

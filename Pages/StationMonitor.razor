@@ -3,8 +3,19 @@
 @using Microsoft.AspNetCore.Authorization
 @using StationCheck.Services
 @using StationCheck.Components
-@attribute [Authorize(Roles = "Admin,Manager")]
+@using StationCheck.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@attribute [Authorize(Roles = "Admin,Manager,StationEmployee")]
 @inject LocalizationStateService LocalizationState
+@inject AuthenticationStateProvider AuthStateProvider
+@implements IAsyncDisposable
+@inject NavigationManager Navigation
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject IJSRuntime JS
+@inject ILogger<StationMonitor> Logger
+@inject HttpClient HttpClient
+@inject IForceLogoutService ForceLogoutService
 
 <PageTitle>Giám sát trạm - StationCheck</PageTitle>
 
@@ -23,8 +34,63 @@
 </div>
 
 @code {
+    private Timer? _accessCheckTimer;
+    private bool _logoutInProgress = false;
+
     protected override async Task OnInitializedAsync()
     {
+        // Kiểm tra quyền truy cập ngay khi load
+        await CheckUserAccessAndLogoutIfNeeded();
+        
         await LocalizationState.InitializeAsync();
+        
+        // Khởi động timer kiểm tra quyền truy cập mỗi 3 giây để detect removal nhanh
+        if (_accessCheckTimer == null)
+        {
+            _accessCheckTimer = new Timer(async _ =>
+            {
+                await CheckUserAccessAndLogoutIfNeeded();
+            }, null, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60));
+        }
+    }
+
+    private async Task CheckUserAccessAndLogoutIfNeeded()
+    {
+        // Prevent showing alert multiple times
+        // DISABLED: ForceLogoutService certificate checking (causes refresh loop for browser SSO)
+        // Certificate-based device validation is handled by AccessControlMiddleware with MAC address
+        // if (_logoutInProgress)
+        //     return;
+        //
+        // try
+        // {
+        //     var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        //     await ForceLogoutService.CheckAndLogoutIfNeededAsync(
+        //         authState.User,
+        //         DbContextFactory,
+        //         HttpClient,
+        //         Navigation,
+        //         JS,
+        //         Logger,
+        //         _accessCheckTimer);
+        //     
+        //     _logoutInProgress = true;
+        // }
+        // catch (Exception ex)
+        // {
+        //     Logger.LogError(ex, $"[StationMonitor] Access check error: {ex.Message}");
+        // }
+    }
+
+    public void Dispose()
+    {
+        _accessCheckTimer?.Dispose();
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        _accessCheckTimer?.Dispose();
+        await ValueTask.CompletedTask;
     }
 }
+

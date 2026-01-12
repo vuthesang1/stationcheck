@@ -9,6 +9,7 @@
 @inject NavigationManager Navigation
 @inject LocalizationStateService LocalizationState
 @inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient Http
 
 <PageTitle>@GetText("user.title", "Quản Lý User")</PageTitle>
 
@@ -111,6 +112,7 @@
                                 @(lastLogin?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? GetText("user.never_login", "Chưa đăng nhập"))
                             </CellDisplayTemplate>
                         </DxGridDataColumn>
+                        <DxGridDataColumn FieldName="DeviceCount" Caption="@GetText("user.device_count", "Số Thiết Bị")" Width="100px" DisplayFormat="0" />
                         <DxGridDataColumn FieldName="Id" Caption="@ActionsColumnCaption" Width="150px" AllowSort="false">
                             <CellDisplayTemplate>
                                 @{
@@ -364,6 +366,9 @@
     private bool showPassword = false;
     private string generatedPassword = "";
 
+    [CascadingParameter]
+    public HttpClient? HttpClient { get; set; }
+
     // Column captions for DevExpress Grid
     private string UsernameColumnCaption => GetText("user.username_column", "Username");
     private string FullNameColumnCaption => GetText("user.fullname_column", "Họ và Tên");
@@ -531,6 +536,30 @@
         try
         {
             users = await UserService.GetAllUsersAsync();
+            
+            // Load device counts for each user
+            if (users != null && users.Count > 0)
+            {
+                try
+                {
+                    var deviceCounts = await Http.GetFromJsonAsync<Dictionary<string, int>>("api/auth/user-device-counts");
+                    if (deviceCounts != null)
+                    {
+                        foreach (var user in users)
+                        {
+                            if (deviceCounts.TryGetValue(user.Id, out var count))
+                            {
+                                user.DeviceCount = count;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to load device counts: {ex.Message}");
+                    // Continue without device counts if the API call fails
+                }
+            }
         }
         catch (Exception ex)
         {

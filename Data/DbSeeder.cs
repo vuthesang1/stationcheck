@@ -64,7 +64,7 @@ public static class DbSeeder
                 new Translation { LanguageCode = "vi", Key = "menu.management", Value = "Quản lý", Category = "menu", CreatedAt = DateTime.UtcNow },
                 new Translation { LanguageCode = "vi", Key = "menu.stations", Value = "Quản lý Trạm", Category = "menu", CreatedAt = DateTime.UtcNow },
                 new Translation { LanguageCode = "vi", Key = "menu.my_station", Value = "Trạm của tôi", Category = "menu", CreatedAt = DateTime.UtcNow },
-                new Translation { LanguageCode = "vi", Key = "menu.motion_monitoring", Value = "Giám sát Chuyển động", Category = "menu", CreatedAt = DateTime.UtcNow },
+                new Translation { LanguageCode = "vi", Key = "menu.motion_monitoring", Value = "Giám sát nhấn nút", Category = "menu", CreatedAt = DateTime.UtcNow },
                 new Translation { LanguageCode = "vi", Key = "menu.schedules", Value = "Cấu hình Lịch", Category = "menu", CreatedAt = DateTime.UtcNow },
                 new Translation { LanguageCode = "vi", Key = "menu.monitoring", Value = "Giám sát", Category = "menu", CreatedAt = DateTime.UtcNow },
                 new Translation { LanguageCode = "vi", Key = "menu.monitoring_settings", Value = "Cấu hình Giám sát", Category = "menu", CreatedAt = DateTime.UtcNow },

@@ -148,7 +148,7 @@ INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [C
 (NEWID(), 'en', 'page.reports', 'Reports and History', 'page', GETUTCDATE()),
 (NEWID(), 'vi', 'page.alert_report', 'Báo cáo Cảnh báo', 'page', GETUTCDATE()),
 (NEWID(), 'en', 'page.alert_report', 'Alert Report', 'page', GETUTCDATE()),
-(NEWID(), 'vi', 'page.motion_report', 'Báo cáo Chuyển động', 'page', GETUTCDATE()),
+(NEWID(), 'vi', 'page.motion_report', 'Báo cáo nhấn nút', 'page', GETUTCDATE()),
 (NEWID(), 'en', 'page.motion_report', 'Motion Report', 'page', GETUTCDATE()),
 (NEWID(), 'vi', 'page.config_history', 'Lịch sử Thay đổi Cấu hình', 'page', GETUTCDATE()),
 (NEWID(), 'en', 'page.config_history', 'Configuration Change History', 'page', GETUTCDATE()),
@@ -163,7 +163,7 @@ INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [C
 INSERT INTO [Translations] ([Id], [LanguageCode], [Key], [Value], [Category], [CreatedAt]) VALUES
 (NEWID(), 'vi', 'tab.alert_report', 'Báo cáo Cảnh báo', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'tab.alert_report', 'Alert Report', 'tab', GETUTCDATE()),
-(NEWID(), 'vi', 'tab.motion_report', 'Báo cáo Chuyển động', 'tab', GETUTCDATE()),
+(NEWID(), 'vi', 'tab.motion_report', 'Báo cáo nhấn nút', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'tab.motion_report', 'Motion Report', 'tab', GETUTCDATE()),
 (NEWID(), 'vi', 'tab.config_history', 'Lịch sử Thay đổi Cấu hình', 'tab', GETUTCDATE()),
 (NEWID(), 'en', 'tab.config_history', 'Configuration History', 'tab', GETUTCDATE());

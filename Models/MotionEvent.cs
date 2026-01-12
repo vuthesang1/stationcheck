@@ -28,6 +28,9 @@ namespace StationCheck.Models
         [MaxLength(500)]
         public string? EmailSubject { get; set; }
 
+        // ✅ NEW: Store full email body content (supports any email format changes)
+        public string? EmailBody { get; set; }  // nvarchar(max) - full email content as-is
+
         // ✅ NEW: Snapshot storage path
         [MaxLength(500)]
         public string? SnapshotPath { get; set; }

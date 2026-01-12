@@ -22,6 +22,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<ApplicationUser> Users => Set<ApplicationUser>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     
+    // Device Registration & Management
+    public DbSet<UserDevice> UserDevices => Set<UserDevice>();
+    public DbSet<DeviceUserAssignment> DeviceUserAssignments => Set<DeviceUserAssignment>();
+    public DbSet<DeviceCertificateAuditLog> DeviceCertificateAuditLogs => Set<DeviceCertificateAuditLog>();
+    
     // Station Management
     public DbSet<Station> Stations => Set<Station>();
     
@@ -110,6 +115,61 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.IsResolved);
             entity.HasIndex(e => e.Severity);
             entity.HasIndex(e => e.TimeFrameHistoryId);
+        });
+
+        // UserDevice configuration
+        modelBuilder.Entity<UserDevice>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CertificateThumbprint).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.CertificateSubject).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.DeviceName).IsRequired().HasMaxLength(200);
+            
+            entity.HasIndex(e => e.CertificateThumbprint).IsUnique();
+            entity.HasIndex(e => e.IsApproved);
+            entity.HasIndex(e => e.IsRevoked);
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // DeviceUserAssignment configuration
+        modelBuilder.Entity<DeviceUserAssignment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            entity.HasOne(e => e.Device)
+                .WithMany(d => d.Assignments)
+                .HasForeignKey(e => e.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            entity.HasIndex(e => new { e.DeviceId, e.UserId }).IsUnique();
+            entity.HasIndex(e => e.IsActive);
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // DeviceCertificateAuditLog configuration
+        modelBuilder.Entity<DeviceCertificateAuditLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            entity.HasOne(e => e.Device)
+                .WithMany(d => d.AuditLogs)
+                .HasForeignKey(e => e.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.Action);
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
         // Seed data
@@ -243,35 +303,7 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
-        // Seed sample stations
-        modelBuilder.Entity<Station>().HasData(
-            new Station
-            {
-                Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                StationCode = "123123123",
-                Name = "Trạm Quan Trắc Sông Hồng",
-                Address = "Quận Hoàn Kiếm, Hà Nội",
-                Description = "Trạm quan trắc chất lượng nước sông Hồng",
-                ContactPerson = "Nguyễn Văn A",
-                ContactPhone = "0123456789",
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            },
-            new Station
-            {
-                Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                StationCode = "121123123",
-                Name = "Trạm Quan Trắc Sông Tô Lịch",
-                Address = "Quận Đống Đa, Hà Nội",
-                Description = "Trạm quan trắc chất lượng nước sông Tô Lịch",
-                ContactPerson = "Trần Thị B",
-                ContactPhone = "0987654321",
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            }
-        );
-        
+       
         // Seed default users
         // Generate hashes at seed time to ensure they're correct
         var adminHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 12);

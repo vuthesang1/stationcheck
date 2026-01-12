@@ -112,7 +112,7 @@ public class MotionDetectionService : IMotionDetectionService
                         Severity = minutesSinceLastMotion > currentRule.IntervalMinutes * 2 
                             ? AlertSeverity.Critical 
                             : AlertSeverity.Warning,
-                        Message = $"Không phát hiện chuyển động trong {minutesSinceLastMotion} phút (mong đợi: {currentRule.IntervalMinutes} phút)",
+                        Message = $"Không phát hiện nhấn nút trong {minutesSinceLastMotion} phút (mong đợi: {currentRule.IntervalMinutes} phút)",
                         // TODO: Sau khi refactor sang station-based, thay StationId và thêm ConfigurationSnapshot
                         // ExpectedIntervalMinutes removed - use TimeFrame logic instead
                         LastMotionAt = lastMotion.DetectedAt,

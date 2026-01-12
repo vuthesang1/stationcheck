@@ -1,0 +1,1008 @@
+@page "/device-management"
+@using Microsoft.AspNetCore.Components.Authorization
+@using StationCheck.Models
+@using Microsoft.EntityFrameworkCore
+@using StationCheck.Data
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject ILogger<DeviceManagement> Logger
+@inject NavigationManager Navigation
+@using DeviceUserAssignmentModel = StationCheck.Models.DeviceUserAssignment
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IForceLogoutService ForceLogoutService
+@inject StationCheck.Services.IDeviceAuthService DeviceAuthService
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-tablet-alt mr-2"></i>
+                @GetText("device_management_title", "Quản lý thiết bị")
+            </h2>
+            <small class="text-muted">@GetText("device_management_desc", "Quản lý duyệt, chỉnh sửa và gán người dùng cho  thiết bị")</small>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(activeTab == "approved" ? "active" : "")"
+                        @onclick="@(() => SwitchTab("approved"))" type="button" role="tab">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        @GetText("device_approved_devices", "Thiết bị đã duyệt")
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(activeTab == "pending" ? "active" : "")"
+                        @onclick="@(() => SwitchTab("pending"))" type="button" role="tab">
+                        <i class="fas fa-hourglass-half mr-2"></i>
+                        @GetText("device_pending_approvals", "Chờ duyệt")
+                        @if (pendingDevices.Count > 0)
+                        {
+                            <span class="badge badge-danger">  @pendingDevices.Count</span>
+                        }
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Approved Devices Tab -->
+        @if (activeTab == "approved")
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                @GetText("device_approved_devices", "Thiết bị đã duyệt")
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (isLoadingApproved)
+                            {
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">@GetText("common_loading", "Đang tải...")</span>
+                                    </div>
+                                </div>
+                            }
+                            else if (approvedDevices.Count == 0)
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    @GetText("device_no_approved", "Không có thiết bị đã được duyệt.")
+                                </div>
+                            }
+                            else
+                            {
+                                <DxGrid Data="@approvedDevices" PageSize="10" ShowPager="true"
+                                    PagerNavigationMode="PagerNavigationMode.InputBox" AllowSelectRowByClick="false"
+                                    HighlightRowOnHover="true" TextWrapEnabled="false"
+                                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                    ColumnResizeMode="GridColumnResizeMode.NextColumn">
+                                    <Columns>
+                                        <DxGridDataColumn FieldName="DeviceName"
+                                            Caption="@GetText("device_name", "Tên thiết bị")" MinWidth="150" />
+                                        <DxGridDataColumn FieldName="MacAddress"
+                                            Caption="@GetText("device_mac_address", "MAC Address")" Width="150px" />
+                                        <DxGridDataColumn FieldName="IsRevoked"
+                                            Caption="@GetText("device_status", "Trạng thái")" Width="120px">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (ApprovedDeviceDto)context.DataItem;
+                                                }
+                                                @if (dev.IsRevoked)
+                                                {
+                                                    <span class="badge badge-danger">@GetText("device_revoked", "Đã vô hiệu")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-success">@GetText("device_active", "Đang hoạt động")</span>
+                                                }
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                        <DxGridDataColumn FieldName="AssignedUsersCount"
+                                            Caption="@GetText("device_assigned_users", "Người dùng được gán")" Width="100px">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (ApprovedDeviceDto)context.DataItem;
+                                                }
+                                                <span class="badge badge-primary">@dev.AssignedUsersCount</span>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                        <DxGridDataColumn FieldName="CertificateValidTo"
+                                            Caption="@GetText("device_valid_to", "Hết hạn")" Width="120px"
+                                            DisplayFormat="dd/MM/yyyy" />
+                                        <DxGridDataColumn FieldName="ApprovedAt"
+                                            Caption="@GetText("device_approved_date", "Ngày duyệt")" Width="150px"
+                                            DisplayFormat="dd/MM/yyyy HH:mm">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (ApprovedDeviceDto)context.DataItem;
+                                                }
+                                                @if (dev.ApprovedAt.HasValue)
+                                                {
+                                                    <span>@dev.ApprovedAt.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                                }
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                        <DxGridDataColumn FieldName="ApprovedBy"
+                                            Caption="@GetText("device_approved_by", "Người duyệt")" Width="120px" />
+                                        <DxGridDataColumn FieldName="LastUsedAt"
+                                            Caption="@GetText("device_last_used", "Lần cuối sử dụng")" Width="120px">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (ApprovedDeviceDto)context.DataItem;
+                                                }
+                                                @if (dev.LastUsedAt.HasValue)
+                                                {
+                                                    <span>@dev.LastUsedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">@GetText("device_never_used", "Chưa sử dụng")</span>
+                                                }
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                        <DxGridDataColumn FieldName="DeviceId" Caption="@GetText("common_actions", "Thao tác")"
+                                            Width="126px" AllowSort="false">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (ApprovedDeviceDto)context.DataItem;
+                                                }
+                                                @if (dev.IsRevoked)
+                                                {
+                                                    <button class="btn btn-sm btn-success mr-1"
+                                                        title="@GetText("device_reactivate", "Kích hoạt lại")"
+                                                        @onclick="@(() => ReactivateDevice(dev))">
+                                                        <i class="fas fa-redo"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-info mr-1"
+                                                        title="@GetText("device_edit", "Chỉnh sửa")"
+                                                        @onclick="@(() => ShowEditModal(dev))">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                }
+                                                <button class="btn btn-sm btn-danger" title="@GetText("device_delete", "Xóa")"
+                                                    @onclick="@(() => DeleteDevice(dev))">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                    </Columns>
+                                </DxGrid>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Pending Devices Tab -->
+        @if (activeTab == "pending")
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-hourglass-half mr-2"></i>
+                                @GetText("device_pending_approvals", "Chờ phê duyệt") (@pendingDevices.Count)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (isLoadingPending)
+                            {
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">@GetText("common_loading", "Đang tải...")</span>
+                                    </div>
+                                </div>
+                            }
+                            else if (pendingDevices.Count == 0)
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    @GetText("device_no_pending", "Không có thiết bị chờ phê duyệt.")
+                                </div>
+                            }
+                            else
+                            {
+                                <DxGrid Data="@pendingDevices" PageSize="10" ShowPager="true"
+                                    PagerNavigationMode="PagerNavigationMode.InputBox" AllowSelectRowByClick="false"
+                                    HighlightRowOnHover="true" TextWrapEnabled="false"
+                                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                    ColumnResizeMode="GridColumnResizeMode.NextColumn">
+                                    <Columns>
+                                        <DxGridDataColumn FieldName="DeviceName"
+                                            Caption="@GetText("device_name", "Tên thiết bị")" MinWidth="150" />
+                                        <DxGridDataColumn FieldName="MacAddress"
+                                            Caption="@GetText("device_mac_address", "MAC Address")" Width="150px" />
+                                        <DxGridDataColumn FieldName="CertificateValidFrom"
+                                            Caption="@GetText("device_valid_from", "Hiệu lực từ")" Width="120px"
+                                            DisplayFormat="dd/MM/yyyy" />
+                                        <DxGridDataColumn FieldName="CertificateValidTo"
+                                            Caption="@GetText("device_valid_to", "Hết hạn")" Width="120px"
+                                            DisplayFormat="dd/MM/yyyy" />
+                                        <DxGridDataColumn FieldName="CreatedAt"
+                                            Caption="@GetText("device_registered_date", "Ngày đăng ký")" Width="150px"
+                                            DisplayFormat="dd/MM/yyyy HH:mm" />
+                                        <DxGridDataColumn FieldName="Id" Caption="@GetText("common_actions", "Thao tác")"
+                                            Width="180px" AllowSort="false">
+                                            <CellDisplayTemplate>
+                                                @{
+                                                    var dev = (PendingDeviceDto)context.DataItem;
+                                                }
+                                                <button class="btn btn-sm btn-success mr-1"
+                                                    title="@GetText("device_approve", "Duyệt")"
+                                                    @onclick="@(() => ApproveDevice(dev))">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                    title="@GetText("device_reject", "Từ chối")"
+                                                    @onclick="@(() => RejectDevice(dev))">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                    </Columns>
+                                </DxGrid>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Edit Device Modal -->
+    <DxPopup @bind-Visible="@showEditModal" HeaderText="@GetText("device_edit_title", "Chỉnh sửa thiết bị")"
+        Width="900px" MaxHeight="80vh">
+        <Content>
+            @if (selectedApprovedDevice != null)
+            {
+                <!-- Tabs within Modal -->
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(editModalTab == "info" ? "active" : "")"
+                            @onclick="@(() => editModalTab = "info")" type="button">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            @GetText("device_info", "Thông tin thiết bị")
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(editModalTab == "users" ? "active" : "")"
+                            @onclick="@(() => editModalTab = "users")" type="button">
+                            <i class="fas fa-users mr-2"></i>
+                            @GetText("device_assign_users", "Quản lý người dùng")
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Device Info Tab -->
+                @if (editModalTab == "info")
+                {
+                    <div class="tab-pane fade show active">
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Người dùng được gán:</strong> @selectedApprovedDevice.AssignedUsersList
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>@GetText("device_name", "Tên thiết bị")</label>
+                            <input type="text" class="form-control" @bind="editFormModel.DeviceName" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>@GetText("device_thumbprint", "Thumbprint")</label>
+                            <input type="text" class="form-control" @bind="editFormModel.CertificateThumbprint" readonly />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>@GetText("device_certificate_subject", "Certificate Subject")</label>
+                            <input type="text" class="form-control" @bind="editFormModel.CertificateSubject" readonly />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>@GetText("device_valid_from", "Hiệu lực từ")</label>
+                                    <input type="text" class="form-control"
+                                        value="@editFormModel.CertificateValidFrom.ToString("dd/MM/yyyy HH:mm:ss")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>@GetText("device_valid_to", "Hết hạn")</label>
+                                    <input type="text" class="form-control"
+                                        value="@editFormModel.CertificateValidTo.ToString("dd/MM/yyyy HH:mm:ss")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>@GetText("device_approved_by", "Người duyệt")</label>
+                                    <input type="text" class="form-control" value="@editFormModel.ApprovedBy" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>@GetText("device_approved_date", "Ngày duyệt")</label>
+                                    <input type="text" class="form-control"
+                                        value="@(editFormModel.ApprovedAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? "")" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            @GetText("device_edit_warning", "Chỉ có thể chỉnh sửa tên thiết bị. Các thông tin khác là chỉ đọc.")
+                        </div>
+
+                        <div class="text-right">
+                            <button class="btn btn-secondary mr-2" @onclick="@(() => showEditModal = false)">
+                                @GetText("common_cancel", "Hủy")
+                            </button>
+                            <button class="btn btn-danger mr-2" @onclick="DeactivateDevice">
+                                <i class="fas fa-ban mr-1"></i>@GetText("device_deactivate", "Vô hiệu hóa")
+                            </button>
+                            <button class="btn btn-primary" @onclick="SaveDeviceChanges">
+                                <i class="fas fa-save mr-1"></i>@GetText("common_save", "Lưu")
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- Users Management Tab -->
+                @if (editModalTab == "users")
+                {
+                    <div class="tab-pane fade show active">
+                        <div class="mb-3">
+                            <h6>@GetText("device_assigned_users_list", "Người dùng được gán")</h6>
+                            @if (assignedUsers.Count > 0)
+                            {
+                                <div class="list-group mb-3">
+                                    @foreach (var user in assignedUsers)
+                                    {
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>@user.Username</span>
+                                            <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveUserAssignment(user.UserId))">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info small">
+                                    @GetText("device_no_assigned_users", "Chưa có người dùng được gán.")
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>@GetText("device_add_user", "Thêm người dùng")</h6>
+                            <div class="input-group">
+                                <select class="custom-select" @bind="selectedUserId">
+                                    <option value="">@GetText("device_select_user", "-- Chọn người dùng --")</option>
+                                    @foreach (var user in availableUsers)
+                                    {
+                                        <option value="@user.Id">@user.Username (@user.FullName)</option>
+                                    }
+                                </select>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="button" @onclick="AddUserAssignment">
+                                        <i class="fas fa-plus mr-1"></i>@GetText("common_add", "Thêm")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Lưu ý:</strong> Admin luôn có thể đăng nhập từ bất kỳ thiết bị nào. Khi user bị remove khỏi
+                            thiết bị, họ sẽ bị logout ngay lập tức.
+                        </div>
+
+                        <div class="text-right mt-4">
+                            <button class="btn btn-secondary" @onclick="@(() => showEditModal = false)">
+                                @GetText("common_close", "Đóng")
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+        </Content>
+    </DxPopup>
+</div>
+
+@code {
+    // Data Transfer Objects
+    private class PendingDeviceDto
+    {
+        public Guid Id { get; set; }
+        public string DeviceName { get; set; } = string.Empty;
+        public string MacAddress { get; set; } = string.Empty;
+        public string CertificateThumbprint { get; set; } = string.Empty;
+        public string CertificateSubject { get; set; } = string.Empty;
+        public DateTime CertificateValidFrom { get; set; }
+        public DateTime CertificateValidTo { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    private class ApprovedDeviceDto
+    {
+        public Guid DeviceId { get; set; }
+        public string DeviceName { get; set; } = string.Empty;
+        public string MacAddress { get; set; } = string.Empty;
+        public string AssignedUsersList { get; set; } = string.Empty;
+        public int AssignedUsersCount { get; set; }
+        public bool IsRevoked { get; set; }
+        public DateTime? LastUsedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime CertificateValidTo { get; set; }
+    }
+
+    private class UserDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+    }
+
+    private class AssignedUserDto
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+    }
+
+    private class EditDeviceFormModel
+    {
+        public Guid Id { get; set; }
+        public string DeviceName { get; set; } = string.Empty;
+        public string MacAddress { get; set; } = string.Empty;
+        public string CertificateThumbprint { get; set; } = string.Empty;
+        public string CertificateSubject { get; set; } = string.Empty;
+        public DateTime CertificateValidFrom { get; set; }
+        public DateTime CertificateValidTo { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+    }
+
+    // State
+    private string activeTab = "approved";
+    private string editModalTab = "info";
+    private Timer? _accessCheckTimer;
+    private bool _logoutInProgress = false;
+
+    private List<ApprovedDeviceDto> approvedDevices = new();
+    private List<PendingDeviceDto> pendingDevices = new();
+    private List<UserDto> availableUsers = new();
+    private List<AssignedUserDto> assignedUsers = new();
+
+    private ApprovedDeviceDto? selectedApprovedDevice;
+    private EditDeviceFormModel editFormModel = new();
+    private string? selectedUserId;
+
+    private bool showEditModal = false;
+    private bool isLoadingApproved = true;
+    private bool isLoadingPending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Kiểm tra xem user hiện tại có quyền truy cập thiết bị không
+        await CheckUserAccessAndLogoutIfNeeded();
+
+        await LoadAllData();
+
+        // Khởi động timer kiểm tra quyền truy cập mỗi 3 giây
+        if (_accessCheckTimer == null)
+        {
+            _accessCheckTimer = new Timer(async _ =>
+            {
+                await CheckUserAccessAndLogoutIfNeeded();
+            }, null, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60));
+        }
+    }
+
+    private async Task CheckUserAccessAndLogoutIfNeeded()
+    {
+        // Prevent showing alert multiple times
+        if (_logoutInProgress)
+            return;
+
+        // DISABLED: ForceLogoutService certificate checking (causes refresh loop for browser SSO)
+        // Certificate-based device validation is handled by AccessControlMiddleware with MAC address
+        // try
+        // {
+        //     var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //     var user = authState.User;
+        //
+        //     await ForceLogoutService.CheckAndLogoutIfNeededAsync(
+        //     user,
+        //     DbContextFactory,
+        //     Http,
+        //     Navigation,
+        //     JS,
+        //     Logger,
+        //     _accessCheckTimer);
+        //
+        //     _logoutInProgress = true;
+        // }
+        // catch (Exception ex)
+        // {
+        //     Logger.LogError(ex, $"[DeviceManagement] Access check error: {ex.Message}");
+        // }
+    }
+
+    private async Task LoadAllData()
+    {
+        await Task.WhenAll(
+        LoadApprovedDevices(),
+        LoadPendingDevices()
+        );
+    }
+
+    private async Task SwitchTab(string tab)
+    {
+        activeTab = tab;
+        if (tab == "approved" && approvedDevices.Count == 0)
+        {
+            await LoadApprovedDevices();
+        }
+        else if (tab == "pending" && pendingDevices.Count == 0)
+        {
+            await LoadPendingDevices();
+        }
+    }
+
+    private async Task LoadApprovedDevices()
+    {
+        try
+        {
+            isLoadingApproved = true;
+            await using var context = DbContextFactory.CreateDbContext();
+            var devices = await context.UserDevices
+            .Where(d => d.IsApproved && !d.IsDeleted)  // Show both active and revoked approved devices
+            .Include(d => d.Assignments!)
+            .ThenInclude(a => a.User)
+            .Select(d => new ApprovedDeviceDto
+            {
+                DeviceId = d.Id,
+                DeviceName = d.DeviceName,
+                MacAddress = d.MacAddress ?? "N/A",
+                AssignedUsersList = d.Assignments != null && d.Assignments.Any(a => a.IsActive)
+            ? string.Join(", ", d.Assignments.Where(a => a.IsActive).Select(a => a.User != null ? a.User.Username : "Unknown"))
+            : "(Chưa gán)",
+                AssignedUsersCount = d.Assignments != null ? d.Assignments.Count(a => a.IsActive) : 0,
+                IsRevoked = d.IsRevoked,
+                LastUsedAt = d.LastUsedAt,
+                ApprovedAt = d.ApprovedAt,
+                ApprovedBy = d.ApprovedBy,
+                CertificateValidTo = d.CertificateValidTo
+            })
+            .ToListAsync();
+            approvedDevices = devices;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading approved devices: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingApproved = false;
+        }
+    }
+
+    private async Task LoadPendingDevices()
+    {
+        try
+        {
+            isLoadingPending = true;
+            await using var context = DbContextFactory.CreateDbContext();
+            var devices = await context.UserDevices
+            .Where(d => !d.IsApproved && !d.IsRevoked && !d.IsDeleted)
+            .Select(d => new PendingDeviceDto
+            {
+                Id = d.Id,
+                DeviceName = d.DeviceName,
+                MacAddress = d.MacAddress ?? "N/A",
+                CertificateThumbprint = d.CertificateThumbprint,
+                CertificateSubject = d.CertificateSubject,
+                CertificateValidFrom = d.CertificateValidFrom,
+                CertificateValidTo = d.CertificateValidTo,
+                CreatedAt = d.CreatedAt
+            })
+            .ToListAsync();
+            pendingDevices = devices;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading pending devices: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoadingPending = false;
+        }
+    }
+
+    private async Task ShowEditModal(ApprovedDeviceDto device)
+    {
+        selectedApprovedDevice = device;
+        selectedUserId = null;
+        assignedUsers.Clear();
+        availableUsers.Clear();
+        editModalTab = "info";
+
+        try
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+
+            // Load device details for edit form
+            var dbDevice = await context.UserDevices
+            .FirstOrDefaultAsync(d => d.Id == device.DeviceId);
+
+            if (dbDevice != null)
+            {
+                editFormModel = new EditDeviceFormModel
+                {
+                    Id = dbDevice.Id,
+                    DeviceName = dbDevice.DeviceName,
+                    CertificateThumbprint = dbDevice.CertificateThumbprint,
+                    CertificateSubject = dbDevice.CertificateSubject,
+                    CertificateValidFrom = dbDevice.CertificateValidFrom,
+                    CertificateValidTo = dbDevice.CertificateValidTo,
+                    ApprovedBy = dbDevice.ApprovedBy,
+                    ApprovedAt = dbDevice.ApprovedAt
+                };
+            }
+
+            // Load assigned users for this device
+            var dbDeviceWithAssignments = await context.UserDevices
+            .Include(d => d.Assignments!)
+            .ThenInclude(a => a.User)
+            .FirstOrDefaultAsync(d => d.Id == device.DeviceId);
+
+            if (dbDeviceWithAssignments?.Assignments != null)
+            {
+                assignedUsers = dbDeviceWithAssignments.Assignments
+                .Where(a => a.IsActive)
+                .Select(a => new AssignedUserDto
+                {
+                    UserId = a.UserId,
+                    Username = a.User != null ? a.User.Username : "Unknown"
+                })
+                .ToList();
+            }
+
+            // Load available users
+            var assignedUserIds = assignedUsers.Select(u => u.UserId).ToList();
+            availableUsers = await context.Users
+            .Where(u => !u.IsDeleted && !assignedUserIds.Contains(u.Id))
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                Username = u.Username,
+                FullName = u.FullName
+            })
+            .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading device details: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+
+        showEditModal = true;
+    }
+
+    private async Task SaveDeviceChanges()
+    {
+        try
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+            var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == editFormModel.Id);
+
+            if (dbDevice != null)
+            {
+                dbDevice.DeviceName = editFormModel.DeviceName;
+                context.UserDevices.Update(dbDevice);
+                await context.SaveChangesAsync();
+
+                await LoadApprovedDevices();
+                showEditModal = false;
+                await JS.InvokeVoidAsync("alert", "Thiết bị đã được cập nhật.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private async Task DeactivateDevice()
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "Bạn có chắc muốn vô hiệu hóa thiết bị này? Người dùng sẽ không thể sử dụng nó."))
+        {
+            try
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+                var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == editFormModel.Id);
+
+                if (dbDevice != null)
+                {
+                    dbDevice.IsRevoked = true;
+                    context.UserDevices.Update(dbDevice);
+                    await context.SaveChangesAsync();
+
+                    // 🔥 Force logout tất cả user đang dùng device này
+                    await DeviceAuthService.NotifyDeviceRevokedAsync(editFormModel.Id);
+                    Logger.LogWarning($"[DeactivateDevice] Device {editFormModel.Id} revoked. Force logout triggered.");
+
+                    // Refresh grid và đóng modal
+                    await LoadApprovedDevices();
+                    showEditModal = false;
+
+                    // Kiểm tra xem có employee nào đang dùng thiết bị này không
+                    var activeAssignments = await context.DeviceUserAssignments
+                        .Include(a => a.User)
+                        .Where(a => a.DeviceId == editFormModel.Id && a.IsActive)
+                        .ToListAsync();
+
+                    if (activeAssignments.Any())
+                    {
+                        var usernames = string.Join(", ", activeAssignments.Select(a => a.User?.Username ?? "Unknown"));
+                        await JS.InvokeVoidAsync("alert", 
+                            $"Thiết bị đã được vô hiệu hóa thành công. Tất cả user đang dùng thiết bị này sẽ bị force logout.");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("alert", "Thiết bị đã được vô hiệu hóa thành công.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task DeleteDevice(ApprovedDeviceDto device)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn xóa thiết bị '{device.DeviceName}'? Hành động này không thể hoàn tác."))
+        {
+            try
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+                var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.DeviceId);
+
+                if (dbDevice != null)
+                {
+                    dbDevice.IsDeleted = true;
+                    context.UserDevices.Update(dbDevice);
+                    await context.SaveChangesAsync();
+
+                    await LoadApprovedDevices();
+                    await JS.InvokeVoidAsync("alert", "Thiết bị đã được xóa.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ApproveDevice(PendingDeviceDto device)
+    {
+        try
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+            var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.Id);
+
+            if (dbDevice != null)
+            {
+                dbDevice.IsApproved = true;
+                dbDevice.IsRevoked = false;
+                dbDevice.ApprovedAt = DateTime.UtcNow;
+                dbDevice.ApprovedBy = "Admin"; // TODO: Get current user
+
+                context.UserDevices.Update(dbDevice);
+                await context.SaveChangesAsync();
+
+                await LoadAllData();
+                await JS.InvokeVoidAsync("alert", $"Thiết bị '{device.DeviceName}' đã được duyệt.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private async Task RejectDevice(PendingDeviceDto device)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn từ chối thiết bị '{device.DeviceName}'?"))
+        {
+            try
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+                var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.Id);
+
+                if (dbDevice != null)
+                {
+                    dbDevice.IsRevoked = true;
+                    dbDevice.IsApproved = false;
+                    context.UserDevices.Update(dbDevice);
+                    await context.SaveChangesAsync();
+
+                    await LoadAllData();
+                    await JS.InvokeVoidAsync("alert", $"Thiết bị '{device.DeviceName}' đã bị từ chối.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ReactivateDevice(ApprovedDeviceDto device)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc muốn kích hoạt lại thiết bị '{device.DeviceName}'?"))
+        {
+            try
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+                var dbDevice = await context.UserDevices.FirstOrDefaultAsync(d => d.Id == device.DeviceId);
+
+                if (dbDevice != null)
+                {
+                    dbDevice.IsRevoked = false;
+                    context.UserDevices.Update(dbDevice);
+                    await context.SaveChangesAsync();
+
+                    await LoadApprovedDevices();
+                    await JS.InvokeVoidAsync("alert", $"Thiết bị '{device.DeviceName}' đã được kích hoạt lại.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task AddUserAssignment()
+    {
+        if (string.IsNullOrEmpty(selectedUserId) || selectedApprovedDevice == null)
+            return;
+
+        try
+        {
+            await using var context = DbContextFactory.CreateDbContext();
+
+            // Kiểm tra xem assignment đã tồn tại hay chưa
+            var existingAssignment = await context.DeviceUserAssignments
+            .FirstOrDefaultAsync(a => a.DeviceId == selectedApprovedDevice.DeviceId
+            && a.UserId == selectedUserId);
+
+            if (existingAssignment != null)
+            {
+                if (existingAssignment.IsActive)
+                {
+                    // Đã được gán và active
+                    await JS.InvokeVoidAsync("alert", "Người dùng đã được gán cho thiết bị này rồi.");
+                    return;
+                }
+                else
+                {
+                    // Đã được gán nhưng bị remove - tái kích hoạt
+                    existingAssignment.IsActive = true;
+                    existingAssignment.AssignedAt = DateTime.UtcNow;
+                    context.DeviceUserAssignments.Update(existingAssignment);
+                }
+            }
+            else
+            {
+                // Tạo mới assignment
+                var assignment = new DeviceUserAssignmentModel
+                {
+                    DeviceId = selectedApprovedDevice.DeviceId,
+                    UserId = selectedUserId,
+                    IsActive = true,
+                    AssignedAt = DateTime.UtcNow
+                };
+
+                context.DeviceUserAssignments.Add(assignment);
+            }
+
+            await context.SaveChangesAsync();
+
+            await ShowEditModal(selectedApprovedDevice);
+            await JS.InvokeVoidAsync("alert", "Người dùng đã được gán cho thiết bị.");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveUserAssignment(string userId)
+    {
+        if (selectedApprovedDevice == null)
+            return;
+
+        if (await JS.InvokeAsync<bool>("confirm", "Bạn có chắc muốn xóa gán này?"))
+        {
+            try
+            {
+                await using var context = DbContextFactory.CreateDbContext();
+
+                var assignment = await context.DeviceUserAssignments
+                .FirstOrDefaultAsync(a => a.DeviceId == selectedApprovedDevice.DeviceId && a.UserId == userId);
+
+                if (assignment != null)
+                {
+                    assignment.IsActive = false;
+                    context.DeviceUserAssignments.Update(assignment);
+                    await context.SaveChangesAsync();
+
+                    // 🔥 Force logout user bị remove khỏi device
+                    await DeviceAuthService.NotifyUserRemovedFromDeviceAsync(selectedApprovedDevice.DeviceId, userId);
+                    Logger.LogWarning($"[RemoveUserAssignment] User {userId} removed from device {selectedApprovedDevice.DeviceId}. Force logout triggered.");
+
+                    // Kiểm tra xem user hiện tại có đang bị remove không
+                    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                    var currentUserId = authState.User?.FindFirst("sub")?.Value;
+
+                    if (currentUserId == userId)
+                    {
+                        // Nếu đó là user hiện tại, sẽ bị logout bởi timer check
+                        await JS.InvokeVoidAsync("alert", "Bạn đã bị remove khỏi thiết bị này. Bạn sẽ bị logout.");
+                        // Timer sẽ tự động detect và logout
+                    }
+                    else
+                    {
+                        await ShowEditModal(selectedApprovedDevice);
+                        await JS.InvokeVoidAsync("alert", "Người dùng đã được xóa khỏi thiết bị và bị force logout.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+    }
+
+    private string GetText(string key, string defaultValue)
+    {
+        // TODO: Implement localization from service
+        return defaultValue;
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        _accessCheckTimer?.Dispose();
+        await ValueTask.CompletedTask;
+    }
+}

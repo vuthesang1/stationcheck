@@ -8,20 +8,21 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient HttpClient
 @inject IAuthService AuthService
 
-<div class="bg-gradient-primary" style="min-height: 100vh;">
+<div class="bg-gradient-primary" style="min-height: 100vh; padding: 20px 0;">
     <div class="container">
         <!-- Outer Row -->
         <div class="row justify-content-center">
             <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
+                <div class="card o-hidden border-0 shadow-lg my-3">
+                    <div class="card-body p-0" style="max-height: 95vh; overflow-y: auto; overflow-x: hidden;">
                         <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image" style="background: url('https://source.unsplash.com/K4mSJ7kc0As/600x800') center center; background-size: cover;"></div>
+                        <div class="row g-0">
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image" style="background: url('https://source.unsplash.com/K4mSJ7kc0As/600x800') center center; background-size: cover; min-height: 400px;"></div>
                             <div class="col-lg-6">
-                                <div class="p-5">
+                                <div class="p-4">
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Chào mừng trở lại!</h1>
                                     </div>
@@ -82,8 +83,64 @@
                                     </EditForm>
                                     
                                     <hr>
-                                    
-                                    @* <div class="text-center">
+                    
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <!-- Download Desktop Login App Section (Only for Employee) -->
+                        <div class="alert alert-warning text-center mt-3" role="alert">
+                            <i class="fas fa-exclamation-triangle mb-2" style="font-size: 1.5rem;"></i>
+                            <h6 class="font-weight-bold mb-2">@successMessage</h6>
+                            <p class="mb-3 small">
+                                Nhân viên trạm phải sử dụng Desktop Login App để đăng nhập.
+                            </p>
+                            
+                            <!-- Download button -->
+                            <div class="mb-3">
+                                <a href="/api/auth/download-desktop-login-app" 
+                                   class="btn btn-primary btn-sm" 
+                                   title="Tải Desktop Login App">
+                                    <i class="fas fa-download"></i> Tải Desktop Login App
+                                </a>
+                            </div>
+                            
+                            <!-- Collapsible Installation instructions -->
+                            <div class="accordion" id="installGuideAccordion">
+                                <div class="card border-0">
+                                    <div class="card-header p-0 bg-transparent border-0" id="headingGuide">
+                                        <button class="btn btn-link btn-sm btn-block text-left text-primary collapsed" 
+                                                type="button" 
+                                                data-toggle="collapse" 
+                                                data-target="#collapseGuide" 
+                                                aria-expanded="false" 
+                                                aria-controls="collapseGuide">
+                                            <i class="fas fa-info-circle"></i> Hướng dẫn cài đặt 
+                                            <i class="fas fa-chevron-down float-right mt-1"></i>
+                                        </button>
+                                    </div>
+                                    <div id="collapseGuide" 
+                                         class="collapse" 
+                                         aria-labelledby="headingGuide" 
+                                         data-parent="#installGuideAccordion">
+                                        <div class="card-body p-2 bg-light rounded">
+                                            <ol class="mb-0 pl-3 small text-left">
+                                                <li>Tải file <strong>DesktopLoginApp.zip</strong></li>
+                                                <li><strong>Giải nén</strong> file ZIP</li>
+                                                <li>Chạy <strong>DesktopLoginApp.exe</strong></li>
+                                                <li>Windows cảnh báo → click <strong>"More info"</strong> → <strong>"Run anyway"</strong></li>
+                                                <li>Đăng nhập bằng tài khoản của bạn</li>
+                                            </ol>
+                                            <p class="mb-0 mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-exclamation-circle"></i> 
+                                                    Không xóa các file khác trong thư mục.
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }@* <div class="text-center">
                                         <small class="text-muted">
                                             <strong>Tài khoản mặc định:</strong><br/>
                                             Admin: <code>admin</code> / <code>Admin@123</code><br/>
@@ -100,7 +157,8 @@
         </div>
     </div>
 </div>
-    
+
+<style>
     .form-group {
         margin-bottom: 20px;
     }
@@ -131,18 +189,103 @@
         padding-left: 20px;
     }
     
+    /* Compact accordion button */
+    #installGuideAccordion .btn-link {
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 8px 0;
+    }
+    
+    #installGuideAccordion .btn-link:hover {
+        text-decoration: none;
+    }
+    
+    #installGuideAccordion .btn-link i.fa-chevron-down {
+        transition: transform 0.3s ease;
+    }
+    
+    #installGuideAccordion .btn-link:not(.collapsed) i.fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    
+    /* Responsive alert sizing */
+    .alert-warning {
+        padding: 1rem;
+    }
+    
+    @@media (max-width: 576px) {
+        .alert-warning {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .alert-warning h6 {
+            font-size: 1rem;
+        }
+        
+        .alert-warning .btn {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+
+<script>
+    window.loginWithFetch = async function(loginRequest) {
+        try {
+            const response = await fetch('/api/auth/web-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginRequest),
+                credentials: 'same-origin' // Important: Include cookies
+            });
+            
+            const data = await response.json();
+            
+            return {
+                success: response.ok && data.success,
+                message: data.message,
+                requiresDeviceRegistration: data.requiresDeviceRegistration || false
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Lỗi kết nối: ' + error.message,
+                requiresDeviceRegistration: false
+            };
+        }
+    };
+</script>
+    
 @code {
     private LoginRequest loginRequest = new LoginRequest();
     private string errorMessage = "";
+    private string successMessage = "";
     private bool isLoggingIn = false;
     
     protected override async Task OnInitializedAsync()
     {
-        // Check if already logged in
-        var token = await JS.InvokeAsync<string>("localStorage.getItem", "jwt_token");
-        if (!string.IsNullOrEmpty(token))
+        // Check if already authenticated via Cookie (for browser SSO)
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        // Check for logout message from device status monitor
+        try
+        {
+            var logoutMessage = await JS.InvokeAsync<string?>("getLogoutMessage");
+            if (!string.IsNullOrEmpty(logoutMessage))
+            {
+                errorMessage = logoutMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] Error getting logout message: {ex.Message}");
         }
     }
     
@@ -152,24 +295,24 @@
         {
             isLoggingIn = true;
             errorMessage = "";
+            successMessage = "";
             
-            // Call AuthService
-            var loginResponse = await AuthService.LoginAsync(loginRequest);
+            // Use JavaScript fetch so browser handles cookies properly
+            var result = await JS.InvokeAsync<LoginResult>("loginWithFetch", loginRequest);
             
-            if (loginResponse.Success && !string.IsNullOrEmpty(loginResponse.AccessToken))
+            if (result.Success)
             {
-                // Notify authentication state provider
-                if (AuthStateProvider is CustomAuthenticationStateProvider customAuthProvider)
-                {
-                    await customAuthProvider.NotifyUserAuthentication(loginResponse.AccessToken, loginResponse.User);
-                }
-                
-                // Redirect to home
+                // Cookie is set by browser, force reload to activate authentication
                 Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else if (result.RequiresDeviceRegistration)
+            {
+                successMessage = "Bạn cần đăng nhập qua Desktop Login App";
+                errorMessage = "";
             }
             else
             {
-                errorMessage = loginResponse.Message ?? "Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.";
+                errorMessage = result.Message ?? "Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.";
             }
         }
         catch (Exception ex)
@@ -180,5 +323,12 @@
         {
             isLoggingIn = false;
         }
+    }
+    
+    private class LoginResult
+    {
+        public bool Success { get; set; }
+        public string? Message { get; set; }
+        public bool RequiresDeviceRegistration { get; set; }
     }
 }

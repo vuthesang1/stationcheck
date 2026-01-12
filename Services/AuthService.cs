@@ -15,18 +15,21 @@ public class AuthService : IAuthService
     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         IDbContextFactory<ApplicationDbContext> contextFactory,
         IConfiguration configuration,
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _contextFactory = contextFactory;
         _configuration = configuration;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<LoginResponse> LoginAsync(LoginRequest request)
+    public async Task<LoginResponse> LoginAsync(LoginRequest request, bool skipPasswordCheck = false)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
         
@@ -43,18 +46,111 @@ public class AuthService : IAuthService
             };
         }
 
-        var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-        _logger.LogInformation($"Login attempt for user '{user.Username}': Password={request.Password}, Hash={user.PasswordHash}, Valid={isPasswordValid}");
-
-        if (!isPasswordValid)
+        // Skip password check for desktop token generation (already authenticated)
+        if (!skipPasswordCheck)
         {
-            return new LoginResponse
+            var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            _logger.LogInformation($"Login attempt for user '{user.Username}': Password valid={isPasswordValid}");
+
+            if (!isPasswordValid)
             {
-                Success = false,
-                Message = "Invalid username or password"
-            };
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Invalid username or password"
+                };
+            }
+        }
+        else
+        {
+            _logger.LogInformation($"Skipping password check for user '{user.Username}' (token generation)");
         }
 
+        // Role-based device validation:
+        // - Admin/Manager: No device validation required
+        // - StationEmployee: Requires MAC address validation (device must be registered, approved, and assigned)
+        
+        if (user.Role == UserRole.Admin || user.Role == UserRole.Manager)
+        {
+            // Admin/Manager bypass ALL device validation
+            _logger.LogInformation($"{user.Role.ToString()} user '{user.Username}' login successful (no device validation required)");
+        }
+        // else if (user.Role == UserRole.StationEmployee)
+        // {
+        //     // StationEmployee login from web (no MAC address) - must use Desktop Login App
+        //     if (string.IsNullOrWhiteSpace(request.MacAddress))
+        //     {
+        //         _logger.LogInformation($"StationEmployee '{user.Username}' login from web (no MAC address) - must download Desktop Login App");
+                
+        //         return new LoginResponse
+        //         {
+        //             Success = false,
+        //             Message = "Thiết bị chưa được đăng ký. Vui lòng tải Desktop Login App để đăng ký thiết bị.",
+        //             RequiresDeviceRegistration = true
+        //         };
+        //     }
+
+        //     // MAC address is present - validate device
+        //     _logger.LogInformation($"StationEmployee login: User='{user.Username}', MAC Address='{request.MacAddress}'");
+
+        //     var device = await context.UserDevices
+        //         .FirstOrDefaultAsync(d => d.MacAddress == request.MacAddress && !d.IsDeleted);
+
+        //     if (device == null)
+        //     {
+        //         _logger.LogWarning($"Login failed: Device MAC '{request.MacAddress}' not found in database");
+        //         return new LoginResponse
+        //         {
+        //             Success = false,
+        //             Message = "Thiết bị chưa được đăng ký. Vui lòng đăng ký thiết bị trong Desktop Login App.",
+        //             RequiresDeviceRegistration = true
+        //         };
+        //     }
+
+        //     // Check if device is revoked
+        //     if (device.IsRevoked)
+        //     {
+        //         _logger.LogWarning($"Login failed: Device {request.MacAddress} is revoked");
+        //         return new LoginResponse
+        //         {
+        //             Success = false,
+        //             Message = "Thiết bị đã bị thu hồi. Vui lòng liên hệ Admin."
+        //         };
+        //     }
+
+        //     // Check device approval
+        //     if (!device.IsApproved)
+        //     {
+        //         _logger.LogWarning($"Login failed: Device {request.MacAddress} not approved yet");
+        //         return new LoginResponse
+        //         {
+        //             Success = false,
+        //             Message = "Thiết bị chưa được phê duyệt. Vui lòng liên hệ Admin để phê duyệt."
+        //         };
+        //     }
+
+        //     // Check user assignment to device
+        //     var deviceAssignment = await context.DeviceUserAssignments
+        //         .FirstOrDefaultAsync(a => a.UserId == user.Id && a.DeviceId == device.Id && a.IsActive && !a.IsDeleted);
+
+        //     if (deviceAssignment == null)
+        //     {
+        //         _logger.LogWarning($"Login failed: StationEmployee '{user.Username}' not assigned to device {request.MacAddress}");
+        //         return new LoginResponse
+        //         {
+        //             Success = false,
+        //             Message = "Bạn chưa được phân quyền để đăng nhập từ thiết bị này. Vui lòng liên hệ Admin."
+        //         };
+        //     }
+
+        //     _logger.LogInformation($"StationEmployee user '{user.Username}' login successful - device {request.MacAddress} validated (approved + assigned)");
+            
+        //     // Update device LastUsedAt timestamp
+        //     device.LastUsedAt = DateTime.UtcNow;
+        //     context.UserDevices.Update(device);
+        // }
+
+        // Check if account is active
         if (!user.IsActive)
         {
             return new LoginResponse
@@ -68,7 +164,7 @@ public class AuthService : IAuthService
         user.LastLoginAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
-        var token = GenerateJwtToken(user);
+        var token = GenerateJwtToken(user, request.MacAddress);
         var refreshToken = GenerateRefreshToken();
 
         // Save refresh token
@@ -102,6 +198,154 @@ public class AuthService : IAuthService
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.LastLoginAt
             }
+        };
+    }
+
+    public async Task<DeviceLoginResponse> DeviceLoginAsync(DeviceLoginRequest request)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+
+        _logger.LogInformation("[DeviceLoginAsync] Login attempt for user '{Username}' from MAC: {MacAddress}", 
+            request.Username, request.MacAddress);
+
+        // 1. Validate username and password
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Username == request.Username && !u.IsDeleted);
+
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            _logger.LogWarning("[DeviceLoginAsync] Invalid credentials for user '{Username}'", request.Username);
+            return new DeviceLoginResponse
+            {
+                Success = false,
+                Message = "Tên đăng nhập hoặc mật khẩu không đúng",
+                Status = DeviceStatus.PendingApproval
+            };
+        }
+
+        // Only StationEmployee can login via desktop app
+        if (user.Role != UserRole.StationEmployee)
+        {
+            _logger.LogWarning("[DeviceLoginAsync] User '{Username}' is not StationEmployee (Role: {Role})", 
+                user.Username, user.Role);
+            return new DeviceLoginResponse
+            {
+                Success = false,
+                Message = "Chỉ nhân viên trạm mới có thể đăng nhập qua ứng dụng này",
+                Status = DeviceStatus.Rejected
+            };
+        }
+
+        // 2. Check if MAC address exists in database
+        var device = await context.UserDevices
+            .Include(d => d.Assignments!.Where(a => a.IsActive))
+            .FirstOrDefaultAsync(d => d.MacAddress == request.MacAddress && !d.IsDeleted);
+
+        if (device == null)
+        {
+            // 3. Create new device with PendingApproval status
+            device = new UserDevice
+            {
+                Id = Guid.NewGuid(),
+                DeviceName = request.DeviceName ?? $"Device-{request.MacAddress.Replace(":", "")}",
+                MacAddress = request.MacAddress,
+                DeviceStatus = DeviceStatus.PendingApproval,
+                IsApproved = false,
+                IsRevoked = false,
+                CertificateThumbprint = "N/A", // Not using certificates
+                IPAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString(),
+                CreatedBy = user.Username,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.UserDevices.Add(device);
+            await context.SaveChangesAsync();
+
+            _logger.LogInformation("[DeviceLoginAsync] Created new device {DeviceId} for MAC {MacAddress}, status: PendingApproval",
+                device.Id, device.MacAddress);
+
+            return new DeviceLoginResponse
+            {
+                Success = false,
+                Message = "Thiết bị mới đã được đăng ký. Vui lòng chờ quản trị viên phê duyệt.",
+                Status = DeviceStatus.PendingApproval,
+                DeviceId = device.Id
+            };
+        }
+
+        // 4. Check device status
+        if (device.DeviceStatus == DeviceStatus.PendingApproval)
+        {
+            _logger.LogInformation("[DeviceLoginAsync] Device {DeviceId} is pending approval", device.Id);
+            return new DeviceLoginResponse
+            {
+                Success = false,
+                Message = "Thiết bị đang chờ phê duyệt. Vui lòng liên hệ quản trị viên.",
+                Status = DeviceStatus.PendingApproval,
+                DeviceId = device.Id
+            };
+        }
+
+        if (device.DeviceStatus == DeviceStatus.Rejected || device.IsRevoked)
+        {
+            _logger.LogWarning("[DeviceLoginAsync] Device {DeviceId} is rejected or revoked", device.Id);
+            return new DeviceLoginResponse
+            {
+                Success = false,
+                Message = "Thiết bị đã bị từ chối hoặc thu hồi. Vui lòng liên hệ quản trị viên.",
+                Status = DeviceStatus.Rejected,
+                DeviceId = device.Id
+            };
+        }
+
+        // 5. Device is approved - check if user is assigned to this device
+        var hasAssignment = device.Assignments?.Any(a => a.UserId == user.Id && a.IsActive) ?? false;
+
+        if (!hasAssignment)
+        {
+            // Auto-assign user to their own device
+            var assignment = new DeviceUserAssignment
+            {
+                Id = Guid.NewGuid(),
+                DeviceId = device.Id,
+                UserId = user.Id,
+                AssignedBy = "System",
+                AssignedAt = DateTime.UtcNow,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "System"
+            };
+
+            context.DeviceUserAssignments.Add(assignment);
+            await context.SaveChangesAsync();
+
+            _logger.LogInformation("[DeviceLoginAsync] Auto-assigned user {UserId} to device {DeviceId}",
+                user.Id, device.Id);
+        }
+
+        // 6. Update device last used
+        device.LastUsedAt = DateTime.UtcNow;
+        device.IPAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        await context.SaveChangesAsync();
+
+        // 7. Update user last login
+        user.LastLoginAt = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+
+        // 8. Generate JWT token with MAC address claim
+        var token = GenerateJwtToken(user, request.MacAddress);
+
+        _logger.LogInformation("[DeviceLoginAsync] Login successful for user '{Username}' from device {DeviceId}",
+            user.Username, device.Id);
+
+        return new DeviceLoginResponse
+        {
+            Success = true,
+            Message = "Đăng nhập thành công",
+            Token = token,
+            Status = DeviceStatus.Approved,
+            DeviceId = device.Id
         };
     }
 
@@ -146,7 +390,7 @@ public class AuthService : IAuthService
 
         _logger.LogInformation($"New user {user.Username} registered by {createdBy ?? "self"}");
 
-        var token = GenerateJwtToken(user);
+        var token = GenerateJwtToken(user, null);
         var refreshToken = GenerateRefreshToken();
 
         // Save refresh token
@@ -205,12 +449,39 @@ public class AuthService : IAuthService
             };
         }
 
+        // Device re-validation for StationEmployee and Manager roles during token refresh
+        if (refreshToken.User.Role == UserRole.StationEmployee || refreshToken.User.Role == UserRole.Manager)
+        {
+            var hasApprovedDevice = await context.DeviceUserAssignments
+                .Where(a => a.UserId == refreshToken.User.Id && a.IsActive && !a.IsDeleted)
+                .Include(a => a.Device)
+                .AnyAsync(a => a.Device != null && a.Device.IsApproved && !a.Device.IsRevoked && !a.Device.IsDeleted);
+
+            if (!hasApprovedDevice)
+            {
+                _logger.LogWarning($"Refresh token invalidated: Device status changed for {refreshToken.User.Role} user '{refreshToken.User.Username}'");
+                
+                // Revoke the refresh token immediately
+                refreshToken.IsRevoked = true;
+                refreshToken.RevokedAt = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+
+                return new LoginResponse
+                {
+                    Success = false,
+                    Message = "Device access revoked or removed. Please login again"
+                };
+            }
+
+            _logger.LogInformation($"Device re-validation passed for {refreshToken.User.Role} user '{refreshToken.User.Username}' during token refresh");
+        }
+
         // Revoke old refresh token
         refreshToken.IsRevoked = true;
         refreshToken.RevokedAt = DateTime.UtcNow;
 
         // Generate new tokens
-        var newToken = GenerateJwtToken(refreshToken.User);
+        var newToken = GenerateJwtToken(refreshToken.User, null);
         var newRefreshToken = GenerateRefreshToken();
 
         var newRefreshTokenEntity = new RefreshToken
@@ -280,8 +551,10 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public string GenerateJwtToken(ApplicationUser user)
+    public string GenerateJwtToken(ApplicationUser user, string? macAddress = null)
     {
+        _logger.LogInformation($"[GenerateJwtToken] Called for user {user.Username}, macAddress: {macAddress ?? "NULL"}");
+        
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? "YourVerySecureSecretKeyForJWT_MinimumLength32Characters!";
         var issuer = jwtSettings["Issuer"] ?? "StationCheck";
@@ -291,7 +564,7 @@ public class AuthService : IAuthService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Name, user.Username),
@@ -300,6 +573,17 @@ public class AuthService : IAuthService
             new Claim("FullName", user.FullName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        // Add MAC address if provided (new authentication method)
+        if (!string.IsNullOrEmpty(macAddress))
+        {
+            claims.Add(new Claim("MacAddress", macAddress));
+            _logger.LogInformation($"[GenerateJwtToken] Added MacAddress claim: {macAddress}");
+        }
+        else
+        {
+            _logger.LogWarning($"[GenerateJwtToken] No MAC address provided - JWT will not contain device info");
+        }
 
         var token = new JwtSecurityToken(
             issuer: issuer,

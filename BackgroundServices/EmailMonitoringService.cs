@@ -33,42 +33,81 @@ namespace StationCheck.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("[EmailMonitor] Service started");
+            _logger.LogInformation("[EmailMonitor] ⚙️ Service starting...");
 
-            // Load interval from database
-            await LoadIntervalAsync();
-
-            // Wait a bit before starting to ensure app is fully initialized
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    await CheckEmailsAsync(stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[EmailMonitor] Error in monitoring loop");
-                }
-
-                // Reload interval from DB every cycle
+                // Load interval from database
                 await LoadIntervalAsync();
 
-                // Wait for next check interval (can be cancelled by config change)
-                try
-                {
-                    _delayCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                    await Task.Delay(_checkInterval, _delayCts.Token);
-                }
-                catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
-                {
-                    // Config changed, reload immediately
-                    _logger.LogInformation("[EmailMonitor] Delay cancelled due to configuration change");
-                }
-            }
+                // Wait a bit before starting to ensure app is fully initialized
+                _logger.LogInformation("[EmailMonitor] ⏳ Waiting 10s for app initialization...");
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                
+                _logger.LogInformation("[EmailMonitor] ✅ Service fully started, entering monitoring loop");
 
-            _logger.LogInformation("[EmailMonitor] Service stopped");
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        _logger.LogInformation("[EmailMonitor] 🔄 Starting email check cycle...");
+                        await CheckEmailsAsync(stoppingToken);
+                        _logger.LogInformation("[EmailMonitor] ✓ Email check cycle completed");
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("[EmailMonitor] ⚠️ Check cancelled due to shutdown request");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[EmailMonitor] ❌ ERROR in monitoring loop - Type: {Type}, Message: {Message}", 
+                            ex.GetType().Name, ex.Message);
+                    }
+
+                    // Reload interval from DB every cycle
+                    try
+                    {
+                        await LoadIntervalAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[EmailMonitor] ❌ Error loading interval, using current value: {Interval}s", 
+                            _checkInterval.TotalSeconds);
+                    }
+
+                    // Wait for next check interval (can be cancelled by config change)
+                    try
+                    {
+                        _logger.LogInformation("[EmailMonitor] ⏱️ Waiting {Interval} seconds until next check...", 
+                            _checkInterval.TotalSeconds);
+                        _delayCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                        await Task.Delay(_checkInterval, _delayCts.Token);
+                    }
+                    catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
+                    {
+                        // Config changed, reload immediately
+                        _logger.LogInformation("[EmailMonitor] ⚡ Delay cancelled due to configuration change");
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("[EmailMonitor] ⚠️ Delay cancelled due to shutdown request");
+                        break;
+                    }
+                }
+
+                _logger.LogInformation("[EmailMonitor] 🛑 Service stopped gracefully");
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("[EmailMonitor] ⚠️ Service cancelled during startup");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "[EmailMonitor] 💥 CRITICAL ERROR in ExecuteAsync - Service will terminate! Type: {Type}, Message: {Message}, StackTrace: {StackTrace}", 
+                    ex.GetType().Name, ex.Message, ex.StackTrace);
+                throw; // Re-throw to crash the app and force restart
+            }
         }
 
         private async Task LoadIntervalAsync()

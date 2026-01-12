@@ -47,7 +47,7 @@ window.renderMotionChart = function (labels, data) {
                 },
                 title: {
                     display: true,
-                    text: 'So sánh tần suất chuyển động giữa các trạm'
+                    text: 'So sánh tần suất nhấn nút giữa các trạm'
                 }
             }
         }

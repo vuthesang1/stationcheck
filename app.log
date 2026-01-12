@@ -1,0 +1,95 @@
+Using launch settings from D:\station-c\Properties\launchSettings.json...
+D:\station-c\StationCheck.csproj : warning NU1603: StationCheck depends on DevExpress.Blazor (>= 25.1.6) but DevExpress.Blazor 25.1.6 was not found. DevExpress.Blazor 25.1.7 was resolved instead.
+D:\station-c\StationCheck.csproj : warning NU1603: StationCheck depends on DevExpress.Blazor.Themes (>= 25.1.6) but DevExpress.Blazor.Themes 25.1.6 was not found. DevExpress.Blazor.Themes 25.1.7 was resolved instead.
+D:\station-c\StationCheck.csproj : warning NU1603: StationCheck depends on DevExpress.Blazor (>= 25.1.6) but DevExpress.Blazor 25.1.6 was not found. DevExpress.Blazor 25.1.7 was resolved instead.
+D:\station-c\StationCheck.csproj : warning NU1603: StationCheck depends on DevExpress.Blazor.Themes (>= 25.1.6) but DevExpress.Blazor.Themes 25.1.6 was not found. DevExpress.Blazor.Themes 25.1.7 was resolved instead.
+[12:17:52 WRN] Entity 'MonitoringProfile' has a global query filter defined and is the required end of a relationship with the entity 'MonitoringProfileHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+[12:17:52 WRN] Entity 'ApplicationUser' has a global query filter defined and is the required end of a relationship with the entity 'RefreshToken'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+[12:17:52 WRN] Entity 'Station' has a global query filter defined and is the required end of a relationship with the entity 'TimeFrameHistory'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+[12:17:52 WRN] The foreign key property 'ApplicationUser.StationId1' was created in shadow state because a conflicting property with the simple name 'StationId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+[12:17:52 INF] Database is up to date
+[12:17:53 INF] Database already has data. Skipping seed.
+[12:17:53 INF] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+[12:17:53 INF] Starting StationCheck application
+[12:17:53 INF] [EmailMonitor] Service started
+[12:17:53 INF] [AlertGeneration] ✅ Service started at 12/01/2025 12:17:53
+[12:17:53 INF] [EmailMonitor] Loaded interval from config: 120 seconds
+[12:17:53 INF] [AlertGeneration] Loaded interval from config: 120 seconds
+[12:17:53 INF] Now listening on: https://localhost:55703
+[12:17:53 INF] Now listening on: http://localhost:55704
+[12:17:53 INF] Application started. Press Ctrl+C to shut down.
+[12:17:53 INF] Hosting environment: Development
+[12:17:53 INF] Content root path: D:\station-c
+[12:18:03 INF] [EmailMonitor] Running check at 2025-12-01 12:18:03
+[12:18:03 INF] [EmailService] Checking for new emails...
+[12:18:03 INF] [EmailService] Connecting to imap.gmail.com:993
+[12:18:05 INF] [EmailService] Successfully authenticated as vienthongvt0408@gmail.com
+[12:18:07 INF] [EmailService] Opened folder: test
+[12:18:07 INF] [EmailService] Found 0 unread emails, processing 0 (limit 200)
+[12:18:08 INF] [EmailService] Processed 0 email(s) successfully
+[12:18:08 INF] [EmailMonitor] Loaded interval from config: 120 seconds
+[12:18:23 INF] [AlertGeneration] Running check at 12/01/2025 05:18:23 (UTC) | 12/01/2025 12:18:23 (Local)
+[12:18:23 INF] [AlertGeneration] Found 21 active stations
+[12:18:23 INF] [AlertGeneration] Station bc024b6e-a645-44b0-b5fe-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station bc024b6e-a645-44b0-b5fe-08de2a82bd24 - IN checkpoint window ✓ Current=12:18:23, MinutesAfterCheckpoint=0.4min (Elapsed=738.4min, Freq=3min, Start=00:00:00)
+[12:18:23 WRN] [AlertGeneration] ⚠️ Station bc024b6e-a645-44b0-b5fe-08de2a82bd24 exceeds check window. Last motion: 2025-11-28 10:36:16, Minutes: 4002, Window: 4 min (Frequency: 3 + Buffer: 1)
+[12:18:23 WRN] [AlertGeneration] Created UNRESOLVED alert 8b00121f-8bad-4916-a119-85b0690f7d75 for Station bc024b6e-a645-44b0-b5fe-08de2a82bd24 (LÊ PHÚ GIA). ProfileVersion: N/A, TimeFrameVersion: 3, Last motion: 28/11/2025 10:36:16 AM, Minutes since: 4002
+[12:18:23 INF] [AlertGeneration] Station 104bc135-6921-4bd6-b5ff-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame 'ca sáng': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station b651b380-b715-451e-b600-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 36340a80-bca6-49d8-b601-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 8559bd0d-2791-4770-b602-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station bcd3eada-1e51-4f61-b603-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 4617ef42-563f-4ca7-b604-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station b4c0a392-f082-4e00-b605-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station e2138279-e285-4e26-b606-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 05321693-afc6-4a47-b607-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station b13dec7f-4fa3-41d9-b608-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station fd7bd21b-115b-419e-b609-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 67ef1667-3acf-4d00-b60a-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 092f4c4c-bba7-4bad-b60b-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 95f851d8-db25-4b6f-b60c-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station dda837d0-7666-4803-b60d-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 28c677ce-b120-4354-b60e-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 28c677ce-b120-4354-b60e-08de2a82bd24 - IN checkpoint window ✓ Current=12:18:23, MinutesAfterCheckpoint=0.4min (Elapsed=738.4min, Freq=3min, Start=00:00:00)
+[12:18:23 WRN] [AlertGeneration] ⚠️ Station 28c677ce-b120-4354-b60e-08de2a82bd24 exceeds check window. Last motion: 2025-11-29 03:35:45, Minutes: 2983, Window: 4 min (Frequency: 3 + Buffer: 1)
+[12:18:23 WRN] [AlertGeneration] Created UNRESOLVED alert 5ecd3b0c-241c-4771-adc0-8a13cb0f0584 for Station 28c677ce-b120-4354-b60e-08de2a82bd24 (HÀ THANH). ProfileVersion: N/A, TimeFrameVersion: 2, Last motion: 29/11/2025 3:35:45 AM, Minutes since: 2982
+[12:18:23 INF] [AlertGeneration] Station 4d31b0c9-9498-490e-b60f-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 769af55b-76b7-4b33-b610-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station 546303fb-bebc-4f11-b611-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Station c9644664-6c2e-4236-b612-08de2a82bd24: Found 1 enabled TimeFrames. Current time: 12:18:23 (Local UTC+7), Day: 1
+[12:18:23 INF] [AlertGeneration]   TimeFrame '1': Start=00:00:00, End=23:59:59, Days=1,2,3,4,5,6,7, TimeMatch=True, DayMatch=True
+[12:18:23 INF] [AlertGeneration] Check completed. Alerts generated: 2, Alerts resolved: 0
+[12:18:23 INF] [AlertGeneration] Loaded interval from config: 120 seconds
+[12:19:07 INF] Request starting HTTP/1.1 GET https://localhost:55703/api/auth/check-access - null null
+[12:19:07 INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+[12:19:07 INF] AuthenticationScheme: Bearer was challenged.
+[12:19:07 INF] Request finished HTTP/1.1 GET https://localhost:55703/api/auth/check-access - 401 0 null 97.5302ms
+[12:20:08 INF] [EmailMonitor] Running check at 2025-12-01 12:20:08
+[12:20:08 INF] [EmailService] Checking for new emails...
+[12:20:08 INF] [EmailService] Connecting to imap.gmail.com:993
+[12:20:11 INF] [EmailService] Successfully authenticated as vienthongvt0408@gmail.com
+[12:20:12 INF] [EmailService] Opened folder: test
+[12:20:12 INF] [EmailService] Found 0 unread emails, processing 0 (limit 200)
+[12:20:13 INF] [EmailService] Processed 0 email(s) successfully
+[12:20:13 INF] [EmailMonitor] Loaded interval from config: 120 seconds

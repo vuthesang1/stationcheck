@@ -40,7 +40,7 @@ namespace StationCheck.Services
                     return new AuthenticationState(_anonymous);
                 }
 
-                var claims = new[]
+                var claimsList = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
                     new Claim(ClaimTypes.Name, userInfo.Username),
@@ -49,7 +49,14 @@ namespace StationCheck.Services
                     new Claim("FullName", userInfo.FullName)
                 };
 
-                var identity = new ClaimsIdentity(claims, "jwt");
+                // Decode JWT token to extract CertificateThumbprint
+                var certificateThumbprint = ExtractCertificateThumbprintFromJwt(token);
+                if (!string.IsNullOrEmpty(certificateThumbprint))
+                {
+                    claimsList.Add(new Claim("CertificateThumbprint", certificateThumbprint));
+                }
+
+                var identity = new ClaimsIdentity(claimsList, "jwt");
                 var user = new ClaimsPrincipal(identity);
 
                 return new AuthenticationState(user);
@@ -57,6 +64,44 @@ namespace StationCheck.Services
             catch
             {
                 return new AuthenticationState(_anonymous);
+            }
+        }
+
+        private string? ExtractCertificateThumbprintFromJwt(string token)
+        {
+            try
+            {
+                // JWT format: header.payload.signature
+                var parts = token.Split('.');
+                if (parts.Length != 3)
+                    return null;
+
+                // Decode the payload (second part)
+                var payload = parts[1];
+                
+                // Base64Url decode
+                var base64 = payload.Replace('-', '+').Replace('_', '/');
+                switch (base64.Length % 4)
+                {
+                    case 2: base64 += "=="; break;
+                    case 3: base64 += "="; break;
+                }
+
+                var bytes = Convert.FromBase64String(base64);
+                var json = System.Text.Encoding.UTF8.GetString(bytes);
+
+                // Parse JSON to extract CertificateThumbprint
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("CertificateThumbprint", out var thumbprintElement))
+                {
+                    return thumbprintElement.GetString();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -74,7 +119,7 @@ namespace StationCheck.Services
             };
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "user_info", JsonSerializer.Serialize(userInfoDto));
             
-            var claims = new[]
+            var claimsList = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
                 new Claim(ClaimTypes.Name, userInfo.Username),
@@ -83,7 +128,14 @@ namespace StationCheck.Services
                 new Claim("FullName", userInfo.FullName)
             };
 
-            var identity = new ClaimsIdentity(claims, "jwt");
+            // Extract certificate thumbprint from JWT
+            var certificateThumbprint = ExtractCertificateThumbprintFromJwt(token);
+            if (!string.IsNullOrEmpty(certificateThumbprint))
+            {
+                claimsList.Add(new Claim("CertificateThumbprint", certificateThumbprint));
+            }
+
+            var identity = new ClaimsIdentity(claimsList, "jwt");
             var user = new ClaimsPrincipal(identity);
 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));

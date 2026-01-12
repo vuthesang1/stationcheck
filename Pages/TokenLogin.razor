@@ -1,0 +1,144 @@
+@page "/tokenlogin"
+@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavigationManager NavigationManager
+@inject ILogger<TokenLogin> Logger
+
+<PageTitle>Token Login - StationCheck</PageTitle>
+
+<div class="container-fluid h-100 d-flex align-items-center justify-content-center">
+    <div class="text-center">
+        @if (isProcessing)
+        {
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Đang xử lý...</span>
+            </div>
+            <h4>Đang đăng nhập...</h4>
+            <p class="text-muted">Vui lòng đợi</p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h5 class="alert-heading">Lỗi đăng nhập</h5>
+                <p>@errorMessage</p>
+                <hr>
+                <button class="btn btn-primary" @onclick="ReturnToLogin">
+                    <i class="fas fa-arrow-left"></i> Quay lại trang đăng nhập
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private bool isProcessing = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get token from query string
+            var uri = new Uri(NavigationManager.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var token = query["token"];
+
+            if (string.IsNullOrEmpty(token))
+            {
+                errorMessage = "Không tìm thấy token. Vui lòng đăng nhập lại qua ứng dụng desktop.";
+                isProcessing = false;
+                return;
+            }
+
+            Logger.LogInformation("[TokenLogin] Received token, attempting to validate and create session");
+
+            // Validate and parse JWT token
+            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityToken? jwtToken = null;
+
+            try
+            {
+                jwtToken = handler.ReadJwtToken(token);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "[TokenLogin] Failed to parse JWT token");
+                errorMessage = "Token không hợp lệ. Vui lòng đăng nhập lại.";
+                isProcessing = false;
+                return;
+            }
+
+            // Check token expiration
+            if (jwtToken.ValidTo < DateTime.UtcNow)
+            {
+                Logger.LogWarning("[TokenLogin] Token expired at {ExpiryTime}", jwtToken.ValidTo);
+                errorMessage = "Token đã hết hạn. Vui lòng đăng nhập lại qua ứng dụng desktop.";
+                isProcessing = false;
+                return;
+            }
+
+            // Extract claims
+            var claims = jwtToken.Claims.ToList();
+            var userId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            var username = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name)?.Value;
+            var role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var macAddress = claims.FirstOrDefault(c => c.Type == "MacAddress")?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role))
+            {
+                Logger.LogWarning("[TokenLogin] Missing required claims in token");
+                errorMessage = "Token thiếu thông tin cần thiết. Vui lòng đăng nhập lại.";
+                isProcessing = false;
+                return;
+            }
+
+            Logger.LogInformation("[TokenLogin] Creating session for user {Username} (ID: {UserId}, Role: {Role}, MAC: {MacAddress})", 
+                username, userId, role, macAddress ?? "None");
+
+            // Create authentication claims
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            // Sign in user with cookie authentication
+            if (HttpContext != null)
+            {
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = jwtToken.ValidTo
+                    });
+
+                Logger.LogInformation("[TokenLogin] Session created successfully for user {Username}", username);
+
+                // Redirect to dashboard
+                NavigationManager.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                Logger.LogError("[TokenLogin] HttpContext is null, cannot create session");
+                errorMessage = "Không thể tạo phiên đăng nhập. Vui lòng thử lại.";
+                isProcessing = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[TokenLogin] Unexpected error during token login");
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            isProcessing = false;
+        }
+    }
+
+    private void ReturnToLogin()
+    {
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+}

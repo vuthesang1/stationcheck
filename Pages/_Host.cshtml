@@ -37,6 +37,12 @@
     
     <script src="_framework/blazor.server.js"></script>
     
+    <!-- SignalR for real-time notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
+    
+    <!-- SweetAlert2 for beautiful popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- Bootstrap core JavaScript-->
@@ -47,12 +53,88 @@
     <!-- Chart.js for reports -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Custom reports script -->
+    <!-- Global 401 Unauthorized Handler - MUST load before other scripts -->
+    <script src="~/js/401-handler.js"></script>
+    
+    <!-- Custom scripts -->
+    <script src="~/js/helpers.js"></script>
     <script src="~/js/reports.js"></script>
     <!-- Toast helper -->
     <script src="~/js/toast-helper.js"></script>
+    <!-- Device Auth Manager - Force logout on device revoke/removal -->
+    <script src="~/js/deviceAuth.js"></script>
+    <!-- Device Status Monitor - Real-time notifications -->
+    <script src="~/js/device-status-monitor.js"></script>
     
     <script>
+        // Auto-login from localStorage token (Desktop App flow)
+        (async function() {
+            // Skip auto-login on callback page (it handles authentication itself)
+            if (window.location.pathname === '/desktop-login-callback') {
+                console.log('[AutoLogin] Skipping auto-login on callback page');
+                return;
+            }
+            
+            const authToken = localStorage.getItem('authToken');
+            if (authToken && window.location.pathname !== '/login') {
+                console.log('[AutoLogin] Found authToken in localStorage, validating...');
+                
+                try {
+                    // Validate token with API
+                    const response = await fetch('/api/auth/validate-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('[AutoLogin] Token valid, user:', data.username);
+                        
+                        // Set authentication cookie for Blazor Server
+                        const cookieResponse = await fetch('/api/auth/set-cookie-from-token', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        
+                        if (cookieResponse.ok) {
+                            console.log('[AutoLogin] Authentication cookie set, reloading page...');
+                            
+                            // Store token for API calls
+                            localStorage.setItem('jwt_token', authToken);
+                            sessionStorage.setItem('jwt_token', authToken);
+                            
+                            // Store user info
+                            if (data.user) {
+                                localStorage.setItem('user_info', JSON.stringify(data.user));
+                            }
+                            
+                            // Reload to activate Blazor authentication
+                            window.location.reload();
+                        } else {
+                            console.warn('[AutoLogin] Failed to set cookie, clearing tokens...');
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('jwt_token');
+                            sessionStorage.removeItem('jwt_token');
+                        }
+                        
+                        // Page will auto-refresh via Blazor
+                    } else {
+                        console.warn('[AutoLogin] Token invalid, clearing...');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('jwt_token');
+                        sessionStorage.removeItem('jwt_token');
+                    }
+                } catch (error) {
+                    console.error('[AutoLogin] Error validating token:', error);
+                }
+            }
+        })();
+    
         window.getLocation = async () => {
             try {
                 const position = await new Promise((resolve, reject) => {
@@ -68,6 +150,67 @@
                 console.error('Error getting location:', error);
                 return null;
             }
+        };
+
+        // Handle 401 Unauthorized responses - force logout
+        window.handleUnauthorized = async () => {
+            console.log('[AccessControl] 401 Unauthorized - calling logout endpoint');
+            
+            try {
+                // Call logout endpoint to revoke tokens server-side
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                }).catch(e => console.warn('Logout endpoint error:', e));
+            } catch (e) {
+                console.warn('Error calling logout:', e);
+            }
+            
+            // Clear client-side tokens
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_info');
+            localStorage.removeItem('refresh_token');
+            
+            // Redirect to login
+            console.log('[AccessControl] Redirecting to /login');
+            window.location.href = '/login';
+        };
+
+        // List of paths that should bypass 401 handling (anonymous endpoints)
+        const anonymousPaths = [
+            '/login',
+            '/api/auth/login',
+            '/api/auth/web-login',
+            '/api/auth/register',
+            '/api/auth/refresh',
+            '/api/auth/download-installer',
+            '/swagger',
+            '/api/docs'
+        ];
+
+        // Check if path is anonymous/public
+        function isAnonymousPath(url) {
+            try {
+                const urlObj = new URL(url, window.location.origin);
+                const path = urlObj.pathname.toLowerCase();
+                return anonymousPaths.some(p => path.startsWith(p.toLowerCase()));
+            } catch {
+                return false;
+            }
+        }
+
+        // Monitor fetch responses for 401 errors
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const url = args[0];
+            return originalFetch.apply(this, args).then(response => {
+                // Only handle 401 for authorized endpoints
+                if (response.status === 401 && !isAnonymousPath(url)) {
+                    console.warn('Received 401 Unauthorized response from', url);
+                    window.handleUnauthorized();
+                }
+                return response;
+            });
         };
     </script>
 </body>

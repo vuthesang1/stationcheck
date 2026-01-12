@@ -476,7 +476,7 @@ namespace StationCheck.Migrations
                 {
                     { new Guid("cccccccc-0001-0000-0000-000000000001"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3310), "System", "Khoảng thời gian quét email mới (giây)", "Email Monitor Interval", true, "EmailMonitorInterval", null, null, "180", "int" },
                     { new Guid("cccccccc-0002-0000-0000-000000000002"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3316), "System", "Khoảng thời gian kiểm tra và tạo cảnh báo (giây)", "Alert Generation Interval", true, "AlertGenerationInterval", null, null, "3600", "int" },
-                    { new Guid("cccccccc-0003-0000-0000-000000000003"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3322), "System", "Khoảng thời gian kiểm tra chuyển động (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" }
+                    { new Guid("cccccccc-0003-0000-0000-000000000003"), "BackgroundServices", new DateTime(2025, 11, 18, 6, 33, 52, 861, DateTimeKind.Utc).AddTicks(3322), "System", "Khoảng thời gian kiểm tra nhấn nút (giây)", "Motion Monitor Interval", true, "MotionMonitorInterval", null, null, "60", "int" }
                 });
 
             migrationBuilder.InsertData(
